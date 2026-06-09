@@ -1,766 +1,902 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const STORAGE_KEY = 'staynest_messages_state';
-  const MOBILE_BREAKPOINT = 900;
+document.addEventListener("DOMContentLoaded", () => {
+  "use strict";
 
-  const els = {
-    header: document.querySelector('.site-header'),
-    menuToggle: document.querySelector('.menu-toggle'),
-    siteNav: document.querySelector('.site-nav'),
-    headerActions: document.querySelector('.header-actions'),
+  const auth = window.HostelLinkAuth?.auth || (window.firebase?.auth ? window.firebase.auth() : null);
+  const db = window.HostelLinkAuth?.db || (window.firebase?.firestore ? window.firebase.firestore() : null);
 
-    conversationPanel: document.querySelector('.conversation-panel'),
-    chatPanel: document.querySelector('.chat-panel'),
-    conversationSearch: document.getElementById('conversationSearch'),
-    conversationItems: Array.from(document.querySelectorAll('.conversation-item')),
+  const STORAGE_PREFIX = "staynest_messages";
+  const ACTIVE_CONVERSATION_KEY = "staynest_active_conversation";
 
-    chatHostelImage: document.getElementById('chatHostelImage'),
-    chatHostelName: document.getElementById('chatHostelName'),
-    chatStatusText: document.getElementById('chatStatusText'),
-    chatAreaText: document.getElementById('chatAreaText'),
-    chatThread: document.getElementById('chatThread'),
-    typingIndicator: document.getElementById('typingIndicator'),
-    messageComposer: document.getElementById('messageComposer'),
-    messageInput: document.getElementById('messageInput'),
-    backToListBtn: document.getElementById('backToListBtn'),
-    emptyChatState: document.getElementById('emptyChatState'),
+  const conversationListEl = document.getElementById("conversationList");
+  const conversationSearchEl = document.getElementById("conversationSearch");
+  const chatThreadEl = document.getElementById("chatThread");
+  const chatHostelImageEl = document.getElementById("chatHostelImage");
+  const chatHostelNameEl = document.getElementById("chatHostelName");
+  const chatStatusTextEl = document.getElementById("chatStatusText");
+  const chatAreaTextEl = document.getElementById("chatAreaText");
+  const typingIndicatorEl = document.getElementById("typingIndicator");
+  const messageComposerEl = document.getElementById("messageComposer");
+  const messageInputEl = document.getElementById("messageInput");
+  const quickQuestionButtons = Array.from(document.querySelectorAll(".quick-question"));
+  const backToListBtn = document.getElementById("backToListBtn");
+  const moreOptionsBtn = document.getElementById("moreOptionsBtn");
+  const chatOptionsMenu = document.getElementById("chatOptionsMenu");
+  const viewDetailsBtn = document.getElementById("viewDetailsBtn");
+  const emptyChatStateEl = document.getElementById("emptyChatState");
+  const hostelDetailsModal = document.getElementById("hostelDetailsModal");
+  const hostelDetailsBackdrop = document.getElementById("hostelDetailsBackdrop");
+  const hostelDetailsCloseBtn = document.getElementById("hostelDetailsCloseBtn");
+  const hostelDetailsImageEl = document.getElementById("hostelDetailsImage");
+  const hostelDetailsTitleEl = document.getElementById("hostelDetailsTitle");
+  const hostelDetailsLocationEl = document.getElementById("hostelDetailsLocation");
+  const hostelDetailsPhoneEl = document.getElementById("hostelDetailsPhone");
+  const hostelDetailsDistanceEl = document.getElementById("hostelDetailsDistance");
+  const hostelDetailsStatusEl = document.getElementById("hostelDetailsStatus");
+  const hostelDetailsRoomTypeEl = document.getElementById("hostelDetailsRoomType");
+  const hostelDetailsViewBtn = document.getElementById("hostelDetailsViewBtn");
+  const layoutEl = document.getElementById("messagesLayout");
 
-    moreOptionsBtn: document.getElementById('moreOptionsBtn'),
-    chatOptionsMenu: document.getElementById('chatOptionsMenu'),
-    viewDetailsBtn: document.getElementById('viewDetailsBtn'),
-
-    detailsModal: document.getElementById('hostelDetailsModal'),
-    detailsBackdrop: document.getElementById('hostelDetailsBackdrop'),
-    detailsCloseBtn: document.getElementById('hostelDetailsCloseBtn'),
-    detailsImage: document.getElementById('hostelDetailsImage'),
-    detailsBadge: document.getElementById('hostelDetailsBadge'),
-    detailsTitle: document.getElementById('hostelDetailsTitle'),
-    detailsLocation: document.getElementById('hostelDetailsLocation'),
-    detailsPhone: document.getElementById('hostelDetailsPhone'),
-    detailsDistance: document.getElementById('hostelDetailsDistance'),
-    detailsStatus: document.getElementById('hostelDetailsStatus'),
-    detailsRoomType: document.getElementById('hostelDetailsRoomType'),
-    detailsViewBtn: document.getElementById('hostelDetailsViewBtn'),
-
-    quickQuestions: Array.from(document.querySelectorAll('.quick-question')),
-    attachButtons: Array.from(document.querySelectorAll('.attach-btn')),
-    sendBtn: document.querySelector('.send-btn'),
-  };
-
-  const DEFAULT_CONVERSATIONS = [
-    {
-      id: 'atlantic-view-hostel',
-      name: 'Atlantic View Hostel',
-      image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=300&q=80',
-      status: 'online',
-      replyText: 'Usually replies within 15 minutes',
-      areaText: 'Amamoma, Cape Coast',
-      phone: '+233240000001',
-      distance: '0.7 km',
-      roomType: 'Double occupancy',
-      availability: 'September intake open',
-      label: 'Popular',
-      viewId: 'sunrise-court-hostel',
+  const DEFAULT_CONVERSATIONS = {
+    "atlantic-view-hostel": {
+      id: "atlantic-view-hostel",
+      name: "Atlantic View Hostel",
+      image:
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+      area: "Amamoma, Cape Coast",
+      phone: "+233 24 000 0001",
+      distance: "0.7 km",
+      roomType: "Double occupancy",
+      statusText: "Usually replies within 15 minutes",
+      onlineStatus: "online",
+      detailsStatus: "September intake open",
+      detailsBadge: "Hostel details",
+      viewDetailsHref: "details.html?id=atlantic-view-hostel",
+      preview: "Room available for September intake...",
+      lastSeenLabel: "2m ago",
       unread: 2,
-      preview: 'Room available for September intake...',
-      timestamp: '2m ago',
-      search: 'Atlantic View Hostel room available september intake pricing utilities photos payment availability',
-      activities: [
-        { icon: 'fa-calendar-check', title: 'Booking request submitted', time: '2 days ago' },
-        { icon: 'fa-receipt', title: 'Payment receipt received', time: 'Yesterday' },
+      activity: [
+        { type: "booking", label: "Booking request submitted", time: "2 days ago" },
+        { type: "receipt", label: "Payment receipt received", time: "Yesterday" },
+      ],
+      quickReplies: [
+        "Ask about pricing",
+        "Ask about room availability",
+        "Ask about utilities",
+        "Request hostel photos",
       ],
       messages: [
-        { type: 'incoming', text: 'Hello 👋\nThanks for your interest in Atlantic View Hostel.', time: '09:12', receipt: 'Seen' },
-        { type: 'outgoing', text: 'Hi, do you have any rooms available near the engineering block?', time: '09:14', receipt: 'Read' },
-        { type: 'incoming', text: 'Yes, we currently have a few double occupancy rooms available.', time: '09:16', receipt: 'Seen' },
-        { type: 'activity', title: 'Booking request submitted', sub: '2 days ago' },
-        { type: 'outgoing', text: 'Great, please share the current price and whether water is included.', time: '09:20', receipt: 'Read' },
-        { type: 'incoming', text: 'Pricing is GH₵ 5,200 for the semester. Water and security are included.', time: '09:22', receipt: 'Seen' },
+        {
+          kind: "incoming",
+          meta: "09:12 • Seen",
+          paragraphs: ["Hello 👋", "Thanks for your interest in Atlantic View Hostel."],
+        },
+        {
+          kind: "outgoing",
+          meta: "09:14 • Read",
+          paragraphs: ["Hi, do you have any rooms available near the engineering block?"],
+        },
+        {
+          kind: "incoming",
+          meta: "09:16 • Seen",
+          paragraphs: ["Yes, we currently have a few double occupancy rooms available."],
+        },
+        {
+          kind: "activity",
+          label: "Booking request submitted",
+          sublabel: "2 days ago",
+        },
+        {
+          kind: "outgoing",
+          meta: "09:20 • Read",
+          paragraphs: ["Great, please share the current price and whether water is included."],
+        },
+        {
+          kind: "incoming",
+          meta: "09:22 • Seen",
+          paragraphs: ["Pricing is GH₵ 5,200 per year. Water and security are included."],
+        },
       ],
     },
-    {
-      id: 'meridian-court',
-      name: 'Meridian Court',
-      image: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=300&q=80',
-      status: 'away',
-      replyText: 'Usually replies within 30 minutes',
-      areaText: 'UCC Road, Cape Coast',
-      phone: '+233240000007',
-      distance: '0.8 km',
-      roomType: 'Private room',
-      availability: 'Rooms available',
-      label: 'New',
-      viewId: 'meridian-court',
+    "meridian-court": {
+      id: "meridian-court",
+      name: "Meridian Court",
+      image:
+        "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80",
+      area: "Kotokuraba, Cape Coast",
+      phone: "+233 24 000 0002",
+      distance: "1.1 km",
+      roomType: "Single occupancy",
+      statusText: "Replies in under an hour",
+      onlineStatus: "away",
+      detailsStatus: "Limited rooms available",
+      detailsBadge: "Hostel details",
+      viewDetailsHref: "details.html?id=meridian-court",
+      preview: "Payment receipt received. Please confirm...",
+      lastSeenLabel: "18m ago",
       unread: 1,
-      preview: 'Payment receipt received. Please confirm...',
-      timestamp: '18m ago',
-      search: 'Meridian Court payment receipt confirm availability booking price private room studio',
-      activities: [
-        { icon: 'fa-file-invoice', title: 'Invoice sent', time: 'Today' },
-        { icon: 'fa-credit-card', title: 'Partial payment made', time: 'Yesterday' },
-      ],
+      activity: [{ type: "payment", label: "Payment receipt received", time: "Today" }],
+      quickReplies: ["Ask about pricing", "Ask about Wi-Fi", "Ask about water bills", "Ask about check-in"],
       messages: [
-        { type: 'incoming', text: 'Good afternoon. Thanks for reaching out about Meridian Court.', time: '11:05', receipt: 'Seen' },
-        { type: 'outgoing', text: 'Hi, I paid the booking deposit yesterday. Can you confirm receipt?', time: '11:08', receipt: 'Read' },
-        { type: 'incoming', text: 'Yes, we received it. Your room is reserved.', time: '11:12', receipt: 'Seen' },
+        {
+          kind: "incoming",
+          meta: "10:05 • Seen",
+          paragraphs: ["Good morning. Thanks for reaching out to Meridian Court."],
+        },
+        {
+          kind: "outgoing",
+          meta: "10:07 • Read",
+          paragraphs: ["Hi, is the single room still available for this academic year?"],
+        },
+        {
+          kind: "incoming",
+          meta: "10:10 • Seen",
+          paragraphs: ["Yes, the single room is available. I can share the full details if you need them."],
+        },
       ],
     },
-    {
-      id: 'harbor-ridge-suites',
-      name: 'Harbor Ridge Suites',
-      image: 'https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=300&q=80',
-      status: 'online',
-      replyText: 'Usually replies within 10 minutes',
-      areaText: 'Ayensudo, Cape Coast',
-      phone: '+233240000004',
-      distance: '0.9 km',
-      roomType: 'Studio room',
-      availability: 'Studio rooms available',
-      label: 'Premium',
-      viewId: 'harbor-ridge-suites',
+    "harbor-ridge-suites": {
+      id: "harbor-ridge-suites",
+      name: "Harbor Ridge Suites",
+      image:
+        "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1200&q=80",
+      area: "Mankessim Road",
+      phone: "+233 24 000 0003",
+      distance: "2.4 km",
+      roomType: "Studio",
+      statusText: "Usually replies within 2 hours",
+      onlineStatus: "online",
+      detailsStatus: "Studio rooms available",
+      detailsBadge: "Hostel details",
+      viewDetailsHref: "details.html?id=harbor-ridge-suites",
+      preview: "We have studio rooms available with Wi-Fi...",
+      lastSeenLabel: "1h ago",
       unread: 0,
-      preview: 'We have studio rooms available with Wi-Fi...',
-      timestamp: '1h ago',
-      search: 'Harbor Ridge Suites studio rooms Wi-Fi utilities photos pricing Ayensudo',
-      activities: [
-        { icon: 'fa-circle-check', title: 'Application reviewed', time: 'Today' },
-        { icon: 'fa-image', title: 'Photos shared', time: 'Today' },
-      ],
+      activity: [{ type: "update", label: "Room availability updated", time: "Today" }],
+      quickReplies: ["Ask about pricing", "Ask about room size", "Ask about power backup", "Request photos"],
       messages: [
-        { type: 'incoming', text: 'Hello, yes we still have studio rooms available.', time: '14:02', receipt: 'Seen' },
-        { type: 'outgoing', text: 'Please send me photos of the bathroom and kitchen area.', time: '14:05', receipt: 'Read' },
-        { type: 'incoming', text: 'Sure, I will send them shortly.', time: '14:07', receipt: 'Seen' },
+        {
+          kind: "incoming",
+          meta: "08:40 • Seen",
+          paragraphs: ["Hello, yes, we still have studio rooms available."],
+        },
+        {
+          kind: "outgoing",
+          meta: "08:42 • Read",
+          paragraphs: ["Please send the yearly price and whether utilities are included."],
+        },
+        {
+          kind: "incoming",
+          meta: "08:44 • Seen",
+          paragraphs: ["The yearly price is GH₵ 6,000 and utilities are partly included."],
+        },
       ],
     },
-    {
-      id: 'blue-horizon-hostel',
-      name: 'Blue Horizon Hostel',
-      image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=300&q=80',
-      status: 'offline',
-      replyText: 'Usually replies within a few hours',
-      areaText: 'Anomabo, Cape Coast',
-      phone: '+233240000003',
-      distance: '1.3 km',
-      roomType: 'Shared room',
-      availability: 'Value option',
-      label: 'Value',
-      viewId: 'blue-horizon-hostel',
+    "blue-horizon-hostel": {
+      id: "blue-horizon-hostel",
+      name: "Blue Horizon Hostel",
+      image:
+        "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80",
+      area: "Abura, Cape Coast",
+      phone: "+233 24 000 0004",
+      distance: "1.8 km",
+      roomType: "Shared room",
+      statusText: "Replies by the next day",
+      onlineStatus: "offline",
+      detailsStatus: "Booking request pending",
+      detailsBadge: "Hostel details",
+      viewDetailsHref: "details.html?id=blue-horizon-hostel",
+      preview: "Your booking request was submitted...",
+      lastSeenLabel: "Yesterday",
       unread: 0,
-      preview: 'Your booking request was submitted...',
-      timestamp: 'Yesterday',
-      search: 'Blue Horizon Hostel booking request submitted shared room value budget utilities security',
-      activities: [
-        { icon: 'fa-paper-plane', title: 'Booking request submitted', time: '2 days ago' },
-      ],
+      activity: [{ type: "booking", label: "Booking request submitted", time: "2 days ago" }],
+      quickReplies: ["Ask about pricing", "Ask about availability", "Ask about deposits", "Ask about move-in date"],
       messages: [
-        { type: 'incoming', text: 'We received your booking request. Thank you.', time: '10:10', receipt: 'Seen' },
-        { type: 'outgoing', text: 'Could you confirm if water is included in the price?', time: '10:12', receipt: 'Read' },
+        {
+          kind: "incoming",
+          meta: "Yesterday • Seen",
+          paragraphs: ["Thanks for your booking request. We are reviewing it now."],
+        },
+        {
+          kind: "outgoing",
+          meta: "Yesterday • Read",
+          paragraphs: ["Thanks. Please let me know if I need to bring any documents."],
+        },
       ],
     },
-    {
-      id: 'oak-residence',
-      name: 'Oak Residence',
-      image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=300&q=80',
-      status: 'online',
-      replyText: 'Usually replies within 20 minutes',
-      areaText: 'Ayensudo, Cape Coast',
-      phone: '+233240000009',
-      distance: '0.6 km',
-      roomType: 'Studio',
-      availability: 'Studio room reserved temporarily',
-      label: 'Recommended',
-      viewId: 'oak-residence',
+    "oak-residence": {
+      id: "oak-residence",
+      name: "Oak Residence",
+      image:
+        "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+      area: "Pedu, Cape Coast",
+      phone: "+233 24 000 0005",
+      distance: "2.0 km",
+      roomType: "Studio",
+      statusText: "Usually replies within 30 minutes",
+      onlineStatus: "online",
+      detailsStatus: "Studio room reserved",
+      detailsBadge: "Hostel details",
+      viewDetailsHref: "details.html?id=oak-residence",
+      preview: "We can reserve the studio room for you...",
+      lastSeenLabel: "Yesterday",
       unread: 1,
-      preview: 'We can reserve the studio room for you...',
-      timestamp: 'Yesterday',
-      search: 'Oak Residence studio room reservation premium furnishing photos booking payment',
-      activities: [
-        { icon: 'fa-bookmark', title: 'Room reserved temporarily', time: 'Yesterday' },
-        { icon: 'fa-receipt', title: 'Receipt received', time: 'Yesterday' },
-      ],
+      activity: [{ type: "reservation", label: "Studio room reserved", time: "Yesterday" }],
+      quickReplies: ["Ask about pricing", "Ask about reservation fee", "Ask about room pictures", "Request call"],
       messages: [
-        { type: 'incoming', text: 'We can reserve the studio room for you if you are ready.', time: '16:20', receipt: 'Seen' },
-        { type: 'outgoing', text: 'Nice. Please share the payment deadline so I can plan.', time: '16:22', receipt: 'Read' },
+        {
+          kind: "incoming",
+          meta: "09:00 • Seen",
+          paragraphs: ["We can reserve the studio room for you if you are ready."],
+        },
+        {
+          kind: "outgoing",
+          meta: "09:03 • Read",
+          paragraphs: ["Please share the yearly fee and reservation process."],
+        },
+        {
+          kind: "incoming",
+          meta: "09:06 • Seen",
+          paragraphs: ["The yearly fee is GH₵ 7,200. Reservation requires a small deposit."],
+        },
       ],
     },
-    {
-      id: 'city-gate-hostel',
-      name: 'City Gate Hostel',
-      image: 'https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=300&q=80',
-      status: 'offline',
-      replyText: 'Usually replies by tomorrow morning',
-      areaText: 'Kotokuraba, Cape Coast',
-      phone: '+233240000006',
-      distance: '1.6 km',
-      roomType: 'Shared room',
-      availability: 'Budget rooms open',
-      label: 'Affordable',
-      viewId: 'city-gate-hostel',
+    "city-gate-hostel": {
+      id: "city-gate-hostel",
+      name: "City Gate Hostel",
+      image:
+        "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1200&q=80",
+      area: "University Avenue",
+      phone: "+233 24 000 0006",
+      distance: "0.5 km",
+      roomType: "Double occupancy",
+      statusText: "Replies within a few hours",
+      onlineStatus: "offline",
+      detailsStatus: "Payment upload received",
+      detailsBadge: "Hostel details",
+      viewDetailsHref: "details.html?id=city-gate-hostel",
+      preview: "We received your payment upload...",
+      lastSeenLabel: "2 days ago",
       unread: 0,
-      preview: 'We received your payment upload...',
-      timestamp: '2 days ago',
-      search: 'City Gate Hostel payment upload budget shared room safety availability',
-      activities: [
-        { icon: 'fa-check-circle', title: 'Payment upload reviewed', time: '2 days ago' },
-      ],
+      activity: [{ type: "payment", label: "Payment upload received", time: "2 days ago" }],
+      quickReplies: ["Ask about receipt", "Ask about room assignment", "Ask about move-in date", "Ask about contact"],
       messages: [
-        { type: 'incoming', text: 'We received your payment upload. Thank you.', time: '08:18', receipt: 'Seen' },
-        { type: 'outgoing', text: 'Great, can I still ask about room availability for the coming semester?', time: '08:20', receipt: 'Read' },
+        {
+          kind: "incoming",
+          meta: "2 days ago • Seen",
+          paragraphs: ["We received your payment upload. We will verify it shortly."],
+        },
+        {
+          kind: "outgoing",
+          meta: "2 days ago • Read",
+          paragraphs: ["Thank you. Please confirm when it has been checked."],
+        },
       ],
     },
-  ];
-
-  const escapeHTML = (value) =>
-    String(value)
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#39;');
-
-  const toLineBreaks = (value) => escapeHTML(value).replace(/\n/g, '<br>');
-
-  const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
-
-  const formatTime = () =>
-    new Date().toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-  const readState = (() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
-  })();
-
-  const conversations = DEFAULT_CONVERSATIONS.map((conversation) => {
-    const stored = readState.conversations?.[conversation.id];
-    return {
-      ...conversation,
-      unread: typeof stored?.unread === 'number' ? stored.unread : conversation.unread,
-      preview: stored?.preview || conversation.preview,
-      timestamp: stored?.timestamp || conversation.timestamp,
-      messages: Array.isArray(stored?.messages) && stored.messages.length ? stored.messages : conversation.messages,
-    };
-  });
+  };
 
   const state = {
-    activeId: readState.activeId || conversations[0]?.id || null,
-    query: '',
-    mobileChatOpen: false,
-    detailsOpen: false,
-    optionsOpen: false,
+    userId: null,
+    activeConversationId: null,
+    query: "",
+    conversations: cloneConversations(DEFAULT_CONVERSATIONS),
+    pendingReplyTimer: null,
   };
 
-  const saveState = () => {
-    const payload = {
-      activeId: state.activeId,
-      conversations: Object.fromEntries(
-        conversations.map((conversation) => [
-          conversation.id,
-          {
-            unread: conversation.unread,
-            preview: conversation.preview,
-            timestamp: conversation.timestamp,
-            messages: conversation.messages,
-          },
-        ])
-      ),
-    };
+  function cloneConversations(source) {
+    return JSON.parse(JSON.stringify(source));
+  }
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  };
+  function safeParse(text, fallback) {
+    try {
+      const parsed = JSON.parse(text);
+      return parsed && typeof parsed === "object" ? parsed : fallback;
+    } catch {
+      return fallback;
+    }
+  }
 
-  const getConversation = (id) => conversations.find((conversation) => conversation.id === id) || null;
-  const getActiveConversation = () => getConversation(state.activeId);
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
 
-  const setHeaderScrolled = () => {
-    els.header?.classList.toggle('is-scrolled', window.scrollY > 8);
-  };
+  function storageKey(uid) {
+    return `${STORAGE_PREFIX}_${uid || "guest"}`;
+  }
 
-  const closeMobileMenu = () => {
-    if (!els.siteNav || !els.menuToggle) return;
-    els.siteNav.classList.remove('open');
-    els.headerActions?.classList.remove('open');
-    els.menuToggle.setAttribute('aria-expanded', 'false');
-    document.body.classList.remove('nav-open');
-  };
+  function getConversation(id) {
+    return state.conversations[id] || null;
+  }
 
-  const openMobileMenu = () => {
-    if (!els.siteNav || !els.menuToggle) return;
-    els.siteNav.classList.add('open');
-    els.headerActions?.classList.add('open');
-    els.menuToggle.setAttribute('aria-expanded', 'true');
-    document.body.classList.add('nav-open');
-  };
+  function getCurrentConversation() {
+    return getConversation(state.activeConversationId);
+  }
 
-  const setLayoutMode = () => {
-    document.body.classList.toggle('messages-mobile', isMobile());
-    document.body.classList.toggle('messages-desktop', !isMobile());
-    document.body.classList.toggle('messages-chat-open', isMobile() && state.mobileChatOpen);
-  };
+  function getDefaultActiveConversationId() {
+    const activeButton = conversationListEl?.querySelector(".conversation-item.active");
+    if (activeButton?.dataset?.conversation) return activeButton.dataset.conversation;
+    const firstButton = conversationListEl?.querySelector(".conversation-item[data-conversation]");
+    return firstButton?.dataset?.conversation || Object.keys(DEFAULT_CONVERSATIONS)[0];
+  }
 
-  const renderEmptyState = () => {
-    const showEmpty = !state.activeId;
-    if (els.emptyChatState) els.emptyChatState.hidden = !showEmpty;
-    if (els.chatPanel) els.chatPanel.hidden = showEmpty;
-    if (els.conversationPanel) els.conversationPanel.hidden = showEmpty ? true : false;
-  };
+  function updateConversationListMeta() {
+    document.querySelectorAll(".conversation-item[data-conversation]").forEach((button) => {
+      const id = button.dataset.conversation;
+      const conversation = getConversation(id);
+      if (!conversation) return;
 
-  const renderActivities = (conversation) => {
-    const activityBar = document.querySelector('.recent-activity-bar');
-    if (!activityBar) return;
+      const topTime = button.querySelector(".conversation-top span");
+      const preview = button.querySelector(".conversation-body p");
+      const unreadBadge = button.querySelector(".unread-badge");
+      const avatarImg = button.querySelector(".conversation-avatar img");
+      const statusDot = button.querySelector(".status-dot");
 
-    activityBar.innerHTML = conversation.activities
-      .map(
-        (activity) => `
-          <div class="activity-item">
-            <i class="fa-solid ${escapeHTML(activity.icon)}"></i>
-            <div>
-              <strong>${escapeHTML(activity.title)}</strong>
-              <span>${escapeHTML(activity.time)}</span>
-            </div>
-          </div>
-        `
-      )
-      .join('');
-  };
+      if (avatarImg) {
+        avatarImg.src = conversation.image;
+        avatarImg.alt = conversation.name;
+      }
 
-  const renderMessages = (conversation) => {
-    if (!els.chatThread) return;
+      if (statusDot) {
+        statusDot.classList.remove("online", "away", "offline");
+        statusDot.classList.add(conversation.onlineStatus || "offline");
+      }
 
-    els.chatThread.innerHTML = conversation.messages
+      if (topTime) topTime.textContent = conversation.lastSeenLabel || "";
+      if (preview) preview.textContent = conversation.preview || "";
+
+      if (unreadBadge) {
+        const unread = Number(conversation.unread || 0);
+        unreadBadge.hidden = unread <= 0 || id === state.activeConversationId;
+        unreadBadge.textContent = String(unread);
+      }
+
+      button.classList.toggle("active", id === state.activeConversationId);
+      button.setAttribute("aria-pressed", String(id === state.activeConversationId));
+    });
+  }
+
+  function renderChatHeader(conversation) {
+    if (!conversation) return;
+
+    if (chatHostelImageEl) {
+      chatHostelImageEl.src = conversation.image;
+      chatHostelImageEl.alt = conversation.name;
+    }
+
+    if (chatHostelNameEl) chatHostelNameEl.textContent = conversation.name;
+    if (chatStatusTextEl) chatStatusTextEl.textContent = conversation.statusText || "";
+    if (chatAreaTextEl) chatAreaTextEl.textContent = conversation.area || "";
+
+    if (viewDetailsBtn) {
+      viewDetailsBtn.onclick = () => openDetailsModal(conversation);
+    }
+
+    if (hostelDetailsViewBtn) {
+      hostelDetailsViewBtn.href = conversation.viewDetailsHref || `details.html?id=${encodeURIComponent(conversation.id)}`;
+    }
+  }
+
+  function renderThread(conversation) {
+    if (!chatThreadEl || !conversation) return;
+
+    chatThreadEl.innerHTML = conversation.messages
       .map((message) => {
-        if (message.type === 'activity') {
+        if (message.kind === "activity") {
           return `
             <div class="message-group activity">
               <div class="activity-chip">
-                ${escapeHTML(message.title)}
-                <span>${escapeHTML(message.sub)}</span>
+                ${escapeHtml(message.label || "")}
+                <span>${escapeHtml(message.sublabel || "")}</span>
               </div>
             </div>
           `;
         }
 
-        const sideClass = message.type === 'outgoing' ? 'outgoing' : 'incoming';
-        const meta = `${escapeHTML(message.time)} • ${escapeHTML(message.receipt || (message.type === 'outgoing' ? 'Read' : 'Seen'))}`;
+        const paragraphs = (message.paragraphs || [])
+          .map((text) => `<p>${escapeHtml(text)}</p>`)
+          .join("");
 
         return `
-          <div class="message-group ${sideClass}">
+          <div class="message-group ${message.kind}">
             <div class="message-bubble">
-              <p>${toLineBreaks(message.text)}</p>
-              <span class="message-meta">${meta}</span>
+              ${paragraphs}
+              <span class="message-meta">${escapeHtml(message.meta || "")}</span>
             </div>
           </div>
         `;
       })
-      .join('');
+      .join("");
 
-    els.chatThread.scrollTop = els.chatThread.scrollHeight;
-  };
+    requestAnimationFrame(() => {
+      chatThreadEl.scrollTop = chatThreadEl.scrollHeight;
+    });
+  }
 
-  const updateHeader = (conversation) => {
-    if (els.chatHostelImage) {
-      els.chatHostelImage.src = conversation.image;
-      els.chatHostelImage.alt = conversation.name;
+  function setTypingVisible(visible) {
+    if (!typingIndicatorEl) return;
+    typingIndicatorEl.hidden = !visible;
+  }
+
+  function setEmptyStateVisible(visible, mode = "default") {
+    if (!emptyChatStateEl) return;
+
+    emptyChatStateEl.hidden = !visible;
+    if (!visible) return;
+
+    const heading = emptyChatStateEl.querySelector("h2");
+    const paragraph = emptyChatStateEl.querySelector("p");
+
+    if (mode === "search") {
+      if (heading) heading.textContent = "No conversations found";
+      if (paragraph) paragraph.textContent = "Try another search term or clear the search box.";
+    } else {
+      if (heading) heading.textContent = "Select a conversation";
+      if (paragraph) paragraph.textContent = "Choose a hostel from your conversations to start chatting.";
     }
-    if (els.chatHostelName) els.chatHostelName.textContent = conversation.name;
-    if (els.chatStatusText) els.chatStatusText.textContent = conversation.replyText;
-    if (els.chatAreaText) els.chatAreaText.textContent = conversation.areaText;
-  };
+  }
 
-  const updateDetailsModal = (conversation) => {
+  function updateQuickQuestions(conversation) {
     if (!conversation) return;
 
-    if (els.detailsImage) {
-      els.detailsImage.src = conversation.image;
-      els.detailsImage.alt = conversation.name;
-    }
-    if (els.detailsBadge) els.detailsBadge.textContent = conversation.label || 'Hostel details';
-    if (els.detailsTitle) els.detailsTitle.textContent = conversation.name;
-    if (els.detailsLocation) els.detailsLocation.textContent = conversation.areaText;
-    if (els.detailsPhone) els.detailsPhone.textContent = conversation.phone;
-    if (els.detailsDistance) els.detailsDistance.textContent = conversation.distance;
-    if (els.detailsStatus) els.detailsStatus.textContent = conversation.availability;
-    if (els.detailsRoomType) els.detailsRoomType.textContent = conversation.roomType;
-    if (els.detailsViewBtn) els.detailsViewBtn.href = `details.html?id=${conversation.viewId}`;
-  };
+    quickQuestionButtons.forEach((button, index) => {
+      const label = conversation.quickReplies?.[index] || button.dataset.fill || button.textContent.trim();
+      button.dataset.fill = label;
+    });
+  }
 
-  const updateConversationList = () => {
-    els.conversationItems.forEach((item) => {
-      const id = item.dataset.conversation;
+  function persistConversations() {
+    const userId = state.userId || "guest";
+    const payload = {
+      activeConversationId: state.activeConversationId,
+      conversations: state.conversations,
+    };
+
+    try {
+      localStorage.setItem(storageKey(userId), JSON.stringify(payload));
+    } catch {
+      // ignore storage errors
+    }
+
+    if (db && state.userId) {
+      // Best-effort sync. Safe to ignore if Firestore rules/collections are different.
+      try {
+        const docs = Object.values(state.conversations).map((conversation) => ({
+          uid: state.userId,
+          conversationId: conversation.id,
+          name: conversation.name,
+          image: conversation.image,
+          area: conversation.area,
+          messages: conversation.messages,
+          updatedAt: new Date().toISOString(),
+        }));
+
+        const batch = db.batch();
+        docs.forEach((doc) => {
+          const ref = db.collection("messages").doc(`${state.userId}_${doc.conversationId}`);
+          batch.set(ref, doc, { merge: true });
+        });
+        batch.commit().catch(() => {});
+      } catch {
+        // ignore sync issues
+      }
+    }
+  }
+
+  function loadPersistedConversations(userId) {
+    const fresh = cloneConversations(DEFAULT_CONVERSATIONS);
+    const stored = safeParse(localStorage.getItem(storageKey(userId || "guest")), null);
+
+    if (stored && stored.conversations) {
+      Object.entries(stored.conversations).forEach(([id, conversation]) => {
+        if (!fresh[id]) return;
+        fresh[id] = {
+          ...fresh[id],
+          ...conversation,
+          messages: Array.isArray(conversation.messages) ? conversation.messages : fresh[id].messages,
+        };
+      });
+
+      if (stored.activeConversationId && fresh[stored.activeConversationId]) {
+        state.activeConversationId = stored.activeConversationId;
+      }
+    }
+
+    return fresh;
+  }
+
+  function applySearchFilter() {
+    const query = state.query.trim().toLowerCase();
+    let visibleCount = 0;
+
+    document.querySelectorAll(".conversation-item[data-conversation]").forEach((button) => {
+      const id = button.dataset.conversation;
       const conversation = getConversation(id);
       if (!conversation) return;
 
-      const text = [conversation.name, conversation.preview, conversation.areaText, conversation.search].join(' ').toLowerCase();
-      const matches = !state.query || text.includes(state.query.toLowerCase());
-      item.hidden = !matches;
-      item.classList.toggle('active', state.activeId === id);
-      item.setAttribute('aria-pressed', String(state.activeId === id));
+      const haystack = [
+        conversation.name,
+        conversation.area,
+        conversation.preview,
+        conversation.roomType,
+        conversation.statusText,
+      ]
+        .join(" ")
+        .toLowerCase();
 
-      const title = item.querySelector('.conversation-top strong');
-      const time = item.querySelector('.conversation-top span');
-      const preview = item.querySelector('.conversation-body p');
-      const unread = item.querySelector('.unread-badge');
-      const dot = item.querySelector('.status-dot');
-
-      if (title) title.textContent = conversation.name;
-      if (time) time.textContent = conversation.timestamp;
-      if (preview) preview.textContent = conversation.preview;
-
-      if (dot) {
-        dot.classList.remove('online', 'away', 'offline');
-        dot.classList.add(conversation.status);
-      }
-
-      if (conversation.unread > 0) {
-        if (unread) unread.textContent = String(conversation.unread);
-      } else if (unread) {
-        unread.remove();
-      }
+      const matches = !query || haystack.includes(query);
+      button.hidden = !matches;
+      if (matches) visibleCount += 1;
     });
-  };
 
-  const syncConversationSummary = (conversation, text) => {
-    const words = String(text).trim().split(/\s+/).filter(Boolean);
-    conversation.preview = words.slice(0, 6).join(' ') + (words.length > 6 ? '...' : '');
-    conversation.timestamp = 'Just now';
-    conversation.unread = 0;
-  };
+    const hasVisibleSelection =
+      state.activeConversationId &&
+      document.querySelector(`.conversation-item[data-conversation="${CSS.escape(state.activeConversationId)}"]`) &&
+      !document.querySelector(
+        `.conversation-item[data-conversation="${CSS.escape(state.activeConversationId)}"]`
+      )?.hidden;
 
-  const makeReply = (conversation, text) => {
-    const lower = text.toLowerCase();
-
-    if (lower.includes('price') || lower.includes('pricing') || lower.includes('cost')) {
-      return `Thanks for asking. ${conversation.name} currently has flexible pricing options. We can share the latest semester rate and payment terms.`;
+    if (!visibleCount) {
+      setEmptyStateVisible(true, "search");
+      if (layoutEl) layoutEl.hidden = true;
+      return;
     }
 
-    if (lower.includes('available') || lower.includes('availability') || lower.includes('room')) {
-      return `Yes, ${conversation.name} currently has room options available. We can confirm the best fit based on your preferred room type and move-in date.`;
+    if (!hasVisibleSelection) {
+      const firstVisibleButton = document.querySelector(".conversation-item[data-conversation]:not([hidden])");
+      if (firstVisibleButton?.dataset?.conversation) {
+        selectConversation(firstVisibleButton.dataset.conversation, { persist: false });
+      }
     }
 
-    if (lower.includes('water') || lower.includes('wifi') || lower.includes('wi-fi') || lower.includes('utility')) {
-      return `Most students ask about Wi-Fi, water, and security. I can send the exact inclusions for this hostel.`;
-    }
+    if (layoutEl) layoutEl.hidden = false;
+    setEmptyStateVisible(false);
+  }
 
-    if (lower.includes('photo') || lower.includes('photos') || lower.includes('image')) {
-      return `Absolutely. I can share more photos of the room, bathroom, and common areas for ${conversation.name}.`;
-    }
-
-    if (lower.includes('payment') || lower.includes('receipt') || lower.includes('deposit')) {
-      return `Thanks for the update. Once payment is confirmed, we usually update the booking status right away.`;
-    }
-
-    if (lower.includes('move') || lower.includes('check in') || lower.includes('date')) {
-      return `We can help with your move-in plan and confirm the exact date once the booking is approved.`;
-    }
-
-    return `Thanks for the message. We’ll check that for ${conversation.name} and reply with the details shortly.`;
-  };
-
-  const appendMessage = (conversation, message) => {
-    conversation.messages.push(message);
-    renderMessages(conversation);
-    syncConversationSummary(conversation, message.text || message.title || '');
-    updateConversationList();
-    saveState();
-  };
-
-  const closeOptionsMenu = () => {
-    if (els.chatOptionsMenu) els.chatOptionsMenu.hidden = true;
-    if (els.moreOptionsBtn) els.moreOptionsBtn.setAttribute('aria-expanded', 'false');
-    state.optionsOpen = false;
-  };
-
-  const openOptionsMenu = () => {
-    if (els.chatOptionsMenu) els.chatOptionsMenu.hidden = false;
-    if (els.moreOptionsBtn) els.moreOptionsBtn.setAttribute('aria-expanded', 'true');
-    state.optionsOpen = true;
-  };
-
-  const closeDetailsModal = () => {
-    if (els.detailsModal) els.detailsModal.hidden = true;
-    document.body.classList.remove('modal-open');
-    state.detailsOpen = false;
-  };
-
-  const openDetailsModal = () => {
-    const conversation = getActiveConversation();
-    if (!conversation || !els.detailsModal) return;
-
-    updateDetailsModal(conversation);
-    els.detailsModal.hidden = false;
-    document.body.classList.add('modal-open');
-    state.detailsOpen = true;
-  };
-
-  const renderMobileState = () => {
-    const mobile = isMobile();
-
-    if (mobile) {
-      if (els.conversationPanel) els.conversationPanel.hidden = state.mobileChatOpen;
-      if (els.chatPanel) els.chatPanel.hidden = !state.mobileChatOpen || !state.activeId;
-      if (els.backToListBtn) els.backToListBtn.style.display = 'inline-flex';
-    } else {
-      if (els.conversationPanel) els.conversationPanel.hidden = false;
-      if (els.chatPanel) els.chatPanel.hidden = !state.activeId;
-      if (els.backToListBtn) els.backToListBtn.style.display = 'none';
-      state.mobileChatOpen = true;
-    }
-
-    setLayoutMode();
-  };
-
-  const selectConversation = (id, options = {}) => {
+  function selectConversation(id, options = {}) {
     const conversation = getConversation(id);
     if (!conversation) return;
 
-    state.activeId = id;
+    if (state.pendingReplyTimer) {
+      clearTimeout(state.pendingReplyTimer);
+      state.pendingReplyTimer = null;
+    }
+
+    state.activeConversationId = id;
+
+    renderChatHeader(conversation);
+    updateQuickQuestions(conversation);
+    renderThread(conversation);
+    updateConversationListMeta();
+    setEmptyStateVisible(false);
+
+    if (backToListBtn) {
+      backToListBtn.setAttribute("aria-expanded", "true");
+    }
+
+    if (messageInputEl) {
+      messageInputEl.focus();
+    }
+
+    if (options.persist !== false) {
+      persistConversations();
+    }
+  }
+
+  function addOutgoingMessage(text) {
+    const conversation = getCurrentConversation();
+    if (!conversation) return;
+
+    conversation.messages.push({
+      kind: "outgoing",
+      meta: `${getNowLabel()} • Sent`,
+      paragraphs: [text],
+    });
+
+    conversation.preview = text;
+    conversation.lastSeenLabel = "Just now";
     conversation.unread = 0;
-    updateHeader(conversation);
-    renderMessages(conversation);
-    renderActivities(conversation);
-    updateConversationList();
-    updateDetailsModal(conversation);
-    saveState();
 
-    if (isMobile()) {
-      state.mobileChatOpen = options.openChat !== false;
-    }
+    renderThread(conversation);
+    renderChatHeader(conversation);
+    updateConversationListMeta();
+    persistConversations();
+  }
 
-    renderMobileState();
-    renderEmptyState();
-  };
-
-  const openConversationFromList = (button) => {
-    const id = button.dataset.conversation;
-    selectConversation(id, { openChat: true });
-  };
-
-  const autoResizeTextarea = (textarea) => {
-    if (!textarea) return;
-    textarea.style.height = 'auto';
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
-  };
-
-  const sendMessage = (text) => {
-    const conversation = getActiveConversation();
-    const messageText = String(text || '').trim();
-    if (!conversation || !messageText) return;
-
-    appendMessage(conversation, {
-      type: 'outgoing',
-      text: messageText,
-      time: formatTime(),
-      receipt: 'Sent',
+  function addIncomingReply(conversation, text) {
+    conversation.messages.push({
+      kind: "incoming",
+      meta: `${getNowLabel()} • Seen`,
+      paragraphs: [text],
     });
 
-    if (els.messageInput) {
-      els.messageInput.value = '';
-      autoResizeTextarea(els.messageInput);
+    conversation.preview = text;
+    conversation.lastSeenLabel = "Just now";
+
+    renderThread(conversation);
+    renderChatHeader(conversation);
+    updateConversationListMeta();
+    persistConversations();
+  }
+
+  function getNowLabel() {
+    const now = new Date();
+    return now.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  function getAutoReply(conversation, sentText) {
+    const message = String(sentText || "").toLowerCase();
+
+    if (message.includes("price") || message.includes("pricing") || message.includes("fee")) {
+      return `The yearly price for ${conversation.name} is currently available. We can share the full breakdown if you'd like.`;
     }
 
-    if (els.typingIndicator) els.typingIndicator.hidden = false;
+    if (message.includes("room") || message.includes("available")) {
+      return `Yes, ${conversation.roomType.toLowerCase()} options are still being updated for ${conversation.name}.`;
+    }
 
-    const reply = makeReply(conversation, messageText);
-    clearTimeout(sendMessage._timer);
-    sendMessage._timer = setTimeout(() => {
-      if (els.typingIndicator) els.typingIndicator.hidden = true;
+    if (message.includes("utility") || message.includes("water") || message.includes("wifi")) {
+      return `Utilities depend on the room type, but we can confirm what is included for ${conversation.name}.`;
+    }
 
-      appendMessage(conversation, {
-        type: 'incoming',
-        text: reply,
-        time: formatTime(),
-        receipt: 'Seen',
+    if (message.includes("photo") || message.includes("picture")) {
+      return `Sure — we can send more photos of ${conversation.name}.`;
+    }
+
+    return `Thanks for the message. We will get back to you about ${conversation.name} shortly.`;
+  }
+
+  function handleSendMessage(event) {
+    event.preventDefault();
+
+    const conversation = getCurrentConversation();
+    if (!conversation || !messageInputEl) return;
+
+    const text = messageInputEl.value.trim();
+    if (!text) return;
+
+    messageInputEl.value = "";
+    messageInputEl.style.height = "auto";
+    addOutgoingMessage(text);
+
+    setTypingVisible(true);
+
+    state.pendingReplyTimer = window.setTimeout(() => {
+      setTypingVisible(false);
+
+      const activeConversation = getCurrentConversation();
+      if (!activeConversation || activeConversation.id !== conversation.id) return;
+
+      addIncomingReply(activeConversation, getAutoReply(activeConversation, text));
+      state.pendingReplyTimer = null;
+    }, 1200);
+  }
+
+  function openDetailsModal(conversation) {
+    if (!hostelDetailsModal || !conversation) return;
+
+    if (hostelDetailsImageEl) {
+      hostelDetailsImageEl.src = conversation.image;
+      hostelDetailsImageEl.alt = conversation.name;
+    }
+
+    if (hostelDetailsTitleEl) hostelDetailsTitleEl.textContent = conversation.name;
+    if (hostelDetailsLocationEl) hostelDetailsLocationEl.textContent = conversation.area || "";
+    if (hostelDetailsPhoneEl) hostelDetailsPhoneEl.textContent = conversation.phone || "";
+    if (hostelDetailsDistanceEl) hostelDetailsDistanceEl.textContent = conversation.distance || "";
+    if (hostelDetailsStatusEl) hostelDetailsStatusEl.textContent = conversation.detailsStatus || "";
+    if (hostelDetailsRoomTypeEl) hostelDetailsRoomTypeEl.textContent = conversation.roomType || "";
+    if (hostelDetailsViewBtn) {
+      hostelDetailsViewBtn.href =
+        conversation.viewDetailsHref || `details.html?id=${encodeURIComponent(conversation.id)}`;
+    }
+
+    hostelDetailsModal.hidden = false;
+    document.body.classList.add("modal-open");
+    hostelDetailsBackdrop?.focus?.();
+  }
+
+  function closeDetailsModal() {
+    if (!hostelDetailsModal) return;
+    hostelDetailsModal.hidden = true;
+    document.body.classList.remove("modal-open");
+  }
+
+  function syncConversationListClicks() {
+    document.querySelectorAll(".conversation-item[data-conversation]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.dataset.conversation;
+        if (!id) return;
+
+        selectConversation(id);
       });
-    }, 900);
-  };
-
-  const filterConversations = (value) => {
-    state.query = String(value || '').trim();
-    updateConversationList();
-  };
-
-  const initConversationSelection = () => {
-    const initial = getConversation(state.activeId) || conversations[0] || null;
-    if (!initial) return;
-
-    state.activeId = initial.id;
-    updateHeader(initial);
-    renderMessages(initial);
-    renderActivities(initial);
-    updateDetailsModal(initial);
-    updateConversationList();
-    saveState();
-
-    if (isMobile()) {
-      state.mobileChatOpen = false;
-    } else {
-      state.mobileChatOpen = true;
-    }
-
-    renderMobileState();
-    renderEmptyState();
-  };
-
-  const wireEvents = () => {
-    els.conversationItems.forEach((item) => {
-      item.addEventListener('click', () => openConversationFromList(item));
     });
+  }
 
-    els.conversationSearch?.addEventListener('input', () => {
-      filterConversations(els.conversationSearch.value);
+  function syncQuickQuestionButtons() {
+    quickQuestionButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const value = button.dataset.fill || button.textContent.trim();
+        if (!messageInputEl) return;
+        messageInputEl.value = value;
+        messageInputEl.focus();
+        messageInputEl.dispatchEvent(new Event("input", { bubbles: true }));
+      });
     });
+  }
 
-    els.backToListBtn?.addEventListener('click', () => {
-      if (!isMobile()) return;
-      state.mobileChatOpen = false;
-      closeOptionsMenu();
-      renderMobileState();
-    });
+  function syncComposerHeight() {
+    if (!messageInputEl) return;
 
-    els.messageComposer?.addEventListener('submit', (event) => {
-      event.preventDefault();
-      closeOptionsMenu();
-      sendMessage(els.messageInput?.value || '');
-    });
+    const resize = () => {
+      messageInputEl.style.height = "auto";
+      messageInputEl.style.height = `${Math.min(messageInputEl.scrollHeight, 180)}px`;
+    };
 
-    els.messageInput?.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' && !event.shiftKey) {
+    messageInputEl.addEventListener("input", resize);
+    messageInputEl.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
-        sendMessage(els.messageInput.value);
+        messageComposerEl?.requestSubmit?.();
       }
     });
+  }
 
-    els.messageInput?.addEventListener('input', () => autoResizeTextarea(els.messageInput));
+  function syncOptionsMenu() {
+    if (!moreOptionsBtn || !chatOptionsMenu) return;
 
-    els.quickQuestions.forEach((button) => {
-      button.addEventListener('click', () => {
-        const fill = button.dataset.fill || button.textContent || '';
-        if (els.messageInput) {
-          els.messageInput.value = fill;
-          autoResizeTextarea(els.messageInput);
-          els.messageInput.focus();
-        }
-      });
-    });
+    const openMenu = () => {
+      chatOptionsMenu.hidden = false;
+      moreOptionsBtn.setAttribute("aria-expanded", "true");
+    };
 
-    els.attachButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-        showToast('Attachment action can be connected later.');
-      });
-    });
+    const closeMenu = () => {
+      chatOptionsMenu.hidden = true;
+      moreOptionsBtn.setAttribute("aria-expanded", "false");
+    };
 
-    els.moreOptionsBtn?.addEventListener('click', (event) => {
+    moreOptionsBtn.addEventListener("click", (event) => {
       event.stopPropagation();
-      const isOpen = !els.chatOptionsMenu?.hidden;
-      if (isOpen) closeOptionsMenu();
-      else openOptionsMenu();
+      if (chatOptionsMenu.hidden) openMenu();
+      else closeMenu();
     });
 
-    els.viewDetailsBtn?.addEventListener('click', (event) => {
-      event.preventDefault();
-      closeOptionsMenu();
-      openDetailsModal();
-    });
-
-    els.detailsCloseBtn?.addEventListener('click', closeDetailsModal);
-    els.detailsBackdrop?.addEventListener('click', closeDetailsModal);
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        if (state.detailsOpen) {
-          closeDetailsModal();
-          return;
-        }
-        if (state.optionsOpen) {
-          closeOptionsMenu();
-          return;
-        }
-        if (isMobile() && state.mobileChatOpen) {
-          state.mobileChatOpen = false;
-          renderMobileState();
-        }
+    document.addEventListener("click", (event) => {
+      if (!chatOptionsMenu.hidden && !chatOptionsMenu.contains(event.target) && !moreOptionsBtn.contains(event.target)) {
+        closeMenu();
       }
     });
 
-    document.addEventListener('click', (event) => {
-      const clickedInsideHeader = els.header?.contains(event.target);
-      if (!clickedInsideHeader && els.siteNav?.classList.contains('open')) {
-        closeMobileMenu();
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeMenu();
+    });
+  }
+
+  function syncModalControls() {
+    hostelDetailsBackdrop?.addEventListener("click", closeDetailsModal);
+    hostelDetailsCloseBtn?.addEventListener("click", closeDetailsModal);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !hostelDetailsModal.hidden) {
+        closeDetailsModal();
       }
+    });
+  }
 
-      if (els.chatOptionsMenu && els.moreOptionsBtn) {
-        const clickedOptions = els.chatOptionsMenu.contains(event.target) || els.moreOptionsBtn.contains(event.target);
-        if (!clickedOptions) closeOptionsMenu();
+  function syncBackToList() {
+    if (!backToListBtn) return;
+
+    backToListBtn.addEventListener("click", () => {
+      const panel = document.querySelector(".conversation-panel");
+      panel?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  function syncLayoutOnResize() {
+    const resize = () => {
+      if (!layoutEl) return;
+      if (window.innerWidth > 992) {
+        layoutEl.classList.remove("show-list");
+        layoutEl.classList.add("show-chat");
       }
-    });
+    };
 
-    els.menuToggle?.addEventListener('click', () => {
-      const isOpen = els.siteNav?.classList.contains('open');
-      if (isOpen) closeMobileMenu();
-      else openMobileMenu();
-    });
+    window.addEventListener("resize", resize);
+    resize();
+  }
 
-    window.addEventListener('resize', () => {
-      closeOptionsMenu();
-      if (window.innerWidth > MOBILE_BREAKPOINT) {
-        state.mobileChatOpen = true;
-      } else if (!state.mobileChatOpen) {
-        state.mobileChatOpen = false;
-      }
-      renderMobileState();
-    });
+  function initConversationSelection() {
+    const storedActive = safeParse(localStorage.getItem(storageKey(state.userId || "guest")), null)?.activeConversationId;
+    const initialId = storedActive || getDefaultActiveConversationId() || Object.keys(DEFAULT_CONVERSATIONS)[0];
+    state.activeConversationId = initialId;
+    selectConversation(initialId, { persist: false });
+  }
 
-    window.addEventListener('storage', (event) => {
-      if (event.key === STORAGE_KEY) window.location.reload();
-    });
-  };
+  function initUserConversations(user) {
+    state.userId = user?.uid || null;
+    state.conversations = loadPersistedConversations(state.userId);
+    initConversationSelection();
+    applySearchFilter();
+    updateConversationListMeta();
 
-  const showToast = (text) => {
-    let toast = document.getElementById('messagesToast');
-    if (!toast) {
-      toast = document.createElement('div');
-      toast.id = 'messagesToast';
-      toast.setAttribute('role', 'status');
-      toast.setAttribute('aria-live', 'polite');
-      toast.style.position = 'fixed';
-      toast.style.left = '50%';
-      toast.style.bottom = '22px';
-      toast.style.transform = 'translateX(-50%) translateY(20px)';
-      toast.style.opacity = '0';
-      toast.style.transition = 'all 0.25s ease';
-      toast.style.zIndex = '9999';
-      toast.style.padding = '12px 16px';
-      toast.style.borderRadius = '16px';
-      toast.style.background = 'rgba(27, 67, 50, 0.96)';
-      toast.style.color = '#fff';
-      toast.style.fontWeight = '700';
-      toast.style.boxShadow = '0 16px 30px rgba(16, 33, 26, 0.2)';
-      document.body.appendChild(toast);
+    if (state.userId && db) {
+      // Best-effort read from Firestore; merge if the collection exists.
+      db.collection("messages")
+        .where("uid", "==", state.userId)
+        .get()
+        .then((snapshot) => {
+          if (!snapshot?.docs?.length) return;
+
+          let changed = false;
+          snapshot.docs.forEach((doc) => {
+            const data = doc.data() || {};
+            const id = data.conversationId;
+            if (!id || !state.conversations[id]) return;
+
+            if (Array.isArray(data.messages) && data.messages.length > state.conversations[id].messages.length) {
+              state.conversations[id].messages = data.messages;
+              changed = true;
+            }
+          });
+
+          if (changed) {
+            const current = getCurrentConversation();
+            renderThread(current);
+            updateConversationListMeta();
+            persistConversations();
+          }
+        })
+        .catch(() => {});
+    }
+  }
+
+  function bindAuthAwareRedirect() {
+    if (!auth || typeof auth.onAuthStateChanged !== "function") return;
+
+    auth.onAuthStateChanged((user) => {
+      if (!user) return;
+      initUserConversations(user);
+    });
+  }
+
+  function init() {
+    syncConversationListClicks();
+    syncQuickQuestionButtons();
+    syncComposerHeight();
+    syncOptionsMenu();
+    syncModalControls();
+    syncBackToList();
+    syncLayoutOnResize();
+
+    if (messageComposerEl) {
+      messageComposerEl.addEventListener("submit", handleSendMessage);
     }
 
-    toast.textContent = text;
-    toast.style.opacity = '1';
-    toast.style.transform = 'translateX(-50%) translateY(0)';
+    if (conversationSearchEl) {
+      conversationSearchEl.addEventListener("input", () => {
+        state.query = conversationSearchEl.value || "";
+        applySearchFilter();
+      });
+    }
 
-    clearTimeout(showToast._timer);
-    showToast._timer = setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateX(-50%) translateY(20px)';
-    }, 1800);
-  };
+    bindAuthAwareRedirect();
 
-  const init = () => {
-    setHeaderScrolled();
-    setLayoutMode();
-    wireEvents();
-    initConversationSelection();
-    autoResizeTextarea(els.messageInput);
-  };
+    const user = auth?.currentUser || null;
+    initUserConversations(user);
+
+    window.MessagesPage = {
+      openDetailsModal,
+      closeDetailsModal,
+      selectConversation,
+      reload: () => initUserConversations(auth?.currentUser || null),
+    };
+  }
 
   init();
 });
