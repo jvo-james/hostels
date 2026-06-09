@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Browse hostels around UCC with smart filters, quick comparisons, and a polished search experience." />
+  <title>StayNest | Explore Hostels</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="explore.css" />
+</head>
+<body>
+  <a class="skip-link" href="#explore-main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand" aria-label="StayNest home">
+        <span class="brand-mark"><i class="fa-solid fa-house-chimney"></i></span>
+        <span class="brand-text">StayNest</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="explore.html" class="active">Explore</a>
+        <a href="saved.html">Saved</a>
+        <a href="bookings.html">Bookings</a>
+        <a href="messages.html">Messages</a>
+        <a href="profile.html">Profile</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="login.html" class="text-link">Sign in</a>
+        <a href="register.html" class="btn btn-primary">Create account</a>
+      </div>
+
+      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <main id="explore-main">
+    <section class="explore-hero">
+      <div class="explore-hero-bg" aria-hidden="true"></div>
+      <div class="container explore-hero-grid">
+        <div class="explore-hero-copy">
+          <span class="eyebrow"><i class="fa-solid fa-location-dot"></i> Around UCC, Cape Coast</span>
+          <h1>Explore hostels that feel close, clear, and easy to choose.</h1>
+          <p>Compare student-friendly stays, save the places you like, and move through room options with a cleaner browsing flow.</p>
+
+          <form class="explore-search-bar" action="explore.html" method="get">
+            <div class="explore-search-field">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" name="q" id="searchInput" placeholder="Search hostel name, area, or room type" />
+            </div>
+            <button class="btn btn-primary" type="submit">Search</button>
+          </form>
+
+          <div class="hero-chips" aria-label="Quick searches">
+            <button class="chip active" type="button" data-area="all">All areas</button>
+            <button class="chip" type="button" data-area="Ayensudo">Ayensudo</button>
+            <button class="chip" type="button" data-area="Anomabo">Anomabo</button>
+            <button class="chip" type="button" data-area="UCC Road">UCC Road</button>
+            <button class="chip" type="button" data-area="Kotokuraba">Kotokuraba</button>
+          </div>
+        </div>
+
+        <div class="explore-hero-visual" aria-hidden="true">
+          <div class="hero-map-card">
+            <div class="hero-map-top">
+              <span>Hostel hotspots</span>
+              <strong>Near campus</strong>
+            </div>
+            <svg viewBox="0 0 560 420" class="map-svg" role="img" aria-label="Decorative neighborhood map">
+              <defs>
+                <linearGradient id="mapGlow" x1="0%" x2="100%" y1="0%" y2="100%">
+                  <stop offset="0%" stop-color="#d8f3dc" />
+                  <stop offset="100%" stop-color="#ffffff" />
+                </linearGradient>
+                <linearGradient id="mapRoad" x1="0%" x2="100%" y1="0%" y2="0%">
+                  <stop offset="0%" stop-color="#1b4332" />
+                  <stop offset="100%" stop-color="#2d6a4f" />
+                </linearGradient>
+              </defs>
+              <rect x="30" y="28" width="500" height="364" rx="26" fill="url(#mapGlow)" stroke="#d9e9de" stroke-width="4"></rect>
+              <path d="M88 320 C 144 270, 168 252, 224 228 S 340 188, 396 132" stroke="url(#mapRoad)" stroke-width="18" fill="none" stroke-linecap="round"></path>
+              <path d="M126 120 C 184 144, 216 168, 280 170 S 392 168, 456 120" stroke="#9fd3b0" stroke-width="10" fill="none" stroke-linecap="round"></path>
+              <path d="M142 306 C 204 298, 250 294, 312 300 S 410 320, 460 338" stroke="#9fd3b0" stroke-width="10" fill="none" stroke-linecap="round"></path>
+              <circle cx="126" cy="118" r="16" fill="#c89b3c"></circle>
+              <circle cx="286" cy="168" r="16" fill="#1b4332"></circle>
+              <circle cx="398" cy="134" r="16" fill="#2d6a4f"></circle>
+              <circle cx="304" cy="302" r="16" fill="#c89b3c"></circle>
+              <circle cx="458" cy="338" r="16" fill="#1b4332"></circle>
+              <rect x="74" y="72" width="118" height="40" rx="20" fill="#fff" stroke="#d7e7dc"></rect>
+              <text x="133" y="97" text-anchor="middle" font-size="16" fill="#1b4332" font-weight="700">UCC</text>
+              <rect x="410" y="66" width="100" height="38" rx="19" fill="#fff" stroke="#d7e7dc"></rect>
+              <text x="460" y="90" text-anchor="middle" font-size="14" fill="#5b6f67" font-weight="700">Ayensudo</text>
+            </svg>
+          </div>
+
+          <div class="hero-note-card">
+            <div>
+              <strong>Popular this week</strong>
+              <span>Students keep checking these first</span>
+            </div>
+            <i class="fa-solid fa-arrow-trend-up"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="explore-toolbar-wrap">
+      <div class="container">
+        <div class="explore-toolbar">
+          <div class="toolbar-left">
+            <div class="results-pill" id="resultsCount">12 hostels found</div>
+            <div class="sort-wrap">
+              <label for="sortSelect">Sort by</label>
+              <select id="sortSelect" class="sort-select">
+                <option value="recommended">Recommended</option>
+                <option value="price-low">Price: low to high</option>
+                <option value="price-high">Price: high to low</option>
+                <option value="rating">Top rated</option>
+                <option value="near">Closest to campus</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="toolbar-right">
+            <button class="view-btn active" type="button" data-view="grid" aria-pressed="true">
+              <i class="fa-solid fa-grid-2"></i>
+              Grid
+            </button>
+            <button class="view-btn" type="button" data-view="list" aria-pressed="false">
+              <i class="fa-solid fa-list"></i>
+              List
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="explore-content section">
+      <div class="container explore-layout">
+        <aside class="filters-panel" aria-label="Filters">
+          <div class="panel-card">
+            <div class="panel-title-row">
+              <h2>Refine your search</h2>
+              <button class="panel-link" type="button" id="resetFilters">Reset</button>
+            </div>
+
+            <div class="filter-group">
+              <h3>Budget</h3>
+              <label class="range-label" for="priceRange">
+                <span>Maximum semester price</span>
+                <strong id="priceLabel">GH₵ 8,000</strong>
+              </label>
+              <input type="range" id="priceRange" min="1500" max="8000" value="8000" step="100" />
+            </div>
+
+            <div class="filter-group">
+              <h3>Property type</h3>
+              <label class="check-item"><input type="checkbox" checked data-type="self-contained" /> Self-contained</label>
+              <label class="check-item"><input type="checkbox" checked data-type="shared-room" /> Shared room</label>
+              <label class="check-item"><input type="checkbox" checked data-type="private-room" /> Private room</label>
+              <label class="check-item"><input type="checkbox" checked data-type="studio" /> Studio room</label>
+            </div>
+
+            <div class="filter-group">
+              <h3>Essentials</h3>
+              <label class="check-item"><input type="checkbox" checked data-amenity="wifi" /> Wi-Fi</label>
+              <label class="check-item"><input type="checkbox" checked data-amenity="water" /> Water available</label>
+              <label class="check-item"><input type="checkbox" checked data-amenity="security" /> Security</label>
+              <label class="check-item"><input type="checkbox" checked data-amenity="furnished" /> Furnished</label>
+            </div>
+
+            <div class="filter-group">
+              <h3>Nearby zones</h3>
+              <div class="mini-zone-grid">
+                <button class="zone-btn active" type="button" data-zone="all">All</button>
+                <button class="zone-btn" type="button" data-zone="Ayensudo">Ayensudo</button>
+                <button class="zone-btn" type="button" data-zone="Anomabo">Anomabo</button>
+                <button class="zone-btn" type="button" data-zone="UCC Road">UCC Road</button>
+                <button class="zone-btn" type="button" data-zone="Kotokuraba">Kotokuraba</button>
+                <button class="zone-btn" type="button" data-zone="Bakaano">Bakaano</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-card promo-card">
+            <span class="eyebrow">Helpful tip</span>
+            <h3>Compare before you decide.</h3>
+            <p>Check distance, room type, and price together so the shortlist feels easy to trust.</p>
+            <a href="saved.html" class="btn btn-dark">View saved</a>
+          </div>
+        </aside>
+
+        <section class="results-panel">
+          <div class="results-hero-card">
+            <div class="results-hero-copy">
+              <span class="eyebrow"><i class="fa-solid fa-bolt"></i> Fresh picks</span>
+              <h2>Hostels worth a second look.</h2>
+              <p>Each listing is arranged to keep prices, ratings, and location details easy to scan.</p>
+            </div>
+            <div class="results-hero-action">
+              <a href="#hostelGrid" class="btn btn-primary">Jump to listings</a>
+            </div>
+          </div>
+
+          <div class="hostel-grid explore-grid" id="hostelGrid">
+            <article class="hostel-card listing-card" data-price="4600" data-rating="4.8" data-distance="0.7" data-area="Ayensudo" data-type="self-contained" data-amenities="wifi water security furnished">
+              <div class="hostel-image-wrap">
+                <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80" alt="Sunrise Court Hostel" />
+                <span class="hostel-tag">Popular</span>
+                <button class="icon-btn save-btn" type="button" aria-label="Save hostel"><i class="fa-regular fa-heart"></i></button>
+              </div>
+              <div class="hostel-body">
+                <div class="hostel-top">
+                  <h3>Sunrise Court Hostel</h3>
+                  <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.8</span>
+                </div>
+                <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> Ayensudo, Cape Coast</p>
+                <div class="hostel-meta-row">
+                  <span><i class="fa-solid fa-bed"></i> Self-contained</span>
+                  <span><i class="fa-solid fa-wifi"></i> Wi-Fi</span>
+                </div>
+                <div class="hostel-bottom-row">
+                  <p class="hostel-price">GH₵ 4,600 <span>per semester</span></p>
+                  <a href="details.html?id=sunrise-court-hostel" class="mini-link">View details</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="hostel-card listing-card" data-price="5200" data-rating="4.7" data-distance="0.4" data-area="UCC Road" data-type="private-room" data-amenities="wifi security furnished water">
+              <div class="hostel-image-wrap">
+                <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80" alt="Campus View Lodge" />
+                <span class="hostel-tag hostel-tag-soft">New</span>
+                <button class="icon-btn save-btn" type="button" aria-label="Save hostel"><i class="fa-regular fa-heart"></i></button>
+              </div>
+              <div class="hostel-body">
+                <div class="hostel-top">
+                  <h3>Campus View Lodge</h3>
+                  <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.7</span>
+                </div>
+                <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> UCC Road, Cape Coast</p>
+                <div class="hostel-meta-row">
+                  <span><i class="fa-solid fa-key"></i> Private room</span>
+                  <span><i class="fa-solid fa-shield-heart"></i> Security</span>
+                </div>
+                <div class="hostel-bottom-row">
+                  <p class="hostel-price">GH₵ 5,200 <span>per semester</span></p>
+                  <a href="details.html?id=campus-view-lodge" class="mini-link">View details</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="hostel-card listing-card" data-price="3900" data-rating="4.6" data-distance="1.3" data-area="Anomabo" data-type="shared-room" data-amenities="wifi water security furnished">
+              <div class="hostel-image-wrap">
+                <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80" alt="Blue Horizon Hostel" />
+                <span class="hostel-tag hostel-tag-gold">Value</span>
+                <button class="icon-btn save-btn" type="button" aria-label="Save hostel"><i class="fa-regular fa-heart"></i></button>
+              </div>
+              <div class="hostel-body">
+                <div class="hostel-top">
+                  <h3>Blue Horizon Hostel</h3>
+                  <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.6</span>
+                </div>
+                <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> Anomabo, Cape Coast</p>
+                <div class="hostel-meta-row">
+                  <span><i class="fa-solid fa-people-roof"></i> Shared room</span>
+                  <span><i class="fa-solid fa-droplet"></i> Water</span>
+                </div>
+                <div class="hostel-bottom-row">
+                  <p class="hostel-price">GH₵ 3,900 <span>per semester</span></p>
+                  <a href="details.html?id=blue-horizon-hostel" class="mini-link">View details</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="hostel-card listing-card" data-price="7100" data-rating="4.9" data-distance="0.9" data-area="Ayensudo" data-type="studio" data-amenities="wifi security furnished water">
+              <div class="hostel-image-wrap">
+                <img src="https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1200&q=80" alt="Harbor Ridge Suites" />
+                <span class="hostel-tag">Premium</span>
+                <button class="icon-btn save-btn" type="button" aria-label="Save hostel"><i class="fa-regular fa-heart"></i></button>
+              </div>
+              <div class="hostel-body">
+                <div class="hostel-top">
+                  <h3>Harbor Ridge Suites</h3>
+                  <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.9</span>
+                </div>
+                <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> Ayensudo, Cape Coast</p>
+                <div class="hostel-meta-row">
+                  <span><i class="fa-solid fa-house"></i> Studio</span>
+                  <span><i class="fa-solid fa-snowflake"></i> Furnished</span>
+                </div>
+                <div class="hostel-bottom-row">
+                  <p class="hostel-price">GH₵ 7,100 <span>per semester</span></p>
+                  <a href="details.html?id=harbor-ridge-suites" class="mini-link">View details</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="hostel-card listing-card" data-price="4300" data-rating="4.5" data-distance="1.1" data-area="Bakaano" data-type="private-room" data-amenities="wifi security water">
+              <div class="hostel-image-wrap">
+                <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80" alt="Palmside Lodge" />
+                <span class="hostel-tag hostel-tag-soft">Quiet</span>
+                <button class="icon-btn save-btn" type="button" aria-label="Save hostel"><i class="fa-regular fa-heart"></i></button>
+              </div>
+              <div class="hostel-body">
+                <div class="hostel-top">
+                  <h3>Palmside Lodge</h3>
+                  <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.5</span>
+                </div>
+                <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> Bakaano, Cape Coast</p>
+                <div class="hostel-meta-row">
+                  <span><i class="fa-solid fa-door-open"></i> Private room</span>
+                  <span><i class="fa-solid fa-shield-heart"></i> Secure</span>
+                </div>
+                <div class="hostel-bottom-row">
+                  <p class="hostel-price">GH₵ 4,300 <span>per semester</span></p>
+                  <a href="details.html?id=palmside-lodge" class="mini-link">View details</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="hostel-card listing-card" data-price="3550" data-rating="4.4" data-distance="1.6" data-area="Kotokuraba" data-type="shared-room" data-amenities="water security">
+              <div class="hostel-image-wrap">
+                <img src="https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1200&q=80" alt="City Gate Hostel" />
+                <span class="hostel-tag hostel-tag-gold">Budget</span>
+                <button class="icon-btn save-btn" type="button" aria-label="Save hostel"><i class="fa-regular fa-heart"></i></button>
+              </div>
+              <div class="hostel-body">
+                <div class="hostel-top">
+                  <h3>City Gate Hostel</h3>
+                  <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.4</span>
+                </div>
+                <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> Kotokuraba, Cape Coast</p>
+                <div class="hostel-meta-row">
+                  <span><i class="fa-solid fa-people-roof"></i> Shared room</span>
+                  <span><i class="fa-solid fa-droplet"></i> Water</span>
+                </div>
+                <div class="hostel-bottom-row">
+                  <p class="hostel-price">GH₵ 3,550 <span>per semester</span></p>
+                  <a href="details.html?id=city-gate-hostel" class="mini-link">View details</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="hostel-card listing-card" data-price="4800" data-rating="4.6" data-distance="0.8" data-area="UCC Road" data-type="self-contained" data-amenities="wifi water security furnished">
+              <div class="hostel-image-wrap">
+                <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80" alt="Meridian Court" />
+                <span class="hostel-tag">Top pick</span>
+                <button class="icon-btn save-btn" type="button" aria-label="Save hostel"><i class="fa-regular fa-heart"></i></button>
+              </div>
+              <div class="hostel-body">
+                <div class="hostel-top">
+                  <h3>Meridian Court</h3>
+                  <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.6</span>
+                </div>
+                <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> UCC Road, Cape Coast</p>
+                <div class="hostel-meta-row">
+                  <span><i class="fa-solid fa-house"></i> Self-contained</span>
+                  <span><i class="fa-solid fa-wifi"></i> Wi-Fi</span>
+                </div>
+                <div class="hostel-bottom-row">
+                  <p class="hostel-price">GH₵ 4,800 <span>per semester</span></p>
+                  <a href="details.html?id=meridian-court" class="mini-link">View details</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="hostel-card listing-card" data-price="2950" data-rating="4.3" data-distance="1.8" data-area="Kotokuraba" data-type="shared-room" data-amenities="water security">
+              <div class="hostel-image-wrap">
+                <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80" alt="Bridge House Hostel" />
+                <span class="hostel-tag hostel-tag-soft">Affordable</span>
+                <button class="icon-btn save-btn" type="button" aria-label="Save hostel"><i class="fa-regular fa-heart"></i></button>
+              </div>
+              <div class="hostel-body">
+                <div class="hostel-top">
+                  <h3>Bridge House Hostel</h3>
+                  <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.3</span>
+                </div>
+                <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> Kotokuraba, Cape Coast</p>
+                <div class="hostel-meta-row">
+                  <span><i class="fa-solid fa-people-roof"></i> Shared room</span>
+                  <span><i class="fa-solid fa-shield-heart"></i> Secure</span>
+                </div>
+                <div class="hostel-bottom-row">
+                  <p class="hostel-price">GH₵ 2,950 <span>per semester</span></p>
+                  <a href="details.html?id=bridge-house-hostel" class="mini-link">View details</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="hostel-card listing-card" data-price="6100" data-rating="4.8" data-distance="0.6" data-area="Ayensudo" data-type="studio" data-amenities="wifi security water furnished">
+              <div class="hostel-image-wrap">
+                <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80" alt="Oak Residence" />
+                <span class="hostel-tag hostel-tag-gold">Recommended</span>
+                <button class="icon-btn save-btn" type="button" aria-label="Save hostel"><i class="fa-regular fa-heart"></i></button>
+              </div>
+              <div class="hostel-body">
+                <div class="hostel-top">
+                  <h3>Oak Residence</h3>
+                  <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.8</span>
+                </div>
+                <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> Ayensudo, Cape Coast</p>
+                <div class="hostel-meta-row">
+                  <span><i class="fa-solid fa-house"></i> Studio</span>
+                  <span><i class="fa-solid fa-snowflake"></i> Furnished</span>
+                </div>
+                <div class="hostel-bottom-row">
+                  <p class="hostel-price">GH₵ 6,100 <span>per semester</span></p>
+                  <a href="details.html?id=oak-residence" class="mini-link">View details</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="hostel-card listing-card" data-price="4450" data-rating="4.5" data-distance="1.0" data-area="Anomabo" data-type="private-room" data-amenities="wifi water security">
+              <div class="hostel-image-wrap">
+                <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80" alt="Seaview Hostel" />
+                <span class="hostel-tag">Comfort</span>
+                <button class="icon-btn save-btn" type="button" aria-label="Save hostel"><i class="fa-regular fa-heart"></i></button>
+              </div>
+              <div class="hostel-body">
+                <div class="hostel-top">
+                  <h3>Seaview Hostel</h3>
+                  <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.5</span>
+                </div>
+                <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> Anomabo, Cape Coast</p>
+                <div class="hostel-meta-row">
+                  <span><i class="fa-solid fa-door-open"></i> Private room</span>
+                  <span><i class="fa-solid fa-droplet"></i> Water</span>
+                </div>
+                <div class="hostel-bottom-row">
+                  <p class="hostel-price">GH₵ 4,450 <span>per semester</span></p>
+                  <a href="details.html?id=seaview-hostel" class="mini-link">View details</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="hostel-card listing-card" data-price="5150" data-rating="4.7" data-distance="0.5" data-area="UCC Road" data-type="self-contained" data-amenities="wifi water security furnished">
+              <div class="hostel-image-wrap">
+                <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80" alt="Greenline Suites" />
+                <span class="hostel-tag hostel-tag-soft">Close to campus</span>
+                <button class="icon-btn save-btn" type="button" aria-label="Save hostel"><i class="fa-regular fa-heart"></i></button>
+              </div>
+              <div class="hostel-body">
+                <div class="hostel-top">
+                  <h3>Greenline Suites</h3>
+                  <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.7</span>
+                </div>
+                <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> UCC Road, Cape Coast</p>
+                <div class="hostel-meta-row">
+                  <span><i class="fa-solid fa-house"></i> Self-contained</span>
+                  <span><i class="fa-solid fa-wifi"></i> Wi-Fi</span>
+                </div>
+                <div class="hostel-bottom-row">
+                  <p class="hostel-price">GH₵ 5,150 <span>per semester</span></p>
+                  <a href="details.html?id=greenline-suites" class="mini-link">View details</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="hostel-card listing-card" data-price="3400" data-rating="4.2" data-distance="1.9" data-area="Bakaano" data-type="shared-room" data-amenities="water security">
+              <div class="hostel-image-wrap">
+                <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80" alt="Harbour Nest Hostel" />
+                <span class="hostel-tag hostel-tag-gold">Budget</span>
+                <button class="icon-btn save-btn" type="button" aria-label="Save hostel"><i class="fa-regular fa-heart"></i></button>
+              </div>
+              <div class="hostel-body">
+                <div class="hostel-top">
+                  <h3>Harbour Nest Hostel</h3>
+                  <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.2</span>
+                </div>
+                <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> Bakaano, Cape Coast</p>
+                <div class="hostel-meta-row">
+                  <span><i class="fa-solid fa-people-roof"></i> Shared room</span>
+                  <span><i class="fa-solid fa-shield-heart"></i> Security</span>
+                </div>
+                <div class="hostel-bottom-row">
+                  <p class="hostel-price">GH₵ 3,400 <span>per semester</span></p>
+                  <a href="details.html?id=harbour-nest-hostel" class="mini-link">View details</a>
+                </div>
+              </div>
+            </article>
+
+            <article class="hostel-card listing-card" data-price="5800" data-rating="4.6" data-distance="0.8" data-area="Ayensudo" data-type="private-room" data-amenities="wifi security furnished water">
+              <div class="hostel-image-wrap">
+                <img src="https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1200&q=80" alt="Crescent House" />
+                <span class="hostel-tag">Best for pairs</span>
+                <button class="icon-btn save-btn" type="button" aria-label="Save hostel"><i class="fa-regular fa-heart"></i></button>
+              </div>
+              <div class="hostel-body">
+                <div class="hostel-top">
+                  <h3>Crescent House</h3>
+                  <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.6</span>
+                </div>
+                <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> Ayensudo, Cape Coast</p>
+                <div class="hostel-meta-row">
+                  <span><i class="fa-solid fa-key"></i> Private room</span>
+                  <span><i class="fa-solid fa-wifi"></i> Wi-Fi</span>
+                </div>
+                <div class="hostel-bottom-row">
+                  <p class="hostel-price">GH₵ 5,800 <span>per semester</span></p>
+                  <a href="details.html?id=crescent-house" class="mini-link">View details</a>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="results-footer-card">
+            <div>
+              <strong>Keep exploring</strong>
+              <p>More hostels can load here as you refine your search, sort, or switch views.</p>
+            </div>
+            <a href="index.html" class="btn btn-outline">Back to home</a>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="explore.js"></script>
+</body>
+</html>
