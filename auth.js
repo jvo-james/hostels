@@ -23,11 +23,26 @@
   const db = typeof firebase.firestore === "function" ? firebase.firestore() : null;
 
   const PROFILE_KEY = "staynest_profile";
-  const body = document.body;
-  const page = body?.dataset?.page || "";
-  const authRequired = body?.dataset?.authRequired === "true";
+
+  let body = null;
+  let authStateReady = false;
+
   const redirectParam = new URLSearchParams(window.location.search).get("redirect");
-  const postAuthRedirect = redirectParam ? decodeURIComponent(redirectParam) : null;
+  const postAuthRedirect = redirectParam
+    ? safeDecodeURIComponent(redirectParam)
+    : null;
+
+  function safeDecodeURIComponent(value) {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  }
+
+  function getBody() {
+    return document.body || body || document.querySelector("body");
+  }
 
   function safeParse(jsonText, fallback = {}) {
     try {
@@ -122,6 +137,20 @@
     });
   }
 
+  function injectAuthStyles() {
+    if (document.getElementById("hostel-auth-visibility-styles")) return;
+
+    const style = document.createElement("style");
+    style.id = "hostel-auth-visibility-styles";
+    style.textContent = `
+      body[data-auth-state="loading"] [data-guest-actions],
+      body[data-auth-state="loading"] [data-user-actions] {
+        visibility: hidden !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   function syncProfileFields(profile) {
     const data = profile || {};
 
@@ -161,7 +190,10 @@
     setTextContent("[data-profile-year]", fieldMap.year);
   }
 
-  function setAuthUI(user, profile) {
+  function setAuthUI(user, profile, resolved = true) {
+    const bodyEl = getBody();
+    if (!bodyEl) return;
+
     const guestActions = document.querySelector("[data-guest-actions]");
     const userActions = document.querySelector("[data-user-actions]");
     const profileTrigger = document.querySelector("[data-profile-trigger]");
@@ -176,10 +208,14 @@
     const email = getEmail(user, profile);
     const photoURL = profile?.photoURL || user?.photoURL || "";
 
-    body.dataset.authState = loggedIn ? "signed-in" : "signed-out";
+    bodyEl.dataset.authState = resolved
+      ? loggedIn
+        ? "signed-in"
+        : "signed-out"
+      : "loading";
 
-    if (guestActions) guestActions.hidden = loggedIn;
-    if (userActions) userActions.hidden = !loggedIn;
+    if (guestActions) guestActions.hidden = loggedIn || !resolved;
+    if (userActions) userActions.hidden = !loggedIn || !resolved;
 
     setHidden("[data-guest-only]", loggedIn);
     setHidden("[data-user-only]", !loggedIn);
@@ -275,10 +311,14 @@
   }
 
   function protectPrivatePages(user) {
+    const page = getBody()?.dataset?.page || "";
+    const authRequired = getBody()?.dataset?.authRequired === "true";
     const isPrivatePage = page === "profile" || authRequired;
 
     if (isPrivatePage && !user) {
-      const redirectTo = encodeURIComponent(window.location.pathname.split("/").pop() || "profile.html");
+      const currentPage =
+        window.location.pathname.split("/").pop() || "profile.html";
+      const redirectTo = encodeURIComponent(currentPage);
       window.location.replace(`login.html?redirect=${redirectTo}`);
     }
   }
@@ -318,8 +358,8 @@
     } finally {
       clearStoredProfile();
       closeDropdown();
-      setAuthUI(null, {});
-      window.location.href = "index.html";
+      setAuthUI(null, {}, true);
+      window.location.replace("index.html");
     }
   }
 
@@ -331,23 +371,38 @@
 
   async function syncCurrentUser(user) {
     if (!user) {
-      setAuthUI(null, getStoredProfile());
+      setAuthUI(null, getStoredProfile(), true);
       protectPrivatePages(null);
       return;
     }
 
     const profile = await hydrateProfile(user);
-    setAuthUI(user, profile);
+    setAuthUI(user, profile, true);
     protectPrivatePages(user);
+
+    if (
+      postAuthRedirect &&
+      (getBody()?.dataset?.page === "login" ||
+        getBody()?.dataset?.page === "register")
+    ) {
+      window.location.replace(postAuthRedirect);
+    }
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  function init() {
+    body = document.body || document.querySelector("body");
+    if (!body) return;
+
+    injectAuthStyles();
+
     const storedProfile = getStoredProfile();
-    setAuthUI(null, storedProfile);
+    setAuthUI(null, storedProfile, false);
+
     setupDropdownHandlers();
     bindLogoutButtons();
 
     auth.onAuthStateChanged(async (user) => {
+      authStateReady = true;
       await syncCurrentUser(user);
     });
 
@@ -365,6 +420,13 @@
       syncProfileFields,
       openDropdown,
       closeDropdown,
+      authStateReady: () => authStateReady,
     };
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
