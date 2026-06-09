@@ -1,378 +1,867 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Chat directly with hostel managers, caretakers, and representatives about availability, payments, and booking updates on StayNest." />
-  <title>StayNest | Messages</title>
+document.addEventListener("DOMContentLoaded", () => {
+  const STORAGE_KEY = "staynest_messages_state";
+  const MOBILE_BREAKPOINT = 900;
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  const els = {
+    layout: document.getElementById("messagesLayout"),
+    conversationSearch: document.getElementById("conversationSearch"),
+    conversationList: document.getElementById("conversationList"),
+    conversationItems: Array.from(document.querySelectorAll(".conversation-item")),
+    chatHostelImage: document.getElementById("chatHostelImage"),
+    chatHostelName: document.getElementById("chatHostelName"),
+    chatStatusText: document.getElementById("chatStatusText"),
+    chatAreaText: document.getElementById("chatAreaText"),
+    chatThread: document.getElementById("chatThread"),
+    typingIndicator: document.getElementById("typingIndicator"),
+    messageComposer: document.getElementById("messageComposer"),
+    messageInput: document.getElementById("messageInput"),
+    quickQuestions: Array.from(document.querySelectorAll(".quick-question")),
+    backToListBtn: document.getElementById("backToListBtn"),
+    emptyChatState: document.getElementById("emptyChatState"),
+    infoHostelImg: document.querySelector(".info-hostel img"),
+    infoHostelName: document.querySelector(".info-hostel h3"),
+    infoHostelLocation: document.querySelector(".info-hostel p"),
+    infoRows: Array.from(document.querySelectorAll(".info-row")),
+    infoActions: Array.from(document.querySelectorAll(".info-actions .btn, .info-actions a")),
+    header: document.querySelector(".site-header"),
+    menuToggle: document.querySelector(".menu-toggle"),
+    siteNav: document.querySelector(".site-nav"),
+    headerActions: document.querySelector(".header-actions"),
+    conversationPanel: document.querySelector(".conversation-panel"),
+    chatPanel: document.querySelector(".chat-panel"),
+    infoPanel: document.querySelector(".info-panel"),
+    layoutShell: document.querySelector(".messages-shell"),
+    moreOptionsBtn: document.querySelector(".chat-header-actions .icon-action:last-child"),
+    callBtn: document.querySelector(".chat-header-actions .icon-action:first-child"),
+  };
 
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="messages.css" />
-</head>
-<body>
-  <a class="skip-link" href="#messages-main">Skip to content</a>
+  const DEFAULT_CONVERSATIONS = [
+    {
+      id: "atlantic-view-hostel",
+      name: "Atlantic View Hostel",
+      image:
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=300&q=80",
+      status: "online",
+      replyText: "Usually replies within 15 minutes",
+      areaText: "Amamoma, Cape Coast",
+      phone: "+233240000001",
+      distance: "0.7 km",
+      viewId: "sunrise-court-hostel",
+      saveId: "sunrise-court-hostel",
+      bookingId: "sunrise-court-hostel",
+      unread: 2,
+      preview: "Room available for September intake...",
+      timestamp: "2m ago",
+      search: "Atlantic View Hostel room available september intake pricing utilities photos payment availability",
+      activities: [
+        { icon: "fa-calendar-check", title: "Booking request submitted", time: "2 days ago" },
+        { icon: "fa-receipt", title: "Payment receipt received", time: "Yesterday" },
+      ],
+      messages: [
+        {
+          id: "m1",
+          type: "incoming",
+          text: "Hello 👋\nThanks for your interest in Atlantic View Hostel.",
+          time: "09:12",
+          receipt: "Seen",
+        },
+        {
+          id: "m2",
+          type: "outgoing",
+          text: "Hi, do you have any rooms available near the engineering block?",
+          time: "09:14",
+          receipt: "Read",
+        },
+        {
+          id: "m3",
+          type: "incoming",
+          text: "Yes, we currently have a few double occupancy rooms available.",
+          time: "09:16",
+          receipt: "Seen",
+        },
+        {
+          id: "activity",
+          type: "activity",
+          title: "Booking request submitted",
+          sub: "2 days ago",
+        },
+        {
+          id: "m4",
+          type: "outgoing",
+          text: "Great, please share the current price and whether water is included.",
+          time: "09:20",
+          receipt: "Read",
+        },
+        {
+          id: "m5",
+          type: "incoming",
+          text: "Pricing is GH₵ 5,200 for the semester. Water and security are included.",
+          time: "09:22",
+          receipt: "Seen",
+        },
+      ],
+    },
+    {
+      id: "meridian-court",
+      name: "Meridian Court",
+      image:
+        "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=300&q=80",
+      status: "away",
+      replyText: "Usually replies within 30 minutes",
+      areaText: "UCC Road, Cape Coast",
+      phone: "+233240000007",
+      distance: "0.8 km",
+      viewId: "meridian-court",
+      saveId: "meridian-court",
+      bookingId: "meridian-court",
+      unread: 1,
+      preview: "Payment receipt received. Please confirm...",
+      timestamp: "18m ago",
+      search: "Meridian Court payment receipt confirm availability booking price private room studio",
+      activities: [
+        { icon: "fa-file-invoice", title: "Invoice sent", time: "Today" },
+        { icon: "fa-credit-card", title: "Partial payment made", time: "Yesterday" },
+      ],
+      messages: [
+        {
+          id: "m1",
+          type: "incoming",
+          text: "Good afternoon. Thanks for reaching out about Meridian Court.",
+          time: "11:05",
+          receipt: "Seen",
+        },
+        {
+          id: "m2",
+          type: "outgoing",
+          text: "Hi, I paid the booking deposit yesterday. Can you confirm receipt?",
+          time: "11:08",
+          receipt: "Read",
+        },
+        {
+          id: "m3",
+          type: "incoming",
+          text: "Yes, we received it. Your room is reserved.",
+          time: "11:12",
+          receipt: "Seen",
+        },
+      ],
+    },
+    {
+      id: "harbor-ridge-suites",
+      name: "Harbor Ridge Suites",
+      image:
+        "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=300&q=80",
+      status: "online",
+      replyText: "Usually replies within 10 minutes",
+      areaText: "Ayensudo, Cape Coast",
+      phone: "+233240000004",
+      distance: "0.9 km",
+      viewId: "harbor-ridge-suites",
+      saveId: "harbor-ridge-suites",
+      bookingId: "harbor-ridge-suites",
+      unread: 0,
+      preview: "We have studio rooms available with Wi-Fi...",
+      timestamp: "1h ago",
+      search: "Harbor Ridge Suites studio rooms Wi-Fi utilities photos pricing Ayensudo",
+      activities: [
+        { icon: "fa-circle-check", title: "Application reviewed", time: "Today" },
+        { icon: "fa-image", title: "Photos shared", time: "Today" },
+      ],
+      messages: [
+        {
+          id: "m1",
+          type: "incoming",
+          text: "Hello, yes we still have studio rooms available.",
+          time: "14:02",
+          receipt: "Seen",
+        },
+        {
+          id: "m2",
+          type: "outgoing",
+          text: "Please send me photos of the bathroom and kitchen area.",
+          time: "14:05",
+          receipt: "Read",
+        },
+        {
+          id: "m3",
+          type: "incoming",
+          text: "Sure, I will send them shortly.",
+          time: "14:07",
+          receipt: "Seen",
+        },
+      ],
+    },
+    {
+      id: "blue-horizon-hostel",
+      name: "Blue Horizon Hostel",
+      image:
+        "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=300&q=80",
+      status: "offline",
+      replyText: "Usually replies within a few hours",
+      areaText: "Anomabo, Cape Coast",
+      phone: "+233240000003",
+      distance: "1.3 km",
+      viewId: "blue-horizon-hostel",
+      saveId: "blue-horizon-hostel",
+      bookingId: "blue-horizon-hostel",
+      unread: 0,
+      preview: "Your booking request was submitted...",
+      timestamp: "Yesterday",
+      search: "Blue Horizon Hostel booking request submitted shared room value budget utilities security",
+      activities: [
+        { icon: "fa-paper-plane", title: "Booking request submitted", time: "2 days ago" },
+      ],
+      messages: [
+        {
+          id: "m1",
+          type: "incoming",
+          text: "We received your booking request. Thank you.",
+          time: "10:10",
+          receipt: "Seen",
+        },
+        {
+          id: "m2",
+          type: "outgoing",
+          text: "Could you confirm if water is included in the price?",
+          time: "10:12",
+          receipt: "Read",
+        },
+      ],
+    },
+    {
+      id: "oak-residence",
+      name: "Oak Residence",
+      image:
+        "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=300&q=80",
+      status: "online",
+      replyText: "Usually replies within 20 minutes",
+      areaText: "Ayensudo, Cape Coast",
+      phone: "+233240000009",
+      distance: "0.6 km",
+      viewId: "oak-residence",
+      saveId: "oak-residence",
+      bookingId: "oak-residence",
+      unread: 1,
+      preview: "We can reserve the studio room for you...",
+      timestamp: "Yesterday",
+      search: "Oak Residence studio room reservation premium furnishing photos booking payment",
+      activities: [
+        { icon: "fa-bookmark", title: "Room reserved temporarily", time: "Yesterday" },
+        { icon: "fa-receipt", title: "Receipt received", time: "Yesterday" },
+      ],
+      messages: [
+        {
+          id: "m1",
+          type: "incoming",
+          text: "We can reserve the studio room for you if you are ready.",
+          time: "16:20",
+          receipt: "Seen",
+        },
+        {
+          id: "m2",
+          type: "outgoing",
+          text: "Nice. Please share the payment deadline so I can plan.",
+          time: "16:22",
+          receipt: "Read",
+        },
+      ],
+    },
+    {
+      id: "city-gate-hostel",
+      name: "City Gate Hostel",
+      image:
+        "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=300&q=80",
+      status: "offline",
+      replyText: "Usually replies by tomorrow morning",
+      areaText: "Kotokuraba, Cape Coast",
+      phone: "+233240000006",
+      distance: "1.6 km",
+      viewId: "city-gate-hostel",
+      saveId: "city-gate-hostel",
+      bookingId: "city-gate-hostel",
+      unread: 0,
+      preview: "We received your payment upload...",
+      timestamp: "2 days ago",
+      search: "City Gate Hostel payment upload budget shared room safety availability",
+      activities: [
+        { icon: "fa-check-circle", title: "Payment upload reviewed", time: "2 days ago" },
+      ],
+      messages: [
+        {
+          id: "m1",
+          type: "incoming",
+          text: "We received your payment upload. Thank you.",
+          time: "08:18",
+          receipt: "Seen",
+        },
+        {
+          id: "m2",
+          type: "outgoing",
+          text: "Great, can I still ask about room availability for the coming semester?",
+          time: "08:20",
+          receipt: "Read",
+        },
+      ],
+    },
+  ];
 
-  <header class="site-header is-scrolled">
-    <div class="container header-inner">
-      <a href="index.html" class="brand" aria-label="StayNest home">
-        <span class="brand-mark"><i class="fa-solid fa-house-chimney"></i></span>
-        <span class="brand-text">StayNest</span>
-      </a>
+  const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
 
-      <nav class="site-nav" aria-label="Primary navigation">
-        <a href="index.html">Home</a>
-        <a href="explore.html">Explore</a>
-        <a href="saved.html">Saved</a>
-        <a href="bookings.html">Bookings</a>
-        <a href="messages.html" class="active">Messages</a>
-        <a href="profile.html">Profile</a>
-      </nav>
+  const escapeHTML = (value) =>
+    String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
 
-      <div class="header-actions">
-        <a href="login.html" class="text-link">Sign in</a>
-        <a href="register.html" class="btn btn-primary">Create account</a>
-      </div>
+  const toLineBreaks = (value) => escapeHTML(value).replace(/\n/g, "<br>");
 
-      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
-        <i class="fa-solid fa-bars"></i>
-      </button>
-    </div>
-  </header>
+  const formatRelativeStamp = (date = new Date()) => {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const mins = Math.max(1, Math.round(diffMs / 60000));
 
-  <main id="messages-main">
-    <div class="container messages-shell">
-      <section class="messages-hero">
-        <div class="messages-hero-copy">
-          <span class="eyebrow"><i class="fa-solid fa-comments"></i> Accommodation communication hub</span>
-          <h1>Messages</h1>
-          <p>Talk directly with hostel managers, caretakers, or property representatives before booking. Ask about availability, room type, payments, or move-in updates.</p>
-        </div>
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.round(hrs / 24);
+    return `${days}d ago`;
+  };
 
-        <div class="messages-hero-stats" aria-label="Message stats">
-          <div class="message-stat">
-            <strong>6</strong>
-            <span>Conversations</span>
+  const readState = (() => {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  })();
+
+  const conversations = DEFAULT_CONVERSATIONS.map((conversation) => {
+    const persisted = readState.conversations?.[conversation.id];
+    return {
+      ...conversation,
+      unread: typeof persisted?.unread === "number" ? persisted.unread : conversation.unread,
+      preview: persisted?.preview || conversation.preview,
+      timestamp: persisted?.timestamp || conversation.timestamp,
+      messages: Array.isArray(persisted?.messages) && persisted.messages.length ? persisted.messages : conversation.messages,
+    };
+  });
+
+  const state = {
+    activeId: readState.activeId || conversations[0]?.id || null,
+    query: "",
+    mobileOpen: !isMobile(),
+  };
+
+  const saveState = () => {
+    const payload = {
+      activeId: state.activeId,
+      conversations: Object.fromEntries(
+        conversations.map((conversation) => [
+          conversation.id,
+          {
+            unread: conversation.unread,
+            preview: conversation.preview,
+            timestamp: conversation.timestamp,
+            messages: conversation.messages,
+          },
+        ])
+      ),
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  };
+
+  const getConversation = (id) => conversations.find((conversation) => conversation.id === id) || null;
+
+  const getActiveConversation = () => getConversation(state.activeId);
+
+  const setBodyMode = () => {
+    const mobile = isMobile();
+    document.body.classList.toggle("messages-mobile", mobile);
+    document.body.classList.toggle("messages-chat-open", mobile && state.mobileOpen);
+    document.body.classList.toggle("messages-desktop", !mobile);
+  };
+
+  const setHeaderScrolled = () => {
+    if (!els.header) return;
+    els.header.classList.toggle("is-scrolled", window.scrollY > 8);
+  };
+
+  setHeaderScrolled();
+  window.addEventListener("scroll", setHeaderScrolled, { passive: true });
+
+  const closeMobileMenu = () => {
+    if (!els.siteNav || !els.menuToggle) return;
+    els.siteNav.classList.remove("open");
+    els.headerActions?.classList.remove("open");
+    els.menuToggle.setAttribute("aria-expanded", "false");
+    document.body.classList.remove("nav-open");
+  };
+
+  const openMobileMenu = () => {
+    if (!els.siteNav || !els.menuToggle) return;
+    els.siteNav.classList.add("open");
+    els.headerActions?.classList.add("open");
+    els.menuToggle.setAttribute("aria-expanded", "true");
+    document.body.classList.add("nav-open");
+  };
+
+  if (els.menuToggle && els.siteNav) {
+    els.menuToggle.addEventListener("click", () => {
+      const isOpen = els.siteNav.classList.contains("open");
+      if (isOpen) closeMobileMenu();
+      else openMobileMenu();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!els.header?.contains(event.target) && els.siteNav.classList.contains("open")) {
+        closeMobileMenu();
+      }
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > MOBILE_BREAKPOINT) closeMobileMenu();
+      setBodyMode();
+      renderMobileView();
+    });
+  }
+
+  const showToast = (text) => {
+    let toast = document.getElementById("messagesToast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "messagesToast";
+      toast.setAttribute("role", "status");
+      toast.setAttribute("aria-live", "polite");
+      toast.style.position = "fixed";
+      toast.style.left = "50%";
+      toast.style.bottom = "22px";
+      toast.style.transform = "translateX(-50%) translateY(20px)";
+      toast.style.opacity = "0";
+      toast.style.transition = "all 0.25s ease";
+      toast.style.zIndex = "9999";
+      toast.style.padding = "12px 16px";
+      toast.style.borderRadius = "16px";
+      toast.style.background = "rgba(27, 67, 50, 0.96)";
+      toast.style.color = "#fff";
+      toast.style.fontWeight = "700";
+      toast.style.boxShadow = "0 16px 30px rgba(16, 33, 26, 0.2)";
+      document.body.appendChild(toast);
+    }
+
+    toast.textContent = text;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(() => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translateX(-50%) translateY(20px)";
+    }, 1800);
+  };
+
+  const renderConversationList = () => {
+    els.conversationItems.forEach((item) => {
+      const id = item.dataset.conversation;
+      const conversation = getConversation(id);
+      if (!conversation) return;
+
+      const matchesQuery =
+        !state.query ||
+        [
+          conversation.name,
+          conversation.preview,
+          conversation.areaText,
+          conversation.search,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(state.query.toLowerCase());
+
+      item.hidden = !matchesQuery;
+      item.classList.toggle("active", state.activeId === id);
+      item.setAttribute("aria-pressed", String(state.activeId === id));
+
+      const body = item.querySelector(".conversation-body");
+      if (body) {
+        const top = body.querySelector(".conversation-top");
+        const preview = body.querySelector("p");
+        if (top) {
+          const time = top.querySelector("span");
+          if (time) time.textContent = conversation.timestamp;
+        }
+        if (preview) preview.textContent = conversation.preview;
+      }
+
+      const unread = item.querySelector(".unread-badge");
+      if (conversation.unread > 0) {
+        if (!unread) {
+          const badge = document.createElement("span");
+          badge.className = "unread-badge";
+          badge.textContent = String(conversation.unread);
+          item.appendChild(badge);
+        } else {
+          unread.textContent = String(conversation.unread);
+        }
+      } else if (unread) {
+        unread.remove();
+      }
+
+      const statusDot = item.querySelector(".status-dot");
+      if (statusDot) {
+        statusDot.classList.remove("online", "away", "offline");
+        statusDot.classList.add(conversation.status);
+      }
+    });
+  };
+
+  const renderMessages = (conversation) => {
+    if (!els.chatThread) return;
+
+    els.chatThread.innerHTML = conversation.messages
+      .map((message) => {
+        if (message.type === "activity") {
+          return `
+            <div class="message-group activity">
+              <div class="activity-chip">
+                ${escapeHTML(message.title)}
+                <span>${escapeHTML(message.sub)}</span>
+              </div>
+            </div>
+          `;
+        }
+
+        const sideClass = message.type === "outgoing" ? "outgoing" : "incoming";
+        return `
+          <div class="message-group ${sideClass}">
+            <div class="message-bubble">
+              <p>${toLineBreaks(message.text)}</p>
+              <span class="message-meta">${escapeHTML(message.time)} • ${escapeHTML(message.receipt || (message.type === "outgoing" ? "Read" : "Seen"))}</span>
+            </div>
           </div>
-          <div class="message-stat">
-            <strong>3</strong>
-            <span>Unread</span>
-          </div>
-          <div class="message-stat">
-            <strong>15m</strong>
-            <span>Avg reply time</span>
-          </div>
-        </div>
-      </section>
+        `;
+      })
+      .join("");
 
-      <section class="messages-layout" id="messagesLayout">
-        <!-- Sidebar -->
-        <aside class="conversation-panel" aria-label="Conversations list">
-          <div class="panel-card conversation-card">
-            <div class="conversation-search">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="conversationSearch" placeholder="Search conversations..." />
-            </div>
+    els.chatThread.scrollTop = els.chatThread.scrollHeight;
+  };
 
-            <div class="conversation-list" id="conversationList">
-              <button class="conversation-item active" type="button" data-conversation="atlantic-view-hostel" aria-pressed="true">
-                <div class="conversation-avatar">
-                  <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=300&q=80" alt="Atlantic View Hostel" />
-                  <span class="status-dot online"></span>
-                </div>
-                <div class="conversation-body">
-                  <div class="conversation-top">
-                    <strong>Atlantic View Hostel</strong>
-                    <span>2m ago</span>
-                  </div>
-                  <p>Room available for September intake...</p>
-                </div>
-                <span class="unread-badge">2</span>
-              </button>
+  const renderActivities = (conversation) => {
+    const activityBar = document.querySelector(".recent-activity-bar");
+    if (!activityBar) return;
 
-              <button class="conversation-item" type="button" data-conversation="meridian-court" aria-pressed="false">
-                <div class="conversation-avatar">
-                  <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=300&q=80" alt="Meridian Court" />
-                  <span class="status-dot away"></span>
-                </div>
-                <div class="conversation-body">
-                  <div class="conversation-top">
-                    <strong>Meridian Court</strong>
-                    <span>18m ago</span>
-                  </div>
-                  <p>Payment receipt received. Please confirm...</p>
-                </div>
-                <span class="unread-badge">1</span>
-              </button>
-
-              <button class="conversation-item" type="button" data-conversation="harbor-ridge-suites" aria-pressed="false">
-                <div class="conversation-avatar">
-                  <img src="https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=300&q=80" alt="Harbor Ridge Suites" />
-                  <span class="status-dot online"></span>
-                </div>
-                <div class="conversation-body">
-                  <div class="conversation-top">
-                    <strong>Harbor Ridge Suites</strong>
-                    <span>1h ago</span>
-                  </div>
-                  <p>We have studio rooms available with Wi-Fi...</p>
-                </div>
-              </button>
-
-              <button class="conversation-item" type="button" data-conversation="blue-horizon-hostel" aria-pressed="false">
-                <div class="conversation-avatar">
-                  <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=300&q=80" alt="Blue Horizon Hostel" />
-                  <span class="status-dot offline"></span>
-                </div>
-                <div class="conversation-body">
-                  <div class="conversation-top">
-                    <strong>Blue Horizon Hostel</strong>
-                    <span>Yesterday</span>
-                  </div>
-                  <p>Your booking request was submitted...</p>
-                </div>
-              </button>
-
-              <button class="conversation-item" type="button" data-conversation="oak-residence" aria-pressed="false">
-                <div class="conversation-avatar">
-                  <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=300&q=80" alt="Oak Residence" />
-                  <span class="status-dot online"></span>
-                </div>
-                <div class="conversation-body">
-                  <div class="conversation-top">
-                    <strong>Oak Residence</strong>
-                    <span>Yesterday</span>
-                  </div>
-                  <p>We can reserve the studio room for you...</p>
-                </div>
-                <span class="unread-badge">1</span>
-              </button>
-
-              <button class="conversation-item" type="button" data-conversation="city-gate-hostel" aria-pressed="false">
-                <div class="conversation-avatar">
-                  <img src="https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=300&q=80" alt="City Gate Hostel" />
-                  <span class="status-dot offline"></span>
-                </div>
-                <div class="conversation-body">
-                  <div class="conversation-top">
-                    <strong>City Gate Hostel</strong>
-                    <span>2 days ago</span>
-                  </div>
-                  <p>We received your payment upload...</p>
-                </div>
-              </button>
+    activityBar.innerHTML = conversation.activities
+      .map(
+        (activity) => `
+          <div class="activity-item">
+            <i class="fa-solid ${escapeHTML(activity.icon)}"></i>
+            <div>
+              <strong>${escapeHTML(activity.title)}</strong>
+              <span>${escapeHTML(activity.time)}</span>
             </div>
           </div>
-        </aside>
+        `
+      )
+      .join("");
+  };
 
-        <!-- Chat Area -->
-        <section class="chat-panel" aria-label="Chat area">
-          <div class="panel-card chat-card">
-            <div class="chat-header">
-              <div class="chat-header-left">
-                <button class="back-to-conversations" id="backToListBtn" type="button" aria-label="Back to conversations">
-                  <i class="fa-solid fa-arrow-left"></i>
-                </button>
+  const updateInfoPanel = (conversation) => {
+    if (els.chatHostelImage) {
+      els.chatHostelImage.src = conversation.image;
+      els.chatHostelImage.alt = conversation.name;
+    }
+    if (els.chatHostelName) els.chatHostelName.textContent = conversation.name;
+    if (els.chatStatusText) els.chatStatusText.textContent = conversation.replyText;
+    if (els.chatAreaText) els.chatAreaText.textContent = conversation.areaText;
 
-                <div class="chat-hostel-avatar">
-                  <img id="chatHostelImage" src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=300&q=80" alt="Atlantic View Hostel" />
-                  <span class="status-dot online"></span>
-                </div>
+    if (els.infoHostelImg) {
+      els.infoHostelImg.src = conversation.image;
+      els.infoHostelImg.alt = conversation.name;
+    }
+    if (els.infoHostelName) els.infoHostelName.textContent = conversation.name;
+    if (els.infoHostelLocation) els.infoHostelLocation.textContent = conversation.areaText;
 
-                <div class="chat-header-copy">
-                  <h2 id="chatHostelName">Atlantic View Hostel</h2>
-                  <p id="chatStatusText">Usually replies within 15 minutes</p>
-                  <div class="chat-status-line">
-                    <span class="chat-online-indicator"><span class="pulse-dot"></span> Online</span>
-                    <span class="chat-divider">•</span>
-                    <span id="chatAreaText">Amamoma, Cape Coast</span>
-                  </div>
-                </div>
-              </div>
+    if (els.infoRows.length >= 3) {
+      els.infoRows[0].querySelector("strong").textContent = conversation.phone;
+      els.infoRows[1].querySelector("strong").textContent = conversation.distance;
+      els.infoRows[2].querySelector("strong").textContent =
+        conversation.status === "online" ? "Usually replies within 15 minutes" : "Usually replies later today";
+    }
 
-              <div class="chat-header-actions">
-                <a href="tel:+233240000001" class="icon-action" aria-label="Call hostel">
-                  <i class="fa-solid fa-phone"></i>
-                </a>
-                <button class="icon-action" type="button" aria-label="More options">
-                  <i class="fa-solid fa-ellipsis-vertical"></i>
-                </button>
-              </div>
-            </div>
+    if (els.infoActions.length >= 3) {
+      els.infoActions[0].setAttribute("href", `details.html?id=${conversation.viewId}`);
+      els.infoActions[1].setAttribute("href", `saved.html`);
+      els.infoActions[2].setAttribute("href", `bookings.html`);
+    }
 
-            <div class="recent-activity-bar" aria-label="Recent activity">
-              <div class="activity-item">
-                <i class="fa-solid fa-calendar-check"></i>
-                <div>
-                  <strong>Booking request submitted</strong>
-                  <span>2 days ago</span>
-                </div>
-              </div>
-              <div class="activity-item">
-                <i class="fa-solid fa-receipt"></i>
-                <div>
-                  <strong>Payment receipt received</strong>
-                  <span>Yesterday</span>
-                </div>
-              </div>
-            </div>
+    if (els.callBtn) {
+      els.callBtn.setAttribute("href", `tel:${conversation.phone}`);
+    }
+  };
 
-            <div class="quick-questions" aria-label="Quick questions">
-              <button class="quick-question" type="button" data-fill="Ask about pricing">Ask about pricing</button>
-              <button class="quick-question" type="button" data-fill="Ask about room availability">Ask about room availability</button>
-              <button class="quick-question" type="button" data-fill="Ask about utilities">Ask about utilities</button>
-              <button class="quick-question" type="button" data-fill="Request hostel photos">Request hostel photos</button>
-            </div>
+  const renderHeaderSelection = (conversation) => {
+    els.conversationItems.forEach((item) => {
+      const active = item.dataset.conversation === conversation.id;
+      item.classList.toggle("active", active);
+      item.setAttribute("aria-pressed", String(active));
+    });
+  };
 
-            <div class="chat-thread" id="chatThread" aria-live="polite">
-              <div class="message-group incoming">
-                <div class="message-bubble">
-                  <p>Hello 👋</p>
-                  <p>Thanks for your interest in Atlantic View Hostel.</p>
-                  <span class="message-meta">09:12 • Seen</span>
-                </div>
-              </div>
+  const renderEmptyState = () => {
+    if (!els.emptyChatState) return;
+    const shouldShow = !state.activeId;
+    els.emptyChatState.hidden = !shouldShow;
 
-              <div class="message-group outgoing">
-                <div class="message-bubble">
-                  <p>Hi, do you have any rooms available near the engineering block?</p>
-                  <span class="message-meta">09:14 • Read</span>
-                </div>
-              </div>
+    if (els.chatPanel) {
+      els.chatPanel.hidden = shouldShow;
+    }
+    if (els.infoPanel) {
+      els.infoPanel.hidden = shouldShow;
+    }
+  };
 
-              <div class="message-group incoming">
-                <div class="message-bubble">
-                  <p>Yes, we currently have a few double occupancy rooms available.</p>
-                  <span class="message-meta">09:16 • Seen</span>
-                </div>
-              </div>
+  const renderMobileView = () => {
+    const mobile = isMobile();
+    state.mobileOpen = mobile ? Boolean(state.activeId && state.mobileOpen) : true;
 
-              <div class="message-group incoming activity">
-                <div class="activity-chip">
-                  Booking request submitted
-                  <span>2 days ago</span>
-                </div>
-              </div>
+    if (mobile) {
+      if (els.conversationPanel) {
+        els.conversationPanel.hidden = state.mobileOpen;
+      }
+      if (els.chatPanel) {
+        els.chatPanel.hidden = !state.mobileOpen || !state.activeId;
+      }
+      if (els.infoPanel) {
+        els.infoPanel.hidden = !state.mobileOpen || !state.activeId;
+      }
+      if (els.backToListBtn) {
+        els.backToListBtn.style.display = "inline-flex";
+      }
+    } else {
+      if (els.conversationPanel) els.conversationPanel.hidden = false;
+      if (els.chatPanel) els.chatPanel.hidden = !state.activeId;
+      if (els.infoPanel) els.infoPanel.hidden = !state.activeId;
+      if (els.backToListBtn) {
+        els.backToListBtn.style.display = "none";
+      }
+    }
+  };
 
-              <div class="message-group outgoing">
-                <div class="message-bubble">
-                  <p>Great, please share the current price and whether water is included.</p>
-                  <span class="message-meta">09:20 • Read</span>
-                </div>
-              </div>
+  const syncConversationMeta = (conversation, newText) => {
+    const words = newText.trim().split(/\s+/);
+    conversation.preview = words.slice(0, 6).join(" ") + (words.length > 6 ? "..." : "");
+    conversation.timestamp = formatRelativeStamp(new Date());
+    conversation.unread = 0;
+  };
 
-              <div class="message-group incoming">
-                <div class="message-bubble">
-                  <p>Pricing is GH₵ 5,200 for the semester. Water and security are included.</p>
-                  <span class="message-meta">09:22 • Seen</span>
-                </div>
-              </div>
-            </div>
+  const makeReply = (conversation, text) => {
+    const lower = text.toLowerCase();
 
-            <div class="typing-indicator" id="typingIndicator" hidden>
-              <span>Atlantic View Hostel is typing</span>
-              <div class="typing-dots">
-                <span></span><span></span><span></span>
-              </div>
-            </div>
+    if (lower.includes("price") || lower.includes("pricing") || lower.includes("cost")) {
+      return `Thanks for asking. ${conversation.name} currently has flexible pricing options. We can share the latest semester rate and payment terms if you'd like.`;
+    }
 
-            <form class="composer" id="messageComposer" autocomplete="off">
-              <div class="composer-top">
-                <button class="attach-btn" type="button" aria-label="Attach image">
-                  <i class="fa-solid fa-image"></i>
-                </button>
-                <button class="attach-btn" type="button" aria-label="Attach document">
-                  <i class="fa-solid fa-paperclip"></i>
-                </button>
+    if (lower.includes("available") || lower.includes("availability") || lower.includes("room")) {
+      return `Yes, ${conversation.name} currently has room options available. We can confirm the best fit based on your preferred room type and move-in date.`;
+    }
 
-                <label class="composer-input-wrap" for="messageInput">
-                  <textarea
-                    id="messageInput"
-                    class="composer-input"
-                    rows="1"
-                    placeholder="Type your message..."
-                  ></textarea>
-                </label>
+    if (lower.includes("utility") || lower.includes("water") || lower.includes("wifi") || lower.includes("wi-fi")) {
+      return `Utilities vary by room type, but most students ask for Wi-Fi, water, and security. I can send the exact inclusions for this hostel.`;
+    }
 
-                <button class="send-btn" type="submit" aria-label="Send message">
-                  <i class="fa-solid fa-paper-plane"></i>
-                </button>
-              </div>
+    if (lower.includes("photo") || lower.includes("photos") || lower.includes("image")) {
+      return `Absolutely. I can share more photos of the room, bathroom, and common areas for ${conversation.name}.`;
+    }
 
-              <p class="composer-note">Press Enter to send, Shift + Enter for a new line.</p>
-            </form>
-          </div>
-        </section>
+    if (lower.includes("payment") || lower.includes("receipt") || lower.includes("deposit")) {
+      return `Thanks for the update. Once payment is confirmed, we usually update the booking status right away.`;
+    }
 
-        <!-- Info Panel -->
-        <aside class="info-panel" aria-label="Conversation information">
-          <div class="panel-card info-card">
-            <span class="eyebrow"><i class="fa-solid fa-building"></i> Hostel details</span>
-            <div class="info-hostel">
-              <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=300&q=80" alt="Atlantic View Hostel" />
-              <div>
-                <h3>Atlantic View Hostel</h3>
-                <p>Amamoma, Cape Coast</p>
-              </div>
-            </div>
+    if (lower.includes("move") || lower.includes("date") || lower.includes("check in")) {
+      return `We can help with your move-in plan and confirm the exact date once the booking is approved.`;
+    }
 
-            <div class="info-list">
-              <div class="info-row">
-                <span>Contact number</span>
-                <strong>+233 24 000 0001</strong>
-              </div>
-              <div class="info-row">
-                <span>Distance from UCC</span>
-                <strong>0.7 km</strong>
-              </div>
-              <div class="info-row">
-                <span>Availability</span>
-                <strong>September intake open</strong>
-              </div>
-            </div>
+    return `Thanks for the message. We’ll check that for ${conversation.name} and reply with the details shortly.`;
+  };
 
-            <div class="info-actions">
-              <a href="details.html?id=sunrise-court-hostel" class="btn btn-primary btn-full">View Hostel</a>
-              <a href="saved.html" class="btn btn-outline btn-full">Save Hostel</a>
-              <a href="bookings.html" class="btn btn-dark btn-full">Start Booking</a>
-            </div>
-          </div>
+  const appendMessage = (conversation, message) => {
+    conversation.messages.push(message);
+    renderMessages(conversation);
+    syncConversationMeta(conversation, message.text || message.title || "");
+    renderConversationList();
+    saveState();
+  };
 
-          <div class="panel-card info-card">
-            <span class="eyebrow"><i class="fa-solid fa-lightbulb"></i> Quick suggestions</span>
-            <p class="info-copy">Ask about room sizes, payment deadlines, or photos of the bathroom and kitchen area before you decide.</p>
-          </div>
-        </aside>
-      </section>
+  const selectConversation = (id, options = {}) => {
+    const conversation = getConversation(id);
+    if (!conversation) return;
 
-      <section class="messages-empty-state" id="emptyChatState" hidden>
-        <div class="empty-card">
-          <svg viewBox="0 0 420 300" role="img" aria-label="Conversation illustration">
-            <defs>
-              <linearGradient id="msgGrad" x1="0%" x2="100%" y1="0%" y2="100%">
-                <stop offset="0%" stop-color="#d8f3dc"></stop>
-                <stop offset="100%" stop-color="#ffffff"></stop>
-              </linearGradient>
-            </defs>
-            <rect x="78" y="54" width="264" height="154" rx="28" fill="url(#msgGrad)" stroke="#dbe7e1" stroke-width="3"></rect>
-            <rect x="120" y="88" width="148" height="16" rx="8" fill="#1b4332" opacity="0.86"></rect>
-            <rect x="120" y="122" width="168" height="12" rx="6" fill="#5b6f67" opacity="0.35"></rect>
-            <rect x="120" y="146" width="126" height="12" rx="6" fill="#5b6f67" opacity="0.25"></rect>
-            <circle cx="304" cy="134" r="28" fill="#d8f3dc" stroke="#c7e5ce"></circle>
-            <path d="M292 134l10 10 18-20" stroke="#1b4332" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path d="M104 236c30 12 62 18 96 18 44 0 74-10 102-10 34 0 59 7 78 17" stroke="#d8f3dc" stroke-width="18" stroke-linecap="round"></path>
-          </svg>
-          <h2>Select a conversation</h2>
-          <p>Choose a hostel from your conversations to start chatting.</p>
-        </div>
-      </section>
-    </div>
-  </main>
+    state.activeId = id;
+    state.mobileOpen = !isMobile() || Boolean(options.openOnMobile);
 
-  <script src="messages.js"></script>
-</body>
-</html>
+    conversation.unread = 0;
+    renderHeaderSelection(conversation);
+    updateInfoPanel(conversation);
+    renderMessages(conversation);
+    renderActivities(conversation);
+    renderConversationList();
+    renderEmptyState();
+    renderMobileView();
+    saveState();
+  };
+
+  const openConversationFromItem = (button) => {
+    const id = button.dataset.conversation;
+    selectConversation(id, { openOnMobile: true });
+  };
+
+  const handleSendMessage = (text) => {
+    const conversation = getActiveConversation();
+    if (!conversation) return;
+
+    const outgoingText = text.trim();
+    if (!outgoingText) return;
+
+    appendMessage(conversation, {
+      id: `msg-${Date.now()}`,
+      type: "outgoing",
+      text: outgoingText,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      receipt: "Sent",
+    });
+
+    els.messageInput.value = "";
+    autoResizeTextarea(els.messageInput);
+
+    if (els.typingIndicator) {
+      els.typingIndicator.hidden = false;
+    }
+
+    const replyText = makeReply(conversation, outgoingText);
+
+    clearTimeout(handleSendMessage._timer);
+    handleSendMessage._timer = setTimeout(() => {
+      if (els.typingIndicator) els.typingIndicator.hidden = true;
+
+      appendMessage(conversation, {
+        id: `msg-${Date.now()}-reply`,
+        type: "incoming",
+        text: replyText,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        receipt: "Seen",
+      });
+    }, 900);
+  };
+
+  const autoResizeTextarea = (textarea) => {
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
+  };
+
+  const updateSearch = (value) => {
+    state.query = value.trim();
+    renderConversationList();
+  };
+
+  const wireEvents = () => {
+    els.conversationItems.forEach((item) => {
+      item.addEventListener("click", () => openConversationFromItem(item));
+    });
+
+    els.conversationSearch?.addEventListener("input", () => updateSearch(els.conversationSearch.value));
+
+    els.quickQuestions.forEach((button) => {
+      button.addEventListener("click", () => {
+        const fill = button.dataset.fill || button.textContent || "";
+        if (els.messageInput) {
+          els.messageInput.value = fill;
+          autoResizeTextarea(els.messageInput);
+          els.messageInput.focus();
+        }
+      });
+    });
+
+    els.messageComposer?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      handleSendMessage(els.messageInput?.value || "");
+    });
+
+    els.messageInput?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        handleSendMessage(els.messageInput.value);
+      }
+    });
+
+    els.messageInput?.addEventListener("input", () => autoResizeTextarea(els.messageInput));
+
+    els.backToListBtn?.addEventListener("click", () => {
+      state.mobileOpen = false;
+      renderMobileView();
+    });
+
+    els.moreOptionsBtn?.addEventListener("click", () => {
+      showToast("More options coming soon.");
+    });
+
+    const attachButtons = Array.from(document.querySelectorAll(".attach-btn"));
+    attachButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        showToast("Attachment actions can be wired to uploads later.");
+      });
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && isMobile() && state.mobileOpen) {
+        state.mobileOpen = false;
+        renderMobileView();
+      }
+    });
+
+    window.addEventListener("storage", (event) => {
+      if (event.key === STORAGE_KEY) {
+        // Reloading is the safest way to keep multi-tab state aligned.
+        window.location.reload();
+      }
+    });
+  };
+
+  const init = () => {
+    setBodyMode();
+    updateSearch(els.conversationSearch?.value || "");
+    wireEvents();
+
+    const initialConversation = getConversation(state.activeId) || conversations[0] || null;
+    if (initialConversation) {
+      selectConversation(initialConversation.id, { openOnMobile: !isMobile() });
+    } else {
+      renderEmptyState();
+      renderMobileView();
+    }
+
+    autoResizeTextarea(els.messageInput);
+    renderConversationList();
+
+    if (isMobile()) {
+      state.mobileOpen = false;
+      renderMobileView();
+    } else {
+      state.mobileOpen = true;
+      renderMobileView();
+    }
+
+    // Mark any selected active conversation as seen.
+    const activeConversation = getActiveConversation();
+    if (activeConversation) {
+      activeConversation.unread = 0;
+      saveState();
+      renderConversationList();
+    }
+  };
+
+  init();
+});
