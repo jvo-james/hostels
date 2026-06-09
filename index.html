@@ -3,25 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Find comfortable hostels around UCC and nearby neighborhoods with a clean, modern booking experience." />
+  <meta
+    name="description"
+    content="Find comfortable hostels around UCC and nearby neighborhoods with a clean, modern booking experience."
+  />
   <title>StayNest | Hostels Around UCC</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  >
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="home.css" />
 </head>
-<body>
+
+<body data-page="home">
   <a class="skip-link" href="#main-content">Skip to content</a>
 
   <header class="site-header">
     <div class="container header-inner">
       <a href="index.html" class="brand" aria-label="StayNest home">
-        <span class="brand-mark">
-          <i class="fa-solid fa-house-chimney"></i>
+        <span class="brand-mark" aria-hidden="true">
+          <img src="assets/logo.svg" alt="" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
         </span>
         <span class="brand-text">StayNest</span>
       </a>
@@ -32,12 +42,50 @@
         <a href="saved.html">Saved</a>
         <a href="bookings.html">Bookings</a>
         <a href="messages.html">Messages</a>
-        <a href="profile.html">Profile</a>
       </nav>
 
-      <div class="header-actions">
-        <a href="login.html" class="text-link">Sign in</a>
-        <a href="register.html" class="btn btn-primary">Create account</a>
+      <div class="header-actions" data-header-actions>
+        <div class="header-guest-actions" data-guest-actions>
+          <a href="login.html" class="text-link">Sign in</a>
+          <a href="register.html" class="btn btn-primary">Create account</a>
+        </div>
+
+        <div class="header-user-actions" data-user-actions hidden>
+          <button
+            class="profile-trigger"
+            type="button"
+            aria-label="Open profile menu"
+            aria-expanded="false"
+            aria-controls="profile-menu"
+            data-profile-trigger
+          >
+            <span class="profile-avatar" data-profile-avatar>U</span>
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          </button>
+
+          <div class="profile-dropdown" id="profile-menu" data-profile-dropdown hidden>
+            <div class="profile-dropdown-top">
+              <strong data-user-name>User Name</strong>
+              <span data-user-email>user@email.com</span>
+            </div>
+
+            <div class="profile-dropdown-links">
+              <a href="profile.html">
+                <i class="fa-regular fa-user"></i>
+                View profile
+              </a>
+              <a href="bookings.html">
+                <i class="fa-regular fa-calendar-check"></i>
+                My bookings
+              </a>
+            </div>
+
+            <button type="button" class="profile-logout" data-logout-btn>
+              <i class="fa-solid fa-right-from-bracket"></i>
+              Log out
+            </button>
+          </div>
+        </div>
       </div>
 
       <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
@@ -53,7 +101,9 @@
         <div class="hero-copy">
           <span class="eyebrow"><i class="fa-solid fa-location-dot"></i> Hostels near UCC</span>
           <h1>Find a place that feels close to campus and easy to settle into.</h1>
-          <p>Browse carefully arranged stays around UCC, compare comfort, location, and price, then choose a room that fits your routine.</p>
+          <p>
+            Browse carefully arranged stays around UCC, compare comfort, location, and price, then choose a room that fits your routine.
+          </p>
 
           <div class="hero-search-card">
             <form class="hero-search" action="explore.html" method="get">
@@ -82,7 +132,10 @@
 
         <div class="hero-visual" aria-hidden="true">
           <div class="hero-card hero-card-main">
-            <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80" alt="Modern hostel room" />
+            <img
+              src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80"
+              alt="Modern hostel room"
+            />
             <div class="hero-card-badge">Top pick near UCC</div>
           </div>
 
@@ -145,7 +198,10 @@
 
         <div class="district-grid">
           <a href="explore.html?area=Ayensudo" class="district-card district-card-large">
-            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80" alt="Apartment exterior" />
+            <img
+              src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80"
+              alt="Apartment exterior"
+            />
             <div class="district-overlay">
               <h3>Ayensudo</h3>
               <p>Close to student life and daily essentials</p>
@@ -153,7 +209,10 @@
           </a>
 
           <a href="explore.html?area=Anomabo" class="district-card">
-            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80" alt="Modern room" />
+            <img
+              src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80"
+              alt="Modern room"
+            />
             <div class="district-overlay">
               <h3>Anomabo</h3>
               <p>Balanced for comfort and budget</p>
@@ -161,7 +220,10 @@
           </a>
 
           <a href="explore.html?area=UCC%20Road" class="district-card">
-            <img src="https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1200&q=80" alt="Stylish hostel interior" />
+            <img
+              src="https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1200&q=80"
+              alt="Stylish hostel interior"
+            />
             <div class="district-overlay">
               <h3>UCC Road</h3>
               <p>Quick access to campus gates</p>
@@ -184,7 +246,10 @@
         <div class="hostel-grid featured-grid">
           <article class="hostel-card">
             <div class="hostel-image-wrap">
-              <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80" alt="Neat single room" />
+              <img
+                src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80"
+                alt="Neat single room"
+              />
               <span class="hostel-tag">Popular</span>
             </div>
             <div class="hostel-body">
@@ -193,13 +258,16 @@
                 <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.8</span>
               </div>
               <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> Ayensudo, Cape Coast</p>
-              <p class="hostel-price">GH₵ 4,600 <span>per semester</span></p>
+              <p class="hostel-price">GH₵ 4,600 <span>per year</span></p>
             </div>
           </article>
 
           <article class="hostel-card">
             <div class="hostel-image-wrap">
-              <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80" alt="Neat hostel bedroom" />
+              <img
+                src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80"
+                alt="Neat hostel bedroom"
+              />
               <span class="hostel-tag hostel-tag-soft">New listing</span>
             </div>
             <div class="hostel-body">
@@ -208,13 +276,16 @@
                 <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.7</span>
               </div>
               <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> UCC Road, Cape Coast</p>
-              <p class="hostel-price">GH₵ 5,200 <span>per semester</span></p>
+              <p class="hostel-price">GH₵ 5,200 <span>per year</span></p>
             </div>
           </article>
 
           <article class="hostel-card">
             <div class="hostel-image-wrap">
-              <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80" alt="Clean hostel interior" />
+              <img
+                src="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80"
+                alt="Clean hostel interior"
+              />
               <span class="hostel-tag hostel-tag-gold">Best value</span>
             </div>
             <div class="hostel-body">
@@ -223,7 +294,7 @@
                 <span class="hostel-rating"><i class="fa-solid fa-star"></i> 4.6</span>
               </div>
               <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> Anomabo, Cape Coast</p>
-              <p class="hostel-price">GH₵ 3,900 <span>per semester</span></p>
+              <p class="hostel-price">GH₵ 3,900 <span>per year</span></p>
             </div>
           </article>
         </div>
@@ -235,7 +306,9 @@
         <div class="spotlight-copy">
           <span class="eyebrow">Comfort with character</span>
           <h2>Stays that feel practical, polished, and easy to trust.</h2>
-          <p>From quiet study-ready rooms to lively student areas, the collection is arranged to help visitors compare fast and choose confidently.</p>
+          <p>
+            From quiet study-ready rooms to lively student areas, the collection is arranged to help visitors compare fast and choose confidently.
+          </p>
 
           <div class="spotlight-checks">
             <div><i class="fa-solid fa-circle-check"></i> Walking distance options</div>
@@ -258,6 +331,7 @@
                 <stop offset="100%" stop-color="#ffffff" />
               </linearGradient>
             </defs>
+
             <rect x="70" y="170" width="420" height="230" rx="24" fill="#ffffff" stroke="#dbe7e1" stroke-width="4"></rect>
             <polygon points="110,170 280,70 450,170" fill="url(#roofGrad)"></polygon>
             <rect x="140" y="230" width="70" height="95" rx="10" fill="url(#glassGrad)"></rect>
@@ -330,7 +404,9 @@
     <div class="container footer-grid">
       <div>
         <a href="index.html" class="brand footer-brand">
-          <span class="brand-mark"><i class="fa-solid fa-house-chimney"></i></span>
+          <span class="brand-mark" aria-hidden="true">
+            <img src="assets/logo.svg" alt="" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
+          </span>
           <span class="brand-text">StayNest</span>
         </a>
         <p>Handpicked hostel options around UCC, built for easy browsing on every screen size.</p>
@@ -345,9 +421,9 @@
 
       <div>
         <h3>Account</h3>
-        <a href="login.html">Sign in</a>
-        <a href="register.html">Create account</a>
-        <a href="profile.html">Profile</a>
+        <a href="login.html" data-guest-only>Sign in</a>
+        <a href="register.html" data-guest-only>Create account</a>
+        <a href="profile.html" data-user-only hidden>Profile</a>
       </div>
 
       <div>
@@ -359,6 +435,7 @@
     </div>
   </footer>
 
-  <script src="app.js"></script>
+  <script src="auth.js" defer></script>
+  <script src="app.js" defer></script>
 </body>
 </html>
