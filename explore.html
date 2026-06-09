@@ -119,15 +119,26 @@
         <div class="explore-toolbar">
           <div class="toolbar-left">
             <div class="results-pill" id="resultsCount">12 hostels found</div>
-            <div class="sort-wrap">
-              <label for="sortSelect">Sort by</label>
-              <select id="sortSelect" class="sort-select">
-                <option value="recommended">Recommended</option>
-                <option value="price-low">Price: low to high</option>
-                <option value="price-high">Price: high to low</option>
-                <option value="rating">Top rated</option>
-                <option value="near">Closest to campus</option>
-              </select>
+
+            <div class="mobile-accordion sort-accordion" data-accordion-card>
+              <button class="accordion-toggle" type="button" data-accordion-btn aria-expanded="false">
+                Sort by
+                <span class="accordion-state">Recommended</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+
+              <div class="accordion-body" data-accordion-body>
+                <div class="sort-wrap">
+                  <label for="sortSelect">Sort by</label>
+                  <select id="sortSelect" class="sort-select">
+                    <option value="recommended">Recommended</option>
+                    <option value="price-low">Price: low to high</option>
+                    <option value="price-high">Price: high to low</option>
+                    <option value="rating">Top rated</option>
+                    <option value="near">Closest to campus</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -148,46 +159,53 @@
     <section class="explore-content section">
       <div class="container explore-layout">
         <aside class="filters-panel" aria-label="Filters">
-          <div class="panel-card">
-            <div class="panel-title-row">
-              <h2>Refine your search</h2>
-              <button class="panel-link" type="button" id="resetFilters">Reset</button>
-            </div>
+          <div class="panel-card filter-accordion" data-accordion-card>
+            <button class="accordion-toggle panel-toggle" type="button" data-accordion-btn aria-expanded="false">
+              <span>Refine your search</span>
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
 
-            <div class="filter-group">
-              <h3>Budget</h3>
-              <label class="range-label" for="priceRange">
-                <span>Maximum semester price</span>
-                <strong id="priceLabel">GH₵ 8,000</strong>
-              </label>
-              <input type="range" id="priceRange" min="1500" max="8000" value="8000" step="100" />
-            </div>
+            <div class="accordion-body" data-accordion-body>
+              <div class="panel-title-row desktop-only">
+                <h2>Refine your search</h2>
+                <button class="panel-link" type="button" id="resetFilters">Reset</button>
+              </div>
 
-            <div class="filter-group">
-              <h3>Property type</h3>
-              <label class="check-item"><input type="checkbox" checked data-type="self-contained" /> Self-contained</label>
-              <label class="check-item"><input type="checkbox" checked data-type="shared-room" /> Shared room</label>
-              <label class="check-item"><input type="checkbox" checked data-type="private-room" /> Private room</label>
-              <label class="check-item"><input type="checkbox" checked data-type="studio" /> Studio room</label>
-            </div>
+              <div class="filter-group">
+                <h3>Budget</h3>
+                <label class="range-label" for="priceRange">
+                  <span>Maximum semester price</span>
+                  <strong id="priceLabel">GH₵ 8,000</strong>
+                </label>
+                <input type="range" id="priceRange" min="1500" max="8000" value="8000" step="100" />
+              </div>
 
-            <div class="filter-group">
-              <h3>Essentials</h3>
-              <label class="check-item"><input type="checkbox" checked data-amenity="wifi" /> Wi-Fi</label>
-              <label class="check-item"><input type="checkbox" checked data-amenity="water" /> Water available</label>
-              <label class="check-item"><input type="checkbox" checked data-amenity="security" /> Security</label>
-              <label class="check-item"><input type="checkbox" checked data-amenity="furnished" /> Furnished</label>
-            </div>
+              <div class="filter-group">
+                <h3>Property type</h3>
+                <label class="check-item"><input type="checkbox" checked data-type="self-contained" /> Self-contained</label>
+                <label class="check-item"><input type="checkbox" checked data-type="shared-room" /> Shared room</label>
+                <label class="check-item"><input type="checkbox" checked data-type="private-room" /> Private room</label>
+                <label class="check-item"><input type="checkbox" checked data-type="studio" /> Studio room</label>
+              </div>
 
-            <div class="filter-group">
-              <h3>Nearby zones</h3>
-              <div class="mini-zone-grid">
-                <button class="zone-btn active" type="button" data-zone="all">All</button>
-                <button class="zone-btn" type="button" data-zone="Ayensudo">Ayensudo</button>
-                <button class="zone-btn" type="button" data-zone="Anomabo">Anomabo</button>
-                <button class="zone-btn" type="button" data-zone="UCC Road">UCC Road</button>
-                <button class="zone-btn" type="button" data-zone="Kotokuraba">Kotokuraba</button>
-                <button class="zone-btn" type="button" data-zone="Bakaano">Bakaano</button>
+              <div class="filter-group">
+                <h3>Essentials</h3>
+                <label class="check-item"><input type="checkbox" checked data-amenity="wifi" /> Wi-Fi</label>
+                <label class="check-item"><input type="checkbox" checked data-amenity="water" /> Water available</label>
+                <label class="check-item"><input type="checkbox" checked data-amenity="security" /> Security</label>
+                <label class="check-item"><input type="checkbox" checked data-amenity="furnished" /> Furnished</label>
+              </div>
+
+              <div class="filter-group">
+                <h3>Nearby zones</h3>
+                <div class="mini-zone-grid">
+                  <button class="zone-btn active" type="button" data-zone="all">All</button>
+                  <button class="zone-btn" type="button" data-zone="Ayensudo">Ayensudo</button>
+                  <button class="zone-btn" type="button" data-zone="Anomabo">Anomabo</button>
+                  <button class="zone-btn" type="button" data-zone="UCC Road">UCC Road</button>
+                  <button class="zone-btn" type="button" data-zone="Kotokuraba">Kotokuraba</button>
+                  <button class="zone-btn" type="button" data-zone="Bakaano">Bakaano</button>
+                </div>
               </div>
             </div>
           </div>
@@ -397,7 +415,7 @@
               </div>
             </article>
 
-            <article class="hostel-card listing-card" data-price="6100" data-rating="4.8" data-distance="0.6" data-area="Ayensudo" data-type="studio" data-amenities="wifi security water furnished">
+            <article class="hostel-card listing-card" data-price="6100" data-rating="4.8" data-distance="0.6" data-area="Ayensudo" data-type="studio" data-amenities="wifi security furnished water">
               <div class="hostel-image-wrap">
                 <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80" alt="Oak Residence" />
                 <span class="hostel-tag hostel-tag-gold">Recommended</span>
