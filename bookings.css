@@ -1,330 +1,804 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const cards = Array.from(document.querySelectorAll(".booking-card"));
-  const tabs = Array.from(document.querySelectorAll(".btab"));
-  const searchInput = document.getElementById("bookingSearch");
-  const sortSelect = document.getElementById("bookingSort");
-  const resetBtn = document.getElementById("resetBookingFilters");
-  const grid = document.getElementById("bookingsGrid");
-  const emptyState = document.getElementById("bookingsEmptyState");
+/* Bookings page styles for StayNest */
 
-  const activeCountEl = document.getElementById("activeCount");
-  const pendingCountEl = document.getElementById("pendingCount");
-  const previousCountEl = document.getElementById("previousCount");
+.bookings-shell {
+  padding: 28px 0 88px;
+}
 
-  const header = document.querySelector(".site-header");
-  const menuToggle = document.querySelector(".menu-toggle");
-  const siteNav = document.querySelector(".site-nav");
-  const headerActions = document.querySelector(".header-actions");
+.bookings-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 34px;
+  padding: 34px;
+  background: linear-gradient(135deg, rgba(27, 67, 50, 0.98), rgba(45, 106, 79, 0.94));
+  color: #fff;
+  box-shadow: 0 24px 50px rgba(16, 33, 26, 0.18);
+  margin-bottom: 22px;
+}
 
-  const state = {
-    tab: "all",
-    query: "",
-    sort: "recent",
-  };
+.bookings-hero::after {
+  content: "";
+  position: absolute;
+  right: -100px;
+  bottom: -120px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  filter: blur(8px);
+  pointer-events: none;
+}
 
-  const originalOrder = new Map(cards.map((card, index) => [card, index]));
+.bookings-hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 360px);
+  gap: 28px;
+  align-items: center;
+}
 
-  const MONTHS = {
-    jan: 0,
-    january: 0,
-    feb: 1,
-    february: 1,
-    mar: 2,
-    march: 2,
-    apr: 3,
-    april: 3,
-    may: 4,
-    jun: 5,
-    june: 5,
-    jul: 6,
-    july: 6,
-    aug: 7,
-    august: 7,
-    sep: 8,
-    sept: 8,
-    september: 8,
-    oct: 9,
-    october: 9,
-    nov: 10,
-    november: 10,
-    dec: 11,
-    december: 11,
-  };
+.bookings-copy h1 {
+  margin: 8px 0 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(2.2rem, 1.5rem + 2vw, 4rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
 
-  const setHeaderScrolled = () => {
-    if (!header) return;
-    header.classList.toggle("is-scrolled", window.scrollY > 8);
-  };
+.bookings-copy p {
+  margin: 14px 0 0;
+  max-width: 60ch;
+  color: rgba(255, 255, 255, 0.84);
+  line-height: 1.7;
+}
 
-  setHeaderScrolled();
-  window.addEventListener("scroll", setHeaderScrolled, { passive: true });
+.booking-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
 
-  const closeMobileMenu = () => {
-    if (!siteNav || !menuToggle) return;
-    siteNav.classList.remove("open");
-    headerActions?.classList.remove("open");
-    menuToggle.setAttribute("aria-expanded", "false");
-    document.body.classList.remove("nav-open");
-  };
+.booking-stat {
+  padding: 16px 18px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(14px);
+}
 
-  const openMobileMenu = () => {
-    if (!siteNav || !menuToggle) return;
-    siteNav.classList.add("open");
-    headerActions?.classList.add("open");
-    menuToggle.setAttribute("aria-expanded", "true");
-    document.body.classList.add("nav-open");
-  };
+.booking-stat strong {
+  display: block;
+  font-size: 1.45rem;
+  line-height: 1;
+  color: #fff;
+}
 
-  if (menuToggle && siteNav) {
-    menuToggle.addEventListener("click", () => {
-      const isOpen = siteNav.classList.contains("open");
-      if (isOpen) closeMobileMenu();
-      else openMobileMenu();
-    });
+.booking-stat span {
+  display: block;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
 
-    document.addEventListener("click", (event) => {
-      if (!header?.contains(event.target) && siteNav.classList.contains("open")) {
-        closeMobileMenu();
-      }
-    });
+.bookings-hero-card {
+  padding: 18px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 24px 50px rgba(10, 21, 16, 0.18);
+}
 
-    window.addEventListener("resize", () => {
-      if (window.innerWidth > 900) closeMobileMenu();
-    });
+.bookings-hero-card-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.bookings-hero-card-top span {
+  opacity: 0.72;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.bookings-hero-card-top strong {
+  font-size: 1rem;
+}
+
+.bookings-mini-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.mini-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.10);
+  color: #fff;
+  font-weight: 600;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.42);
+  flex-shrink: 0;
+}
+
+.dot.done {
+  background: #d8f3dc;
+}
+
+.bookings-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+  padding: 16px 18px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(16, 33, 26, 0.08);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.booking-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btab {
+  border: 1.5px solid rgba(16, 33, 26, 0.10);
+  border-radius: 999px;
+  background: rgba(27, 67, 50, 0.03);
+  padding: 11px 16px;
+  color: var(--text-muted);
+  font-weight: 800;
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.btab:hover {
+  transform: translateY(-1px);
+}
+
+.btab.active {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+.booking-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.booking-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(16, 33, 26, 0.10);
+  background: #fff;
+  min-width: min(100%, 360px);
+}
+
+.booking-search i {
+  color: var(--text-muted);
+}
+
+.booking-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  min-width: 0;
+  font: inherit;
+}
+
+.booking-search input::placeholder {
+  color: rgba(16, 33, 26, 0.50);
+}
+
+.sort-select {
+  min-width: 190px;
+  border: 1.5px solid rgba(16, 33, 26, 0.10);
+  border-radius: 999px;
+  background: #fff;
+  padding: 11px 14px;
+  color: var(--text);
+  outline: none;
+}
+
+.bookings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 24px;
+  align-items: start;
+}
+
+.bookings-main-column {
+  display: grid;
+  gap: 18px;
+}
+
+.section-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(16, 33, 26, 0.08);
+  border-radius: 30px;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+  padding: 22px;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 1.12rem;
+}
+
+.section-head p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.bookings-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.booking-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  background: #fff;
+  border: 1px solid rgba(16, 33, 26, 0.08);
+  box-shadow: 0 16px 26px rgba(16, 33, 26, 0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.booking-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 36px rgba(16, 33, 26, 0.10);
+}
+
+.booking-card-image-wrap {
+  position: relative;
+}
+
+.booking-card-image-wrap img {
+  width: 100%;
+  height: 230px;
+  display: block;
+  object-fit: cover;
+}
+
+.booking-badge {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  box-shadow: 0 14px 24px rgba(16, 33, 26, 0.14);
+  backdrop-filter: blur(10px);
+}
+
+.booking-badge.active {
+  background: rgba(216, 243, 220, 0.96);
+  color: var(--green);
+}
+
+.booking-badge.pending {
+  background: rgba(254, 243, 199, 0.96);
+  color: #92400e;
+}
+
+.booking-badge.expired {
+  background: rgba(243, 244, 246, 0.96);
+  color: #6b7280;
+}
+
+.booking-card-body {
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.booking-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+  flex-wrap: wrap;
+}
+
+.booking-top h3 {
+  margin: 0;
+  font-size: 1.06rem;
+  line-height: 1.25;
+}
+
+.booking-location {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.booking-price {
+  text-align: right;
+}
+
+.booking-price strong {
+  display: block;
+  color: var(--green);
+  font-size: 1.05rem;
+}
+
+.booking-price span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.booking-ref-row {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.booking-ref-row strong {
+  color: var(--text);
+}
+
+.booking-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.booking-meta-item {
+  border-radius: 22px;
+  background: rgba(27, 67, 50, 0.05);
+  border: 1px solid rgba(16, 33, 26, 0.08);
+  padding: 14px;
+}
+
+.booking-meta-item .label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+
+.booking-meta-item strong {
+  color: var(--text);
+  font-size: 0.98rem;
+}
+
+.booking-timeline {
+  display: grid;
+  gap: 14px;
+  padding: 16px 0 2px;
+  margin-top: 2px;
+  border-top: 1px solid rgba(16, 33, 26, 0.08);
+}
+
+.timeline-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 18px;
+  bottom: -18px;
+  width: 2px;
+  background: rgba(16, 33, 26, 0.10);
+}
+
+.timeline-item:last-child::before {
+  display: none;
+}
+
+.timeline-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(16, 33, 26, 0.20);
+  background: #fff;
+  margin-top: 2px;
+  position: relative;
+  z-index: 1;
+}
+
+.timeline-item.done .timeline-dot {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.timeline-item.current .timeline-dot {
+  background: #fff;
+  border-color: var(--green);
+  box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.10);
+}
+
+.timeline-item strong {
+  display: block;
+  font-size: 0.98rem;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.timeline-item p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.booking-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.booking-actions .btn {
+  padding: 11px 14px;
+  border-radius: 14px;
+  font-size: 0.92rem;
+}
+
+.bookings-aside {
+  display: grid;
+  gap: 18px;
+}
+
+.reminder-card,
+.payment-card,
+.support-card {
+  display: grid;
+  gap: 12px;
+}
+
+.reminder-card {
+  background: linear-gradient(145deg, rgba(27, 67, 50, 0.98), rgba(45, 106, 79, 0.94));
+  color: #fff;
+}
+
+.reminder-card .eyebrow,
+.reminder-card h2,
+.reminder-card p,
+.reminder-card li,
+.reminder-card .reminder-list h3 {
+  color: #fff;
+}
+
+.reminder-card p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.80);
+  line-height: 1.7;
+}
+
+.reminder-card h2 {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.85rem;
+  line-height: 1;
+}
+
+.reminder-list {
+  padding: 16px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.reminder-list h3 {
+  margin: 0 0 10px;
+  font-size: 0.98rem;
+}
+
+.reminder-list ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 7px;
+}
+
+.payment-card .payment-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(16, 33, 26, 0.08);
+}
+
+.payment-card .payment-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.payment-card .payment-row span {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.payment-card .payment-row strong {
+  color: var(--green);
+  font-weight: 900;
+}
+
+.support-card h2 {
+  margin: 0;
+  font-size: 1.22rem;
+}
+
+.support-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.support-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.btn-full {
+  width: 100%;
+  justify-content: center;
+}
+
+.bookings-empty {
+  text-align: center;
+  padding: 74px 18px;
+}
+
+.bookings-empty svg {
+  width: min(260px, 64vw);
+  height: auto;
+  margin-bottom: 18px;
+}
+
+.bookings-empty h2 {
+  margin: 10px 0 8px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(2rem, 1.4rem + 1.4vw, 3rem);
+  line-height: 1;
+}
+
+.bookings-empty p {
+  margin: 0 auto 22px;
+  max-width: 58ch;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.compare-bar {
+  position: sticky;
+  bottom: 18px;
+  z-index: 30;
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(16, 33, 26, 0.08);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(12px);
+  margin-top: 16px;
+}
+
+.compare-bar.show {
+  display: flex;
+}
+
+.compare-bar strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.compare-bar span {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.booking-tabs .btab:focus-visible,
+.booking-search input:focus-visible,
+.sort-select:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid rgba(27, 67, 50, 0.3);
+  outline-offset: 2px;
+}
+
+body.nav-open {
+  overflow: hidden;
+}
+
+.site-header.is-scrolled {
+  box-shadow: 0 12px 28px rgba(16, 33, 26, 0.08);
+}
+
+.site-nav.open,
+.header-actions.open {
+  display: flex;
+}
+
+.reveal-item {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.reveal-item.in-view {
+  animation: fadeUp 0.38s ease forwards;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1100px) {
+  .bookings-hero-grid,
+  .bookings-layout {
+    grid-template-columns: 1fr;
   }
 
-  const formatMoney = (value) =>
-    new Intl.NumberFormat("en-GH", {
-      style: "currency",
-      currency: "GHS",
-      maximumFractionDigits: 0,
-    })
-      .format(Number(value))
-      .replace("GHS", "GH₵");
+  .bookings-hero-card {
+    width: 100%;
+  }
 
-  const parseMoney = (text) => {
-    const match = String(text).replace(/,/g, "").match(/GH₵\s*([\d.]+)/i);
-    return match ? Number(match[1]) : 0;
-  };
+  .bookings-aside {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 
-  const parseDateText = (text) => {
-    if (!text) return null;
+@media (max-width: 900px) {
+  .bookings-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-    const clean = String(text)
-      .replace(/Move in:?\s*/i, "")
-      .replace(/Stayed:?\s*/i, "")
-      .replace(/\s+/g, " ")
-      .trim();
+  .booking-toolbar-actions {
+    width: 100%;
+  }
 
-    // Try native parsing first.
-    const native = Date.parse(clean);
-    if (!Number.isNaN(native)) return native;
+  .booking-search,
+  .sort-select {
+    width: 100%;
+    min-width: 0;
+  }
 
-    const match = clean.match(/([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/);
-    if (!match) return null;
+  .section-head {
+    align-items: start;
+  }
 
-    const month = MONTHS[match[1].toLowerCase()];
-    if (month === undefined) return null;
+  .compare-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-    const day = Number(match[2]);
-    const year = Number(match[3]);
-    return new Date(year, month, day).getTime();
-  };
+  .compare-bar .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
 
-  const cardText = (card) => card.textContent.toLowerCase();
+@media (max-width: 760px) {
+  .bookings-shell {
+    padding-top: 18px;
+  }
 
-  const getCardStatus = (card) => card.dataset.status || "all";
+  .bookings-hero,
+  .bookings-toolbar,
+  .section-card {
+    border-radius: 22px;
+  }
 
-  const getMoveInTimestamp = (card) => {
-    const metaItems = Array.from(card.querySelectorAll(".booking-meta-item"));
-    const moveInBox = metaItems.find((item) =>
-      item.textContent.toLowerCase().includes("move in")
-    );
-    if (!moveInBox) return Number.POSITIVE_INFINITY;
+  .bookings-hero {
+    padding: 24px;
+  }
 
-    const value = moveInBox.querySelector("strong")?.textContent || "";
-    const ts = parseDateText(value);
-    return ts ?? Number.POSITIVE_INFINITY;
-  };
+  .booking-stats-row {
+    grid-template-columns: 1fr;
+  }
 
-  const getPaidAmount = (card) => {
-    const priceText = card.querySelector(".booking-price strong")?.textContent || "";
-    return parseMoney(priceText);
-  };
+  .booking-meta-grid {
+    grid-template-columns: 1fr;
+  }
 
-  const updateHeroStats = () => {
-    const active = cards.filter((card) => getCardStatus(card) === "active").length;
-    const pending = cards.filter((card) => getCardStatus(card) === "pending").length;
-    const previous = cards.filter((card) => getCardStatus(card) === "previous").length;
+  .booking-card-image-wrap img {
+    height: 210px;
+  }
 
-    if (activeCountEl) activeCountEl.textContent = String(active);
-    if (pendingCountEl) pendingCountEl.textContent = String(pending);
-    if (previousCountEl) previousCountEl.textContent = String(previous);
-  };
+  .booking-card-body {
+    padding: 16px;
+  }
 
-  const setActiveTabUI = () => {
-    tabs.forEach((tab) => {
-      const active = tab.dataset.tab === state.tab;
-      tab.classList.toggle("active", active);
-      tab.setAttribute("aria-selected", String(active));
-    });
-  };
+  .bookings-aside {
+    grid-template-columns: 1fr;
+  }
 
-  const matchesFilters = (card) => {
-    const status = getCardStatus(card);
-    const query = state.query.trim().toLowerCase();
+  .booking-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
 
-    const tabMatch = state.tab === "all" || status === state.tab;
+@media (max-width: 520px) {
+  .booking-tabs {
+    width: 100%;
+  }
 
-    const searchBlob = [
-      card.dataset.search || "",
-      cardText(card),
-      card.querySelector("h3")?.textContent || "",
-    ]
-      .join(" ")
-      .toLowerCase();
+  .btab {
+    flex: 1 1 calc(50% - 8px);
+    justify-content: center;
+  }
 
-    const queryMatch = !query || searchBlob.includes(query);
+  .booking-price {
+    text-align: left;
+  }
 
-    return tabMatch && queryMatch;
-  };
+  .booking-ref-row {
+    align-items: start;
+  }
 
-  const sortCompare = (a, b) => {
-    const aIndex = originalOrder.get(a) ?? 0;
-    const bIndex = originalOrder.get(b) ?? 0;
-
-    switch (state.sort) {
-      case "movein": {
-        const aMoveIn = getMoveInTimestamp(a);
-        const bMoveIn = getMoveInTimestamp(b);
-
-        if (aMoveIn !== bMoveIn) return aMoveIn - bMoveIn;
-        return aIndex - bIndex;
-      }
-
-      case "paid-high": {
-        const aPaid = getPaidAmount(a);
-        const bPaid = getPaidAmount(b);
-        if (aPaid !== bPaid) return bPaid - aPaid;
-        return aIndex - bIndex;
-      }
-
-      case "paid-low": {
-        const aPaid = getPaidAmount(a);
-        const bPaid = getPaidAmount(b);
-        if (aPaid !== bPaid) return aPaid - bPaid;
-        return aIndex - bIndex;
-      }
-
-      case "recent":
-      default:
-        return aIndex - bIndex;
-    }
-  };
-
-  const renderCards = () => {
-    const visibleCards = [];
-    const hiddenCards = [];
-
-    cards.forEach((card) => {
-      const visible = matchesFilters(card);
-      card.style.display = visible ? "" : "none";
-      card.dataset.visible = visible ? "true" : "false";
-      if (visible) visibleCards.push(card);
-      else hiddenCards.push(card);
-    });
-
-    visibleCards.sort(sortCompare);
-
-    if (grid) {
-      visibleCards.forEach((card) => grid.appendChild(card));
-      hiddenCards.forEach((card) => grid.appendChild(card));
-    }
-
-    if (emptyState) {
-      const shouldShowEmpty = visibleCards.length === 0;
-      emptyState.hidden = !shouldShowEmpty;
-    }
-
-    const activeVisible = visibleCards.filter((card) => getCardStatus(card) === "active").length;
-    const pendingVisible = visibleCards.filter((card) => getCardStatus(card) === "pending").length;
-    const previousVisible = visibleCards.filter((card) => getCardStatus(card) === "previous").length;
-
-    // These are useful when tabs/search narrow the view.
-    if (activeCountEl && state.tab !== "all") activeCountEl.textContent = String(activeVisible);
-    if (pendingCountEl && state.tab !== "all") pendingCountEl.textContent = String(pendingVisible);
-    if (previousCountEl && state.tab !== "all") previousCountEl.textContent = String(previousVisible);
-  };
-
-  const refresh = () => {
-    updateHeroStats();
-    setActiveTabUI();
-    renderCards();
-  };
-
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      state.tab = tab.dataset.tab || "all";
-      refresh();
-    });
-  });
-
-  searchInput?.addEventListener("input", () => {
-    state.query = searchInput.value;
-    renderCards();
-  });
-
-  sortSelect?.addEventListener("change", () => {
-    state.sort = sortSelect.value;
-    renderCards();
-  });
-
-  resetBtn?.addEventListener("click", () => {
-    state.tab = "all";
-    state.query = "";
-    state.sort = "recent";
-
-    if (searchInput) searchInput.value = "";
-    if (sortSelect) sortSelect.value = "recent";
-
-    refresh();
-  });
-
-  // Simple keyboard convenience.
-  searchInput?.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      searchInput.value = "";
-      state.query = "";
-      renderCards();
-    }
-  });
-
-  // Initial paint.
-  refresh();
-
-  // Animate cards in softly.
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("in-view");
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      threshold: 0.14,
-      rootMargin: "0px 0px -40px 0px",
-    }
-  );
-
-  cards.forEach((card) => {
-    card.classList.add("reveal-item");
-    observer.observe(card);
-  });
-
-  // Keep active counts in sync if another tab changes storage later.
-  window.addEventListener("storage", () => {
-    refresh();
-  });
-});
+  .bookings-empty {
+    padding: 58px 12px;
+  }
+}
