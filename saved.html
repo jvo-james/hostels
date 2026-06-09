@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Track your favorite hostels, compare shortlisted options, and return to the places you're seriously considering." />
+  <title>StayNest | Saved Hostels</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    .saved-shell {
+      padding: 28px 0 88px;
+    }
+
+    .saved-hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 34px;
+      padding: 34px;
+      background:
+        linear-gradient(135deg, rgba(27, 67, 50, 0.98), rgba(45, 106, 79, 0.94));
+      color: #fff;
+      box-shadow: 0 24px 50px rgba(16, 33, 26, 0.18);
+      margin-bottom: 22px;
+    }
+
+    .saved-hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -120px -140px auto;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      filter: blur(10px);
+      pointer-events: none;
+    }
+
+    .saved-hero-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 360px);
+      gap: 28px;
+      align-items: center;
+    }
+
+    .saved-hero-copy h1 {
+      margin: 8px 0 0;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(2.1rem, 1.5rem + 2vw, 4rem);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+      max-width: 11ch;
+    }
+
+    .saved-hero-copy p {
+      margin: 14px 0 0;
+      color: rgba(255, 255, 255, 0.84);
+      max-width: 58ch;
+      line-height: 1.7;
+    }
+
+    .saved-stats {
+      display: grid;
+      gap: 12px;
+    }
+
+    .saved-stat-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 18px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+    }
+
+    .saved-stat-card strong {
+      display: block;
+      font-size: 1.45rem;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .saved-stat-card span {
+      display: block;
+      margin-top: 4px;
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .saved-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 18px;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(12px);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .saved-toolbar-left,
+    .saved-toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .saved-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(27, 67, 50, 0.08);
+      color: var(--green);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(16, 33, 26, 0.10);
+      background: #fff;
+      min-width: min(100%, 360px);
+    }
+
+    .search-wrap i {
+      color: var(--text-muted);
+    }
+
+    .search-wrap input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      min-width: 0;
+      color: var(--text);
+      font: inherit;
+    }
+
+    .search-wrap input::placeholder {
+      color: rgba(16, 33, 26, 0.50);
+    }
+
+    .sort-select {
+      min-width: 200px;
+      border: 1.5px solid rgba(16, 33, 26, 0.10);
+      border-radius: 999px;
+      background: #fff;
+      padding: 11px 14px;
+      color: var(--text);
+      outline: none;
+    }
+
+    .saved-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .saved-main {
+      display: grid;
+      gap: 18px;
+    }
+
+    .section-card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      border-radius: 30px;
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(12px);
+      padding: 22px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 1.12rem;
+    }
+
+    .section-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .section-head .right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .saved-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .saved-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 26px;
+      background: #fff;
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      box-shadow: 0 16px 26px rgba(16, 33, 26, 0.08);
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .saved-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 36px rgba(16, 33, 26, 0.10);
+    }
+
+    .saved-image-wrap {
+      position: relative;
+    }
+
+    .saved-image-wrap img {
+      width: 100%;
+      height: 198px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .saved-badge {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(27, 67, 50, 0.92);
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 800;
+      box-shadow: 0 14px 24px rgba(16, 33, 26, 0.14);
+    }
+
+    .saved-badge.light {
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--green);
+    }
+
+    .saved-remove-btn {
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      width: 42px;
+      height: 42px;
+      border: 0;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.95);
+      color: #b63e4b;
+      box-shadow: 0 14px 24px rgba(16, 33, 26, 0.12);
+      cursor: pointer;
+      transition: transform 0.18s ease;
+    }
+
+    .saved-remove-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .saved-check {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      border: 0;
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--green);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 14px 24px rgba(16, 33, 26, 0.12);
+      cursor: pointer;
+    }
+
+    .saved-check.active {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .saved-body {
+      padding: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .saved-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .saved-top h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      line-height: 1.25;
+    }
+
+    .saved-rating {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      color: var(--gold);
+      white-space: nowrap;
+      font-size: 0.92rem;
+    }
+
+    .saved-location {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .saved-meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .saved-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .saved-footer {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: end;
+      flex-wrap: wrap;
+      padding-top: 4px;
+    }
+
+    .saved-price {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--green);
+    }
+
+    .saved-price span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .saved-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .saved-actions .btn {
+      padding: 11px 14px;
+      border-radius: 14px;
+      font-size: 0.92rem;
+    }
+
+    .compare-bar {
+      position: sticky;
+      bottom: 18px;
+      z-index: 30;
+      margin-top: 16px;
+      padding: 16px 18px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      box-shadow: var(--shadow-md);
+      display: none;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      backdrop-filter: blur(12px);
+    }
+
+    .compare-bar.show {
+      display: flex;
+    }
+
+    .compare-bar strong {
+      display: block;
+      font-size: 1rem;
+    }
+
+    .compare-bar span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .compare-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: end;
+      justify-content: center;
+      z-index: 500;
+      background: rgba(10, 21, 16, 0.52);
+      padding: 18px;
+    }
+
+    .compare-modal.show {
+      display: flex;
+    }
+
+    .compare-sheet {
+      width: min(1120px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.24);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      animation: slideUp 0.28s ease;
+    }
+
+    .compare-sheet-head {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 18px;
+      padding: 22px 24px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid rgba(16, 33, 26, 0.08);
+    }
+
+    .compare-sheet-head h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .compare-sheet-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .compare-close {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      border: 1px solid rgba(16, 33, 26, 0.10);
+      background: #fff;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .compare-table-wrap {
+      padding: 20px 24px 24px;
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+      overflow: hidden;
+    }
+
+    .compare-table th,
+    .compare-table td {
+      text-align: left;
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(16, 33, 26, 0.08);
+      vertical-align: top;
+    }
+
+    .compare-table th {
+      color: var(--text-muted);
+      font-size: 0.86rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .compare-hostel {
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .compare-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(27, 67, 50, 0.08);
+      color: var(--green);
+      font-weight: 800;
+      white-space: nowrap;
+      font-size: 0.88rem;
+    }
+
+    .recent-row {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .recent-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .recent-card {
+      flex: 0 0 280px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      background: #fff;
+      box-shadow: 0 16px 26px rgba(16, 33, 26, 0.08);
+    }
+
+    .recent-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .recent-body {
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .recent-body h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .recent-body p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .recent-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .recent-bottom strong {
+      color: var(--green);
+    }
+
+    .saved-empty {
+      text-align: center;
+      padding: 70px 18px;
+    }
+
+    .saved-empty svg {
+      width: min(240px, 60vw);
+      height: auto;
+      margin-bottom: 18px;
+    }
+
+    .saved-empty h2 {
+      margin: 10px 0 8px;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(2rem, 1.5rem + 1.4vw, 3rem);
+      line-height: 1;
+    }
+
+    .saved-empty p {
+      margin: 0 auto 22px;
+      max-width: 58ch;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .section-note {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-top: 10px;
+    }
+
+    .mobile-only {
+      display: none;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(24px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 1100px) {
+      .saved-hero-grid,
+      .saved-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .saved-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .recent-card {
+        flex-basis: 260px;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .saved-hero {
+        padding: 24px;
+      }
+
+      .saved-toolbar {
+        padding: 14px;
+      }
+
+      .search-wrap,
+      .sort-select {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .saved-toolbar-left,
+      .saved-toolbar-right {
+        width: 100%;
+      }
+
+      .saved-toolbar-right {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .compare-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .compare-bar .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .saved-shell {
+        padding-top: 18px;
+      }
+
+      .saved-hero,
+      .saved-toolbar,
+      .section-card {
+        border-radius: 22px;
+      }
+
+      .saved-stat-card {
+        padding: 14px;
+      }
+
+      .saved-image-wrap img {
+        height: 186px;
+      }
+
+      .saved-body {
+        padding: 16px;
+      }
+
+      .saved-actions .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .compare-modal {
+        padding: 10px;
+        align-items: end;
+      }
+
+      .compare-sheet {
+        border-radius: 22px;
+      }
+
+      .compare-sheet-head,
+      .compare-table-wrap {
+        padding: 16px;
+      }
+
+      .compare-table {
+        min-width: 760px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .saved-hero-copy h1 {
+        max-width: 10ch;
+      }
+
+      .recent-card {
+        flex-basis: 85vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#saved-main">Skip to content</a>
+
+  <header class="site-header is-scrolled">
+    <div class="container header-inner">
+      <a href="index.html" class="brand" aria-label="StayNest home">
+        <span class="brand-mark"><i class="fa-solid fa-house-chimney"></i></span>
+        <span class="brand-text">StayNest</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="explore.html">Explore</a>
+        <a href="saved.html" class="active">Saved</a>
+        <a href="bookings.html">Bookings</a>
+        <a href="messages.html">Messages</a>
+        <a href="profile.html">Profile</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="login.html" class="text-link">Sign in</a>
+        <a href="register.html" class="btn btn-primary">Create account</a>
+      </div>
+
+      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <main id="saved-main">
+    <div class="container saved-shell">
+      <section class="saved-hero">
+        <div class="saved-hero-grid">
+          <div class="saved-hero-copy">
+            <span class="eyebrow"><i class="fa-solid fa-heart"></i> Personal shortlist</span>
+            <h1>Saved Hostels</h1>
+            <p>Your favourite places, all in one place. Compare the ones you're seriously considering, trim the list when needed, and keep the best options close at hand.</p>
+          </div>
+
+          <div class="saved-stats" aria-label="Saved hostel stats">
+            <div class="saved-stat-card">
+              <div>
+                <strong id="savedCount">0</strong>
+                <span>Saved hostels</span>
+              </div>
+              <i class="fa-solid fa-bookmark" aria-hidden="true"></i>
+            </div>
+            <div class="saved-stat-card">
+              <div>
+                <strong id="recentCount">0</strong>
+                <span>Recently added</span>
+              </div>
+              <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="saved-toolbar" aria-label="Saved search and sorting">
+        <div class="saved-toolbar-left">
+          <div class="saved-pill" id="savedResultsPill">0 saved hostels</div>
+          <label class="search-wrap" for="savedSearch">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="savedSearch" placeholder="Search your saved hostels" />
+          </label>
+        </div>
+
+        <div class="saved-toolbar-right">
+          <select id="savedSort" class="sort-select" aria-label="Sort saved hostels">
+            <option value="recent">Recently Saved</option>
+            <option value="price-low">Lowest Price</option>
+            <option value="price-high">Highest Price</option>
+            <option value="rating">Highest Rated</option>
+            <option value="near">Closest to UCC</option>
+          </select>
+          <a href="explore.html" class="btn btn-outline">Browse more hostels</a>
+        </div>
+      </section>
+
+      <section class="saved-layout">
+        <div class="saved-main">
+          <section class="section-card">
+            <div class="section-head">
+              <div>
+                <h2>Saved shortlist</h2>
+                <p>These are the hostels you have already marked as interesting.</p>
+              </div>
+              <div class="right">
+                <button class="btn btn-secondary" id="clearSearch" type="button">Clear search</button>
+                <button class="btn btn-primary" id="compareOpenBtn" type="button" disabled>Compare Selected (0)</button>
+              </div>
+            </div>
+
+            <div id="savedGrid" class="saved-grid" aria-live="polite"></div>
+
+            <div id="savedEmptyState" class="saved-empty" hidden>
+              <svg viewBox="0 0 360 250" role="img" aria-label="Empty saved hostels illustration">
+                <defs>
+                  <linearGradient id="emptyGrad" x1="0%" x2="100%" y1="0%" y2="100%">
+                    <stop offset="0%" stop-color="#d8f3dc"></stop>
+                    <stop offset="100%" stop-color="#ffffff"></stop>
+                  </linearGradient>
+                </defs>
+                <rect x="52" y="72" width="256" height="134" rx="24" fill="url(#emptyGrad)" stroke="#dbe7e1" stroke-width="3"></rect>
+                <rect x="90" y="102" width="96" height="14" rx="7" fill="#1b4332" opacity="0.85"></rect>
+                <rect x="90" y="128" width="182" height="12" rx="6" fill="#5b6f67" opacity="0.35"></rect>
+                <rect x="90" y="150" width="150" height="12" rx="6" fill="#5b6f67" opacity="0.25"></rect>
+                <circle cx="268" cy="136" r="24" fill="#d8f3dc" stroke="#c7e5ce"></circle>
+                <path d="M258 136l8 8 14-16" stroke="#1b4332" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M96 206c26 10 52 15 84 15 37 0 60-8 84-8 29 0 54 7 74 17" stroke="#d8f3dc" stroke-width="18" stroke-linecap="round"></path>
+              </svg>
+              <h2>No saved hostels yet</h2>
+              <p>When you find a hostel you like, save it and it will appear here.</p>
+              <a href="explore.html" class="btn btn-primary">Browse Hostels</a>
+            </div>
+          </section>
+
+          <section class="section-card">
+            <div class="section-head">
+              <div>
+                <h2>Recently viewed</h2>
+                <p>Hostels you opened recently, but have not saved yet.</p>
+              </div>
+            </div>
+            <div id="recentRow" class="recent-row"></div>
+            <p class="section-note" id="recentNote">This section updates automatically when recent hostels are stored in localStorage.</p>
+          </section>
+        </div>
+
+        <aside class="saved-aside">
+          <section class="section-card">
+            <div class="section-head">
+              <div>
+                <h2>Shortlist tips</h2>
+                <p>Use these to trim your list quickly.</p>
+              </div>
+            </div>
+            <div class="saved-stats" style="gap: 14px;">
+              <div class="saved-stat-card" style="background: rgba(27, 67, 50, 0.05); border-color: rgba(16, 33, 26, 0.08); color: var(--text);">
+                <div>
+                  <strong style="color: var(--text);">2–4</strong>
+                  <span style="color: var(--muted);">Best range for comparison</span>
+                </div>
+                <i class="fa-solid fa-layer-group" style="color: var(--green);"></i>
+              </div>
+              <div class="saved-stat-card" style="background: rgba(27, 67, 50, 0.05); border-color: rgba(16, 33, 26, 0.08); color: var(--text);">
+                <div>
+                  <strong style="color: var(--text);">Lowest price</strong>
+                  <span style="color: var(--muted);">Good for budget sorting</span>
+                </div>
+                <i class="fa-solid fa-tags" style="color: var(--green);"></i>
+              </div>
+              <div class="saved-stat-card" style="background: rgba(27, 67, 50, 0.05); border-color: rgba(16, 33, 26, 0.08); color: var(--text);">
+                <div>
+                  <strong style="color: var(--text);">Closest to UCC</strong>
+                  <span style="color: var(--muted);">Best for everyday convenience</span>
+                </div>
+                <i class="fa-solid fa-location-dot" style="color: var(--green);"></i>
+              </div>
+            </div>
+          </section>
+
+          <section class="section-card" style="background: linear-gradient(145deg, rgba(27,67,50,0.98), rgba(45,106,79,0.94)); color: #fff;">
+            <span class="eyebrow" style="background: rgba(255,255,255,0.10); color: #fff;">Next step</span>
+            <h2 style="margin: 12px 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: 1.9rem; line-height: 1;">Open details for a closer look.</h2>
+            <p style="margin: 0; color: rgba(255,255,255,0.80); line-height: 1.7;">Jump into any hostel to review amenities, room layouts, and contact options before booking.</p>
+            <div style="margin-top: 18px;">
+              <a href="explore.html" class="btn btn-dark">Open Explore</a>
+            </div>
+          </section>
+        </aside>
+      </section>
+    </div>
+  </main>
+
+  <div class="compare-bar" id="compareBar" aria-live="polite">
+    <div>
+      <strong id="compareBarTitle">Compare Selected (0)</strong>
+      <span id="compareBarText">Choose 2 to 4 saved hostels to compare.</span>
+    </div>
+    <button class="btn btn-primary" id="compareBtn" type="button" disabled>Compare Selected</button>
+  </div>
+
+  <div class="compare-modal" id="compareModal" aria-hidden="true">
+    <div class="compare-sheet" role="dialog" aria-modal="true" aria-labelledby="compareTitle">
+      <div class="compare-sheet-head">
+        <div>
+          <h3 id="compareTitle">Compare Selected Hostels</h3>
+          <p>See the key differences side by side before you decide.</p>
+        </div>
+        <button class="compare-close" id="compareCloseBtn" type="button" aria-label="Close comparison panel">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="compare-table-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Hostel</th>
+              <th>Price</th>
+              <th>Distance</th>
+              <th>Wi-Fi</th>
+              <th>Security</th>
+              <th>Water</th>
+              <th>Rating</th>
+            </tr>
+          </thead>
+          <tbody id="compareTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const HOSTELS = [
+      {
+        id: "sunrise-court-hostel",
+        name: "Sunrise Court Hostel",
+        area: "Ayensudo",
+        location: "Ayensudo, Cape Coast",
+        rating: 4.8,
+        price: 4600,
+        distance: 0.7,
+        type: "Self-contained",
+        label: "Popular",
+        short: "A polished, student-friendly hostel with a calm setting and easy access to UCC.",
+        image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1400&q=80",
+        amenities: ["Wi-Fi", "Water", "Security", "Furnished"],
+      },
+      {
+        id: "campus-view-lodge",
+        name: "Campus View Lodge",
+        area: "UCC Road",
+        location: "UCC Road, Cape Coast",
+        rating: 4.7,
+        price: 5200,
+        distance: 0.4,
+        type: "Private room",
+        label: "New",
+        short: "A modern lodge with private rooms and very close access to the university road.",
+        image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1400&q=80",
+        amenities: ["Wi-Fi", "Security", "Furnished", "Water"],
+      },
+      {
+        id: "blue-horizon-hostel",
+        name: "Blue Horizon Hostel",
+        area: "Anomabo",
+        location: "Anomabo, Cape Coast",
+        rating: 4.6,
+        price: 3900,
+        distance: 1.3,
+        type: "Shared room",
+        label: "Value",
+        short: "A budget-conscious choice with shared rooms and practical amenities.",
+        image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1400&q=80",
+        amenities: ["Wi-Fi", "Water", "Security", "Furnished"],
+      },
+      {
+        id: "harbor-ridge-suites",
+        name: "Harbor Ridge Suites",
+        area: "Ayensudo",
+        location: "Ayensudo, Cape Coast",
+        rating: 4.9,
+        price: 7100,
+        distance: 0.9,
+        type: "Studio",
+        label: "Premium",
+        short: "A higher-end studio-style hostel with a premium finish and strong ratings.",
+        image: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1400&q=80",
+        amenities: ["Wi-Fi", "Security", "Furnished", "Water"],
+      },
+      {
+        id: "palmside-lodge",
+        name: "Palmside Lodge",
+        area: "Bakaano",
+        location: "Bakaano, Cape Coast",
+        rating: 4.5,
+        price: 4300,
+        distance: 1.1,
+        type: "Private room",
+        label: "Quiet",
+        short: "A quieter hostel for students who prefer a calmer atmosphere.",
+        image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80",
+        amenities: ["Security", "Water", "Wi-Fi"],
+      },
+      {
+        id: "city-gate-hostel",
+        name: "City Gate Hostel",
+        area: "Kotokuraba",
+        location: "Kotokuraba, Cape Coast",
+        rating: 4.4,
+        price: 3550,
+        distance: 1.6,
+        type: "Shared room",
+        label: "Budget",
+        short: "A more affordable hostel with basic but useful amenities.",
+        image: "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1400&q=80",
+        amenities: ["Water", "Security"],
+      },
+      {
+        id: "meridian-court",
+        name: "Meridian Court",
+        area: "UCC Road",
+        location: "UCC Road, Cape Coast",
+        rating: 4.6,
+        price: 4800,
+        distance: 0.8,
+        type: "Self-contained",
+        label: "Top pick",
+        short: "A balanced option with a modern feel and a convenient location.",
+        image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1400&q=80",
+        amenities: ["Wi-Fi", "Water", "Security", "Furnished"],
+      },
+      {
+        id: "bridge-house-hostel",
+        name: "Bridge House Hostel",
+        area: "Kotokuraba",
+        location: "Kotokuraba, Cape Coast",
+        rating: 4.3,
+        price: 2950,
+        distance: 1.8,
+        type: "Shared room",
+        label: "Affordable",
+        short: "An economical hostel for students who need the lowest price point.",
+        image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80",
+        amenities: ["Water", "Security"],
+      },
+      {
+        id: "oak-residence",
+        name: "Oak Residence",
+        area: "Ayensudo",
+        location: "Ayensudo, Cape Coast",
+        rating: 4.8,
+        price: 6100,
+        distance: 0.6,
+        type: "Studio",
+        label: "Recommended",
+        short: "A polished studio residence with premium furnishing and strong reviews.",
+        image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80",
+        amenities: ["Wi-Fi", "Security", "Furnished", "Water"],
+      },
+      {
+        id: "seaview-hostel",
+        name: "Seaview Hostel",
+        area: "Anomabo",
+        location: "Anomabo, Cape Coast",
+        rating: 4.5,
+        price: 4450,
+        distance: 1.0,
+        type: "Private room",
+        label: "Comfort",
+        short: "Private rooms with a straightforward, comfortable feel.",
+        image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1400&q=80",
+        amenities: ["Wi-Fi", "Water", "Security"],
+      },
+      {
+        id: "greenline-suites",
+        name: "Greenline Suites",
+        area: "UCC Road",
+        location: "UCC Road, Cape Coast",
+        rating: 4.7,
+        price: 5150,
+        distance: 0.5,
+        type: "Self-contained",
+        label: "Close to campus",
+        short: "A close-to-campus self-contained option with reliable features.",
+        image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1400&q=80",
+        amenities: ["Wi-Fi", "Water", "Security", "Furnished"],
+      },
+      {
+        id: "harbour-nest-hostel",
+        name: "Harbour Nest Hostel",
+        area: "Bakaano",
+        location: "Bakaano, Cape Coast",
+        rating: 4.2,
+        price: 3400,
+        distance: 1.9,
+        type: "Shared room",
+        label: "Budget",
+        short: "A value-friendly hostel with the basics covered.",
+        image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80",
+        amenities: ["Water", "Security"],
+      },
+      {
+        id: "crescent-house",
+        name: "Crescent House",
+        area: "Ayensudo",
+        location: "Ayensudo, Cape Coast",
+        rating: 4.6,
+        price: 5800,
+        distance: 0.8,
+        type: "Private room",
+        label: "Best for pairs",
+        short: "A private-room option that works well for two students sharing.",
+        image: "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80",
+        amenities: ["Wi-Fi", "Security", "Furnished", "Water"],
+      },
+    ];
+
+    const STORAGE_KEYS = {
+      saved: "staynest_saved_hostels",
+      recent: "staynest_recent_hostels",
+    };
+
+    const state = {
+      query: "",
+      sort: "recent",
+      savedIds: readStorageArray(STORAGE_KEYS.saved),
+      selected: [],
+      recentIds: readStorageArray(STORAGE_KEYS.recent),
+    };
+
+    const els = {
+      savedGrid: document.getElementById("savedGrid"),
+      savedEmptyState: document.getElementById("savedEmptyState"),
+      savedCount: document.getElementById("savedCount"),
+      recentCount: document.getElementById("recentCount"),
+      savedResultsPill: document.getElementById("savedResultsPill"),
+      savedSearch: document.getElementById("savedSearch"),
+      savedSort: document.getElementById("savedSort"),
+      clearSearch: document.getElementById("clearSearch"),
+      compareOpenBtn: document.getElementById("compareOpenBtn"),
+      compareBtn: document.getElementById("compareBtn"),
+      compareBar: document.getElementById("compareBar"),
+      compareBarTitle: document.getElementById("compareBarTitle"),
+      compareBarText: document.getElementById("compareBarText"),
+      compareModal: document.getElementById("compareModal"),
+      compareCloseBtn: document.getElementById("compareCloseBtn"),
+      compareTableBody: document.getElementById("compareTableBody"),
+      recentRow: document.getElementById("recentRow"),
+      recentNote: document.getElementById("recentNote"),
+    };
+
+    function readStorageArray(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(value) ? value : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function writeStorageArray(key, arr) {
+      localStorage.setItem(key, JSON.stringify(arr));
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat("en-GH", {
+        style: "currency",
+        currency: "GHS",
+        maximumFractionDigits: 0,
+      }).format(Number(value)).replace("GHS", "GH₵");
+    }
+
+    function formatMin(distance) {
+      const minutes = Math.max(1, Math.round(Number(distance) * 8));
+      return `${minutes} min to UCC`;
+    }
+
+    function isSaved(hostel) {
+      return state.savedIds.includes(hostel.id) || state.savedIds.includes(hostel.name);
+    }
+
+    function syncSavedState() {
+      const matched = HOSTELS.filter(isSaved);
+
+      // keep saved order aligned to storage order
+      state.savedIds = state.savedIds.filter((id) => {
+        const exists = HOSTELS.some((hostel) => hostel.id === id || hostel.name === id);
+        return exists;
+      });
+      writeStorageArray(STORAGE_KEYS.saved, state.savedIds);
+
+      const count = matched.length;
+      els.savedCount.textContent = count;
+      els.savedResultsPill.textContent = `${count} saved hostel${count === 1 ? "" : "s"}`;
+
+      const recentAdded = matched.filter((hostel) => state.savedIds.slice(0, 4).some((id) => id === hostel.id || id === hostel.name)).length;
+      els.recentCount.textContent = recentAdded;
+    }
+
+    function getSavedHostels() {
+      const mapped = state.savedIds
+        .map((id) => HOSTELS.find((hostel) => hostel.id === id || hostel.name === id))
+        .filter(Boolean);
+
+      return mapped;
+    }
+
+    function matchesQuery(hostel) {
+      const q = state.query.trim().toLowerCase();
+      if (!q) return true;
+      return [
+        hostel.name,
+        hostel.area,
+        hostel.location,
+        hostel.type,
+        hostel.label,
+        hostel.amenities.join(" "),
+      ].join(" ").toLowerCase().includes(q);
+    }
+
+    function sortHostels(list) {
+      const withIndex = (hostel) => ({
+        hostel,
+        savedIndex: Math.max(
+          state.savedIds.lastIndexOf(hostel.id),
+          state.savedIds.lastIndexOf(hostel.name)
+        ),
+      });
+
+      const items = list.map(withIndex);
+
+      switch (state.sort) {
+        case "price-low":
+          items.sort((a, b) => a.hostel.price - b.hostel.price);
+          break;
+        case "price-high":
+          items.sort((a, b) => b.hostel.price - a.hostel.price);
+          break;
+        case "rating":
+          items.sort((a, b) => b.hostel.rating - a.hostel.rating);
+          break;
+        case "near":
+          items.sort((a, b) => a.hostel.distance - b.hostel.distance);
+          break;
+        default:
+          items.sort((a, b) => b.savedIndex - a.savedIndex);
+          break;
+      }
+
+      return items.map((entry) => entry.hostel);
+    }
+
+    function toggleSaved(hostel) {
+      const byId = state.savedIds.findIndex((item) => item === hostel.id || item === hostel.name);
+      if (byId >= 0) {
+        state.savedIds.splice(byId, 1);
+      } else {
+        state.savedIds.unshift(hostel.id);
+      }
+      writeStorageArray(STORAGE_KEYS.saved, state.savedIds);
+      state.selected = state.selected.filter((id) => id !== hostel.id);
+      render();
+    }
+
+    function toggleSelected(hostel) {
+      const index = state.selected.indexOf(hostel.id);
+      if (index >= 0) {
+        state.selected.splice(index, 1);
+      } else if (state.selected.length < 4) {
+        state.selected.push(hostel.id);
+      }
+      renderCompareBar();
+      renderCards();
+    }
+
+    function renderSavedCards() {
+      const savedHostels = sortHostels(
+        getSavedHostels().filter((hostel) => matchesQuery(hostel))
+      );
+
+      els.savedGrid.innerHTML = "";
+
+      if (!savedHostels.length) {
+        els.savedEmptyState.hidden = state.savedIds.length !== 0;
+        els.savedGrid.style.display = "none";
+      } else {
+        els.savedEmptyState.hidden = true;
+        els.savedGrid.style.display = "grid";
+      }
+
+      if (!savedHostels.length && state.savedIds.length === 0) {
+        els.savedGrid.innerHTML = "";
+        return;
+      }
+
+      if (!savedHostels.length) {
+        els.savedGrid.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 20px; text-align: center; color: var(--muted);">
+            No saved hostels match your search.
+          </div>
+        `;
+        return;
+      }
+
+      savedHostels.forEach((hostel) => {
+        const selected = state.selected.includes(hostel.id);
+        const card = document.createElement("article");
+        card.className = "saved-card";
+        card.innerHTML = `
+          <div class="saved-image-wrap">
+            <img src="${hostel.image}" alt="${hostel.name}" />
+            <span class="saved-badge">${hostel.label}</span>
+            <button class="saved-remove-btn" type="button" aria-label="Remove ${hostel.name} from saved">
+              <i class="fa-solid fa-heart"></i>
+            </button>
+            <button class="saved-check ${selected ? "active" : ""}" type="button" aria-label="Select ${hostel.name} for comparison" aria-pressed="${selected}">
+              <i class="fa-solid fa-scale-balanced"></i>
+            </button>
+          </div>
+          <div class="saved-body">
+            <div class="saved-top">
+              <div>
+                <h3>${hostel.name}</h3>
+                <p class="saved-location"><i class="fa-solid fa-location-dot"></i> ${hostel.location}</p>
+              </div>
+              <div class="saved-rating"><i class="fa-solid fa-star"></i> ${hostel.rating.toFixed(1)}</div>
+            </div>
+
+            <div class="saved-meta">
+              <span><i class="fa-solid fa-wifi"></i> WiFi</span>
+              <span><i class="fa-solid fa-droplet"></i> Water</span>
+              <span><i class="fa-solid fa-shield-heart"></i> Security</span>
+            </div>
+
+            <div class="saved-footer">
+              <p class="saved-price">${formatMoney(hostel.price)} <span>per semester</span></p>
+              <div class="saved-actions">
+                <a href="details.html?id=${hostel.id}" class="btn btn-primary">View Details</a>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; color:var(--text-muted); font-size:0.92rem; font-weight:600;">
+              <span><i class="fa-solid fa-route"></i> ${formatMin(hostel.distance)}</span>
+              <span><i class="fa-solid fa-building"></i> ${hostel.type}</span>
+            </div>
+          </div>
+        `;
+
+        card.querySelector(".saved-remove-btn")?.addEventListener("click", () => toggleSaved(hostel));
+        card.querySelector(".saved-check")?.addEventListener("click", () => toggleSelected(hostel));
+        els.savedGrid.appendChild(card);
+      });
+    }
+
+    function renderRecentViewed() {
+      const recentHostels = state.recentIds
+        .map((id) => HOSTELS.find((hostel) => hostel.id === id || hostel.name === id))
+        .filter(Boolean)
+        .filter((hostel) => !isSaved(hostel))
+        .slice(0, 6);
+
+      els.recentRow.innerHTML = "";
+
+      if (!recentHostels.length) {
+        els.recentRow.innerHTML = `
+          <div style="padding: 8px 2px; color: var(--muted);">
+            No recent hostel opens stored yet.
+          </div>
+        `;
+        return;
+      }
+
+      recentHostels.forEach((hostel) => {
+        const el = document.createElement("article");
+        el.className = "recent-card";
+        el.innerHTML = `
+          <img src="${hostel.image}" alt="${hostel.name}" />
+          <div class="recent-body">
+            <div>
+              <h3>${hostel.name}</h3>
+              <p>${hostel.location}</p>
+            </div>
+            <div class="recent-bottom">
+              <strong>${formatMoney(hostel.price)}</strong>
+              <a href="details.html?id=${hostel.id}" class="text-link">Open</a>
+            </div>
+          </div>
+        `;
+        els.recentRow.appendChild(el);
+      });
+    }
+
+    function renderCompareBar() {
+      const count = state.selected.length;
+      els.compareBarTitle.textContent = `Compare Selected (${count})`;
+      els.compareBarText.textContent =
+        count >= 2 && count <= 4
+          ? `Ready to compare ${count} hostel${count === 1 ? "" : "s"}.`
+          : "Choose 2 to 4 saved hostels to compare.";
+
+      const enabled = count >= 2 && count <= 4;
+      els.compareOpenBtn.disabled = !enabled;
+      els.compareBtn.disabled = !enabled;
+
+      els.compareBar.classList.toggle("show", count > 0);
+    }
+
+    function renderCompareTable() {
+      const selectedHostels = state.selected
+        .map((id) => HOSTELS.find((hostel) => hostel.id === id))
+        .filter(Boolean)
+        .slice(0, 4);
+
+      els.compareTableBody.innerHTML = selectedHostels
+        .map((hostel) => {
+          const hasWifi = hostel.amenities.some((a) => a.toLowerCase().includes("wi"));
+          const hasSecurity = hostel.amenities.some((a) => a.toLowerCase().includes("security"));
+          const hasWater = hostel.amenities.some((a) => a.toLowerCase().includes("water"));
+
+          return `
+            <tr>
+              <td>
+                <div class="compare-hostel">${hostel.name}</div>
+                <div class="section-note" style="margin:4px 0 0;">${hostel.location}</div>
+              </td>
+              <td><span class="compare-pill">${formatMoney(hostel.price)}</span></td>
+              <td><span class="compare-pill">${formatMin(hostel.distance)}</span></td>
+              <td>${hasWifi ? "Yes" : "No"}</td>
+              <td>${hasSecurity ? "Yes" : "No"}</td>
+              <td>${hasWater ? "Yes" : "No"}</td>
+              <td><span class="compare-pill"><i class="fa-solid fa-star"></i> ${hostel.rating.toFixed(1)}</span></td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    function openCompareModal() {
+      if (state.selected.length < 2 || state.selected.length > 4) return;
+      renderCompareTable();
+      els.compareModal.classList.add("show");
+      els.compareModal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeCompareModal() {
+      els.compareModal.classList.remove("show");
+      els.compareModal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    function renderCards() {
+      syncSavedState();
+      renderSavedCards();
+      renderCompareBar();
+      renderRecentViewed();
+    }
+
+    function render() {
+      const savedHostels = getSavedHostels();
+      const filteredCount = savedHostels.filter((hostel) => matchesQuery(hostel)).length;
+
+      els.savedResultsPill.textContent = `${filteredCount} saved hostel${filteredCount === 1 ? "" : "s"}`;
+      els.savedCount.textContent = savedHostels.length;
+      els.recentCount.textContent = Math.min(4, savedHostels.length);
+
+      renderCards();
+    }
+
+    // Mobile header support
+    const menuToggle = document.querySelector(".menu-toggle");
+    const siteNav = document.querySelector(".site-nav");
+    const headerActions = document.querySelector(".header-actions");
+
+    if (menuToggle && siteNav) {
+      menuToggle.addEventListener("click", () => {
+        const isOpen = siteNav.classList.contains("open");
+        siteNav.classList.toggle("open", !isOpen);
+        headerActions?.classList.toggle("open", !isOpen);
+        menuToggle.setAttribute("aria-expanded", String(!isOpen));
+      });
+
+      document.addEventListener("click", (event) => {
+        const clickedInsideHeader = document.querySelector(".site-header")?.contains(event.target);
+        if (!clickedInsideHeader && siteNav.classList.contains("open")) {
+          siteNav.classList.remove("open");
+          headerActions?.classList.remove("open");
+          menuToggle.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 900) {
+          siteNav.classList.remove("open");
+          headerActions?.classList.remove("open");
+          menuToggle.setAttribute("aria-expanded", "false");
+        }
+      });
+    }
+
+    els.savedSearch?.addEventListener("input", () => {
+      state.query = els.savedSearch.value;
+      renderCards();
+    });
+
+    els.clearSearch?.addEventListener("click", () => {
+      state.query = "";
+      if (els.savedSearch) els.savedSearch.value = "";
+      renderCards();
+    });
+
+    els.savedSort?.addEventListener("change", () => {
+      state.sort = els.savedSort.value;
+      renderCards();
+    });
+
+    els.compareOpenBtn?.addEventListener("click", openCompareModal);
+    els.compareBtn?.addEventListener("click", openCompareModal);
+    els.compareCloseBtn?.addEventListener("click", closeCompareModal);
+
+    els.compareModal?.addEventListener("click", (event) => {
+      if (event.target === els.compareModal) closeCompareModal();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && els.compareModal.classList.contains("show")) {
+        closeCompareModal();
+      }
+    });
+
+    // Initial render
+    render();
+
+    // Keep stats honest if storage changes from another tab
+    window.addEventListener("storage", (event) => {
+      if (event.key === STORAGE_KEYS.saved || event.key === STORAGE_KEYS.recent) {
+        state.savedIds = readStorageArray(STORAGE_KEYS.saved);
+        state.recentIds = readStorageArray(STORAGE_KEYS.recent);
+        render();
+      }
+    });
+  </script>
+</body>
+</html>
