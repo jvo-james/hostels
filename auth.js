@@ -1,5 +1,3 @@
-
-
 (function () {
   "use strict";
 
@@ -13,9 +11,7 @@
   };
 
   if (!window.firebase) {
-    console.error(
-      "Firebase is not loaded. Add the Firebase compat scripts before auth.js."
-    );
+    console.error("Firebase is not loaded. Add the Firebase compat scripts before auth.js.");
     return;
   }
 
@@ -29,6 +25,7 @@
   const PROFILE_KEY = "staynest_profile";
   const body = document.body;
   const page = body?.dataset?.page || "";
+  const authRequired = body?.dataset?.authRequired === "true";
   const redirectParam = new URLSearchParams(window.location.search).get("redirect");
   const postAuthRedirect = redirectParam ? decodeURIComponent(redirectParam) : null;
 
@@ -49,7 +46,7 @@
     try {
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile || {}));
     } catch {
-      // Ignore storage errors.
+      // ignore storage issues
     }
   }
 
@@ -57,7 +54,7 @@
     try {
       localStorage.removeItem(PROFILE_KEY);
     } catch {
-      // Ignore storage errors.
+      // ignore storage issues
     }
   }
 
@@ -98,6 +95,7 @@
       const img = document.createElement("img");
       img.src = photoURL;
       img.alt = "";
+      img.referrerPolicy = "no-referrer";
       el.appendChild(img);
       return;
     }
@@ -109,6 +107,58 @@
     document.querySelectorAll(selector).forEach((el) => {
       el.hidden = hidden;
     });
+  }
+
+  function setTextContent(selector, text) {
+    document.querySelectorAll(selector).forEach((el) => {
+      el.textContent = text ?? "";
+    });
+  }
+
+  function setInputValue(selector, value) {
+    document.querySelectorAll(selector).forEach((el) => {
+      if ("value" in el) el.value = value ?? "";
+      else el.textContent = value ?? "";
+    });
+  }
+
+  function syncProfileFields(profile) {
+    const data = profile || {};
+
+    const fieldMap = {
+      fullName: data.fullName || "",
+      email: data.email || "",
+      phone: data.phone || "",
+      studentId: data.studentId || "",
+      institution: data.institution || "",
+      department: data.department || "",
+      year: data.year || "",
+      photoURL: data.photoURL || "",
+    };
+
+    Object.entries(fieldMap).forEach(([key, value]) => {
+      document.querySelectorAll(`[data-profile-field="${key}"]`).forEach((el) => {
+        if ("value" in el) el.value = value;
+        else el.textContent = value;
+      });
+    });
+
+    setInputValue("#fullName", fieldMap.fullName);
+    setInputValue("#email", fieldMap.email);
+    setInputValue("#phone", fieldMap.phone);
+    setInputValue("#studentId", fieldMap.studentId);
+    setInputValue("#institution", fieldMap.institution);
+    setInputValue("#department", fieldMap.department);
+    setInputValue("#year", fieldMap.year);
+    setInputValue("#photoURL", fieldMap.photoURL);
+
+    setTextContent("[data-profile-name]", fieldMap.fullName);
+    setTextContent("[data-profile-email]", fieldMap.email);
+    setTextContent("[data-profile-phone]", fieldMap.phone);
+    setTextContent("[data-profile-student-id]", fieldMap.studentId);
+    setTextContent("[data-profile-institution]", fieldMap.institution);
+    setTextContent("[data-profile-department]", fieldMap.department);
+    setTextContent("[data-profile-year]", fieldMap.year);
   }
 
   function setAuthUI(user, profile) {
@@ -125,6 +175,8 @@
     const name = getDisplayName(user, profile);
     const email = getEmail(user, profile);
     const photoURL = profile?.photoURL || user?.photoURL || "";
+
+    body.dataset.authState = loggedIn ? "signed-in" : "signed-out";
 
     if (guestActions) guestActions.hidden = loggedIn;
     if (userActions) userActions.hidden = !loggedIn;
@@ -143,6 +195,18 @@
 
       avatarEls.forEach((el) => renderAvatar(el, name, photoURL));
       avatarLargeEls.forEach((el) => renderAvatar(el, name, photoURL));
+      syncProfileFields(profile);
+    } else {
+      userNameEls.forEach((el) => {
+        el.textContent = "User";
+      });
+
+      userEmailEls.forEach((el) => {
+        el.textContent = "";
+      });
+
+      avatarEls.forEach((el) => renderAvatar(el, "User", ""));
+      avatarLargeEls.forEach((el) => renderAvatar(el, "User", ""));
     }
 
     if (profileDropdown) {
@@ -211,10 +275,11 @@
   }
 
   function protectPrivatePages(user) {
-    const isProfilePage = page === "profile" || body?.dataset?.authRequired === "true";
+    const isPrivatePage = page === "profile" || authRequired;
 
-    if (isProfilePage && !user) {
-      window.location.replace("login.html?redirect=profile.html");
+    if (isPrivatePage && !user) {
+      const redirectTo = encodeURIComponent(window.location.pathname.split("/").pop() || "profile.html");
+      window.location.replace(`login.html?redirect=${redirectTo}`);
     }
   }
 
@@ -264,24 +329,9 @@
     });
   }
 
-  function redirectIfAlreadySignedIn(user) {
-    const isLoginPage = page === "login";
-    const isRegisterPage = page === "register";
-
-    if (!user) return;
-
-    if (isLoginPage || isRegisterPage) {
-      const target =
-        postAuthRedirect ||
-        (isRegisterPage ? "profile.html" : "index.html");
-
-      window.location.replace(target);
-    }
-  }
-
   async function syncCurrentUser(user) {
     if (!user) {
-      setAuthUI(null, {});
+      setAuthUI(null, getStoredProfile());
       protectPrivatePages(null);
       return;
     }
@@ -289,11 +339,11 @@
     const profile = await hydrateProfile(user);
     setAuthUI(user, profile);
     protectPrivatePages(user);
-    redirectIfAlreadySignedIn(user);
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    setAuthUI(null, {});
+    const storedProfile = getStoredProfile();
+    setAuthUI(null, storedProfile);
     setupDropdownHandlers();
     bindLogoutButtons();
 
@@ -301,7 +351,6 @@
       await syncCurrentUser(user);
     });
 
-    // Expose helpers for page scripts.
     window.HostelLinkAuth = {
       auth,
       db,
@@ -312,6 +361,10 @@
       getEmail,
       getInitials,
       hydrateProfile,
+      setAuthUI,
+      syncProfileFields,
+      openDropdown,
+      closeDropdown,
     };
   });
 })();
