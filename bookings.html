@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Track your hostel reservations, pending requests, confirmed stays, and move-in dates on StayNest." />
+  <meta
+    name="description"
+    content="Track your hostel bookings, pending requests, and confirmed stays in one clean dashboard."
+  />
   <title>StayNest | My Bookings</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,16 +14,908 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="bookings.css" />
+
+  <style>
+    :root {
+      --page-bg: #f4f8f5;
+      --page-surface: rgba(255, 255, 255, 0.88);
+      --page-surface-strong: #ffffff;
+      --page-text: #10211a;
+      --page-muted: #66756f;
+      --page-green: #1b4332;
+      --page-green-2: #2d6a4f;
+      --page-mint: #d8f3dc;
+      --page-line: rgba(16, 33, 26, 0.10);
+      --page-shadow: 0 26px 70px rgba(16, 33, 26, 0.14);
+      --page-shadow-soft: 0 14px 34px rgba(16, 33, 26, 0.08);
+      --page-radius: 32px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, sans-serif;
+      color: var(--page-text);
+      background:
+        radial-gradient(circle at top left, rgba(216, 243, 220, 0.70), transparent 28%),
+        radial-gradient(circle at top right, rgba(247, 239, 217, 0.65), transparent 24%),
+        radial-gradient(circle at bottom center, rgba(45, 106, 79, 0.08), transparent 28%),
+        var(--page-bg);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select { font: inherit; }
+    * { box-sizing: border-box; }
+
+    .container {
+      width: min(calc(100% - 32px), 1180px);
+      margin-inline: auto;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -999px;
+      top: 12px;
+      z-index: 200;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--page-green);
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .skip-link:focus { left: 12px; }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 1200;
+      margin: 16px 0 20px;
+    }
+
+    .site-header.is-scrolled .header-inner {
+      background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--page-shadow-soft);
+    }
+
+    .header-inner {
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      border-radius: 999px;
+      box-shadow: var(--page-shadow-soft);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #ffffff, rgba(216, 243, 220, 0.84));
+      color: var(--page-green);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.10);
+      overflow: hidden;
+      flex: none;
+    }
+
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 8px;
+      display: block;
+    }
+
+    .brand-text { font-size: 1.05rem; }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      color: var(--page-muted);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .site-nav a {
+      position: relative;
+      padding-bottom: 2px;
+    }
+
+    .site-nav a.active,
+    .site-nav a:hover {
+      color: var(--page-text);
+    }
+
+    .site-nav a.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -6px;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--page-green);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-guest-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .text-link {
+      font-weight: 800;
+      color: var(--page-green);
+    }
+
+    .btn.btn-primary {
+      box-shadow: 0 16px 30px rgba(27, 67, 50, 0.18);
+    }
+
+    .header-user-actions {
+      position: relative;
+    }
+
+    .profile-trigger {
+      border: 0;
+      background: rgba(16, 33, 26, 0.06);
+      border-radius: 999px;
+      padding: 7px 10px 7px 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--page-text);
+      font-weight: 700;
+    }
+
+    .profile-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--page-green), var(--page-green-2));
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      overflow: hidden;
+      flex: none;
+    }
+
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .profile-dropdown {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 12px);
+      width: min(320px, calc(100vw - 24px));
+      background: #fff;
+      border-radius: 24px;
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      box-shadow: 0 26px 56px rgba(16, 33, 26, 0.16);
+      padding: 14px;
+      z-index: 40;
+    }
+
+    .profile-dropdown-top {
+      display: grid;
+      gap: 3px;
+      padding: 4px 4px 12px;
+      border-bottom: 1px solid rgba(16, 33, 26, 0.08);
+      margin-bottom: 10px;
+    }
+
+    .profile-dropdown-top strong {
+      font-size: 1rem;
+      line-height: 1.25;
+    }
+
+    .profile-dropdown-top span {
+      color: var(--page-muted);
+      font-size: 0.92rem;
+      word-break: break-word;
+    }
+
+    .profile-dropdown-links {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .profile-dropdown-links a,
+    .profile-logout {
+      border-radius: 16px;
+      padding: 11px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      background: rgba(16, 33, 26, 0.04);
+    }
+
+    .profile-dropdown-links a:hover,
+    .profile-logout:hover {
+      background: rgba(16, 33, 26, 0.07);
+    }
+
+    .profile-logout {
+      width: 100%;
+      border: 1px solid rgba(220, 38, 38, 0.14);
+      background: rgba(220, 38, 38, 0.06);
+      color: #991b1b;
+      cursor: pointer;
+      justify-content: center;
+    }
+
+    .menu-toggle {
+      border: 0;
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      background: rgba(16, 33, 26, 0.06);
+      color: var(--page-text);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .bookings-shell {
+      padding: 10px 0 88px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .bookings-header-card {
+      border-radius: 34px;
+      background:
+        linear-gradient(135deg, rgba(27, 67, 50, 0.98), rgba(45, 106, 79, 0.95));
+      color: #fff;
+      box-shadow: var(--page-shadow);
+      padding: 28px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      gap: 22px;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bookings-header-card::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      bottom: -130px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      filter: blur(10px);
+      pointer-events: none;
+    }
+
+    .bookings-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.92);
+      font-size: 0.86rem;
+      font-weight: 800;
+      width: fit-content;
+    }
+
+    .bookings-header-card h1 {
+      margin: 14px 0 0;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(2rem, 1.35rem + 2vw, 3.8rem);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .bookings-header-card p {
+      margin: 14px 0 0;
+      max-width: 64ch;
+      color: rgba(255, 255, 255, 0.84);
+      line-height: 1.7;
+      position: relative;
+      z-index: 1;
+    }
+
+    .booking-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .booking-stat-card {
+      padding: 18px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 36px rgba(10, 21, 16, 0.14);
+    }
+
+    .booking-stat-card strong {
+      display: block;
+      font-size: 1.55rem;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .booking-stat-card span {
+      display: block;
+      margin-top: 5px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .bookings-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: center;
+      padding: 16px 18px;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      box-shadow: var(--page-shadow-soft);
+      backdrop-filter: blur(12px);
+      flex-wrap: wrap;
+    }
+
+    .booking-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btab {
+      border: 1.5px solid rgba(16, 33, 26, 0.10);
+      border-radius: 999px;
+      background: rgba(27, 67, 50, 0.03);
+      padding: 11px 16px;
+      color: #66756f;
+      font-weight: 800;
+      transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+    }
+
+    .btab:hover { transform: translateY(-1px); }
+
+    .btab.active {
+      background: var(--page-green);
+      color: #fff;
+      border-color: var(--page-green);
+    }
+
+    .booking-toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .booking-search {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(16, 33, 26, 0.10);
+      background: #fff;
+      min-width: min(100%, 360px);
+    }
+
+    .booking-search i { color: #66756f; }
+
+    .booking-search input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--page-text);
+      min-width: 0;
+    }
+
+    .booking-search input::placeholder {
+      color: rgba(16, 33, 26, 0.50);
+    }
+
+    .sort-select {
+      min-width: 190px;
+      border: 1.5px solid rgba(16, 33, 26, 0.10);
+      border-radius: 999px;
+      background: #fff;
+      padding: 11px 14px;
+      color: var(--page-text);
+      outline: none;
+    }
+
+    .bookings-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .bookings-main-column {
+      display: grid;
+      gap: 18px;
+    }
+
+    .section-card,
+    .bookings-side-card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      border-radius: 30px;
+      box-shadow: var(--page-shadow-soft);
+      backdrop-filter: blur(12px);
+      padding: 22px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 1.12rem;
+    }
+
+    .section-head p {
+      margin: 6px 0 0;
+      color: var(--page-muted);
+      line-height: 1.6;
+    }
+
+    .bookings-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .bookings-empty-state {
+      display: grid;
+      justify-items: center;
+      text-align: center;
+      gap: 14px;
+      padding: 26px 18px;
+      border-radius: 28px;
+      border: 1px dashed rgba(16, 33, 26, 0.14);
+      background: linear-gradient(180deg, rgba(216, 243, 220, 0.38), rgba(255, 255, 255, 0.72));
+    }
+
+    .empty-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(27, 67, 50, 0.10);
+      color: var(--page-green);
+      font-size: 1.55rem;
+    }
+
+    .bookings-empty-state h3 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .bookings-empty-state p {
+      margin: 0;
+      color: var(--page-muted);
+      line-height: 1.65;
+      max-width: 46ch;
+    }
+
+    .bookings-empty-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .bookings-side-card {
+      display: grid;
+      gap: 16px;
+    }
+
+    .side-card-top {
+      display: grid;
+      gap: 5px;
+    }
+
+    .side-card-top h3 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .side-card-top p {
+      margin: 0;
+      color: var(--page-muted);
+      line-height: 1.6;
+    }
+
+    .side-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .side-list-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(16, 33, 26, 0.04);
+    }
+
+    .side-list-item i {
+      margin-top: 2px;
+      color: var(--page-green);
+    }
+
+    .side-list-item strong,
+    .side-list-item span {
+      display: block;
+    }
+
+    .side-list-item strong {
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+    }
+
+    .side-list-item span {
+      color: var(--page-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .side-links {
+      display: grid;
+      gap: 10px;
+    }
+
+    .side-links a {
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(16, 33, 26, 0.04);
+      font-weight: 700;
+    }
+
+    .side-links a:hover {
+      background: rgba(16, 33, 26, 0.07);
+    }
+
+    .bookings-grid .booking-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 28px;
+      background: #fff;
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      box-shadow: 0 16px 26px rgba(16, 33, 26, 0.08);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .bookings-grid .booking-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 36px rgba(16, 33, 26, 0.10);
+    }
+
+    .booking-card-image-wrap {
+      position: relative;
+    }
+
+    .booking-card-image-wrap img {
+      width: 100%;
+      height: 230px;
+      display: block;
+      object-fit: cover;
+    }
+
+    .booking-badge {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      box-shadow: 0 14px 24px rgba(16, 33, 26, 0.14);
+      backdrop-filter: blur(10px);
+    }
+
+    .booking-badge.active { background: rgba(216, 243, 220, 0.96); color: var(--page-green); }
+    .booking-badge.pending { background: rgba(254, 243, 199, 0.96); color: #92400e; }
+    .booking-badge.expired { background: rgba(243, 244, 246, 0.96); color: #6b7280; }
+
+    .booking-card-body {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .booking-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+      flex-wrap: wrap;
+    }
+
+    .booking-top h3 {
+      margin: 0;
+      font-size: 1.06rem;
+      line-height: 1.25;
+    }
+
+    .booking-location {
+      margin: 6px 0 0;
+      color: var(--page-muted);
+      font-size: 0.94rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .booking-price {
+      text-align: right;
+    }
+
+    .booking-price strong {
+      display: block;
+      color: var(--page-green);
+      font-size: 1.05rem;
+    }
+
+    .booking-price span {
+      display: block;
+      margin-top: 4px;
+      color: var(--page-muted);
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    .booking-ref-row {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      color: var(--page-muted);
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .booking-ref-row strong { color: var(--page-text); }
+
+    .booking-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .booking-meta-item {
+      border-radius: 22px;
+      background: rgba(27, 67, 50, 0.05);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      padding: 14px;
+    }
+
+    .booking-meta-item .label {
+      display: block;
+      color: var(--page-muted);
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+    }
+
+    .booking-meta-item strong {
+      color: var(--page-text);
+      font-size: 0.98rem;
+    }
+
+    .booking-timeline {
+      display: grid;
+      gap: 14px;
+      padding: 16px 0 2px;
+      margin-top: 2px;
+      border-top: 1px solid rgba(16, 33, 26, 0.08);
+    }
+
+    .timeline-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 18px;
+      bottom: -18px;
+      width: 2px;
+      background: rgba(16, 33, 26, 0.10);
+    }
+
+    .timeline-item:last-child::before { display: none; }
+
+    .timeline-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid rgba(16, 33, 26, 0.20);
+      background: #fff;
+    }
+
+    .timeline-item.done .timeline-dot {
+      background: var(--page-green);
+      border-color: var(--page-green);
+    }
+
+    .booking-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 4px;
+    }
+
+    .booking-actions .btn {
+      min-width: 150px;
+      justify-content: center;
+    }
+
+    body[data-auth-state="loading"] [data-guest-actions],
+    body[data-auth-state="loading"] [data-user-actions] {
+      visibility: hidden !important;
+    }
+
+    @media (max-width: 1024px) {
+      .bookings-header-card,
+      .bookings-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .site-nav,
+      .header-actions {
+        display: none;
+      }
+
+      .site-nav.open,
+      .header-actions.open {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .site-nav.open { padding-top: 8px; }
+      .header-actions.open { padding-bottom: 6px; }
+
+      .menu-toggle { display: inline-flex; }
+
+      .booking-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .booking-toolbar {
+        align-items: stretch;
+      }
+
+      .booking-search,
+      .sort-select {
+        width: 100%;
+        min-width: 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .site-header {
+        margin-top: 10px;
+      }
+
+      .header-inner {
+        border-radius: 28px;
+        padding: 12px;
+      }
+
+      .bookings-shell {
+        padding-bottom: 62px;
+      }
+
+      .bookings-header-card,
+      .section-card,
+      .bookings-side-card,
+      .bookings-toolbar {
+        border-radius: 24px;
+      }
+
+      .bookings-header-card {
+        padding: 20px;
+      }
+
+      .booking-meta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .booking-actions .btn {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
-<body>
+<body data-page="bookings" data-auth-required="true">
   <a class="skip-link" href="#bookings-main">Skip to content</a>
 
-  <header class="site-header is-scrolled">
+  <header class="site-header">
     <div class="container header-inner">
       <a href="index.html" class="brand" aria-label="StayNest home">
-        <span class="brand-mark"><i class="fa-solid fa-house-chimney"></i></span>
+        <span class="brand-mark" aria-hidden="true">
+          <img src="assets/logo.svg" alt="" />
+        </span>
         <span class="brand-text">StayNest</span>
       </a>
 
@@ -30,12 +925,50 @@
         <a href="saved.html">Saved</a>
         <a href="bookings.html" class="active">Bookings</a>
         <a href="messages.html">Messages</a>
-        <a href="profile.html">Profile</a>
       </nav>
 
       <div class="header-actions">
-        <a href="login.html" class="text-link">Sign in</a>
-        <a href="register.html" class="btn btn-primary">Create account</a>
+        <div class="header-guest-actions" data-guest-actions>
+          <a href="login.html" class="text-link">Sign in</a>
+          <a href="register.html" class="btn btn-primary">Create account</a>
+        </div>
+
+        <div class="header-user-actions" data-user-actions hidden>
+          <button
+            class="profile-trigger"
+            type="button"
+            aria-label="Open profile menu"
+            aria-expanded="false"
+            aria-controls="profile-menu"
+            data-profile-trigger
+          >
+            <span class="profile-avatar" data-profile-avatar>U</span>
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          </button>
+
+          <div class="profile-dropdown" id="profile-menu" data-profile-dropdown hidden>
+            <div class="profile-dropdown-top">
+              <strong data-user-name>User Name</strong>
+              <span data-user-email>user@email.com</span>
+            </div>
+
+            <div class="profile-dropdown-links">
+              <a href="profile.html">
+                <i class="fa-regular fa-user"></i>
+                View profile
+              </a>
+              <a href="saved.html">
+                <i class="fa-regular fa-bookmark"></i>
+                Saved hostels
+              </a>
+            </div>
+
+            <button type="button" class="profile-logout" data-logout-btn>
+              <i class="fa-solid fa-right-from-bracket"></i>
+              Log out
+            </button>
+          </div>
+        </div>
       </div>
 
       <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
@@ -46,57 +979,36 @@
 
   <main id="bookings-main">
     <div class="container bookings-shell">
-      <section class="bookings-hero">
-        <div class="bookings-hero-grid">
-          <div class="bookings-copy">
-            <span class="eyebrow"><i class="fa-solid fa-calendar-check"></i> Accommodation dashboard</span>
-            <h1>My Bookings</h1>
-            <p>Track your accommodation requests and confirmed stays in one clean place, with move-in reminders, booking progress, and payment context.</p>
+      <section class="bookings-header-card" aria-labelledby="bookingsTitle">
+        <div class="bookings-header-copy">
+          <span class="bookings-kicker">
+            <i class="fa-solid fa-calendar-check"></i>
+            My bookings
+          </span>
+          <h1 id="bookingsTitle">Track every hostel request in one clean dashboard.</h1>
+          <p>
+            Only bookings made from the hostel pages should appear here. You can review pending requests,
+            confirm move-in plans, and keep an eye on the hostels tied to your account.
+          </p>
+        </div>
 
-            <div class="booking-stats-row" aria-label="Booking summary">
-              <div class="booking-stat">
-                <strong id="activeCount">2</strong>
-                <span>Active Bookings</span>
-              </div>
-              <div class="booking-stat">
-                <strong id="pendingCount">1</strong>
-                <span>Pending Requests</span>
-              </div>
-              <div class="booking-stat">
-                <strong id="previousCount">3</strong>
-                <span>Previous Bookings</span>
-              </div>
-            </div>
+        <div class="booking-stats" aria-label="Booking summary">
+          <div class="booking-stat-card">
+            <strong id="activeCount">0</strong>
+            <span>Active bookings</span>
           </div>
-
-          <div class="bookings-hero-card">
-            <div class="bookings-hero-card-top">
-              <span>Current status</span>
-              <strong>2 Active • 1 Pending • 3 Previous</strong>
-            </div>
-            <div class="bookings-mini-panel">
-              <div class="mini-line">
-                <span class="dot done"></span>
-                <span>Application submitted</span>
-              </div>
-              <div class="mini-line">
-                <span class="dot done"></span>
-                <span>Booking reviewed</span>
-              </div>
-              <div class="mini-line">
-                <span class="dot done"></span>
-                <span>Payment confirmed</span>
-              </div>
-              <div class="mini-line">
-                <span class="dot"></span>
-                <span>Move-in day</span>
-              </div>
-            </div>
+          <div class="booking-stat-card">
+            <strong id="pendingCount">0</strong>
+            <span>Pending requests</span>
+          </div>
+          <div class="booking-stat-card">
+            <strong id="previousCount">0</strong>
+            <span>Previous bookings</span>
           </div>
         </div>
       </section>
 
-      <section class="bookings-toolbar" aria-label="Booking tabs">
+      <section class="bookings-toolbar" aria-label="Booking filters">
         <div class="booking-tabs" id="bookingTabs" role="tablist" aria-label="Filter bookings by status">
           <button class="btab active" type="button" data-tab="all" aria-selected="true" role="tab">All</button>
           <button class="btab" type="button" data-tab="active" aria-selected="false" role="tab">Active</button>
@@ -125,7 +1037,7 @@
             <div class="section-head">
               <div>
                 <h2>Your bookings</h2>
-                <p>Confirmed stays, pending applications, and completed reservations all appear here.</p>
+                <p>Bookings created from your signed-in account will appear here automatically.</p>
               </div>
               <div class="section-head-right">
                 <button class="btn btn-secondary" id="resetBookingFilters" type="button">Reset filters</button>
@@ -133,510 +1045,74 @@
             </div>
 
             <div id="bookingsGrid" class="bookings-grid" aria-live="polite">
-              <!-- Active Booking -->
-              <article class="booking-card" data-status="active" data-search="atlantic view hostel amamoma cape coast stn-28491 double occupancy sept 2 2026 gh₵ 5200">
-                <div class="booking-card-image-wrap">
-                  <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1400&q=80" alt="Atlantic View Hostel" />
-                  <span class="booking-badge active">Confirmed</span>
+              <article id="bookingsEmptyState" class="bookings-empty-state" hidden>
+                <div class="empty-icon" aria-hidden="true">
+                  <i class="fa-regular fa-calendar"></i>
                 </div>
-
-                <div class="booking-card-body">
-                  <div class="booking-top">
-                    <div>
-                      <h3>Atlantic View Hostel</h3>
-                      <p class="booking-location"><i class="fa-solid fa-location-dot"></i> Amamoma, Cape Coast</p>
-                    </div>
-                    <div class="booking-price">
-                      <strong>GH₵ 5,200</strong>
-                      <span>Paid</span>
-                    </div>
-                  </div>
-
-                  <div class="booking-ref-row">
-                    <span>Reference: <strong>STN-28491</strong></span>
-                    <span><i class="fa-solid fa-bed"></i> Double Occupancy</span>
-                  </div>
-
-                  <div class="booking-meta-grid">
-                    <div class="booking-meta-item">
-                      <span class="label">Move in</span>
-                      <strong>Sept 2, 2026</strong>
-                    </div>
-                    <div class="booking-meta-item">
-                      <span class="label">Status</span>
-                      <strong>Confirmed</strong>
-                    </div>
-                  </div>
-
-                  <div class="booking-timeline">
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Application Submitted</strong>
-                        <p>Sent on Aug 4, 2026</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Booking Reviewed</strong>
-                        <p>Approved by the hostel owner</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Payment Confirmed</strong>
-                        <p>Receipt verified successfully</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Move-In Day</strong>
-                        <p>Coming up soon</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="booking-actions">
-                    <a href="details.html?id=sunrise-court-hostel" class="btn btn-primary">View Details</a>
-                    <a href="messages.html" class="btn btn-outline">Contact Hostel</a>
-                  </div>
+                <h3>No bookings yet</h3>
+                <p>
+                  Once you book a hostel from the explore or details page, it will show up here for your account only.
+                </p>
+                <div class="bookings-empty-actions">
+                  <a href="explore.html" class="btn btn-primary">Browse hostels</a>
+                  <a href="saved.html" class="btn btn-secondary">View saved list</a>
                 </div>
               </article>
-
-              <!-- Active Booking -->
-              <article class="booking-card" data-status="active" data-search="meridian court ucc road cape coast stn-40177 private room sept 10 2026 gh₵ 4800">
-                <div class="booking-card-image-wrap">
-                  <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1400&q=80" alt="Meridian Court" />
-                  <span class="booking-badge active">Confirmed</span>
-                </div>
-
-                <div class="booking-card-body">
-                  <div class="booking-top">
-                    <div>
-                      <h3>Meridian Court</h3>
-                      <p class="booking-location"><i class="fa-solid fa-location-dot"></i> UCC Road, Cape Coast</p>
-                    </div>
-                    <div class="booking-price">
-                      <strong>GH₵ 4,800</strong>
-                      <span>Paid</span>
-                    </div>
-                  </div>
-
-                  <div class="booking-ref-row">
-                    <span>Reference: <strong>STN-40177</strong></span>
-                    <span><i class="fa-solid fa-key"></i> Private Room</span>
-                  </div>
-
-                  <div class="booking-meta-grid">
-                    <div class="booking-meta-item">
-                      <span class="label">Move in</span>
-                      <strong>Sept 10, 2026</strong>
-                    </div>
-                    <div class="booking-meta-item">
-                      <span class="label">Status</span>
-                      <strong>Confirmed</strong>
-                    </div>
-                  </div>
-
-                  <div class="booking-timeline">
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Application Submitted</strong>
-                        <p>Sent on Aug 8, 2026</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Booking Reviewed</strong>
-                        <p>Approved by the hostel owner</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Payment Confirmed</strong>
-                        <p>Receipt verified successfully</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Move-In Day</strong>
-                        <p>Coming up soon</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="booking-actions">
-                    <a href="details.html?id=meridian-court" class="btn btn-primary">View Details</a>
-                    <a href="messages.html" class="btn btn-outline">Contact Hostel</a>
-                  </div>
-                </div>
-              </article>
-
-              <!-- Pending Booking -->
-              <article class="booking-card" data-status="pending" data-search="harbor ridge suites ayensudo cape coast stn-51022 studio application under review gh₵ 7100">
-                <div class="booking-card-image-wrap">
-                  <img src="https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1400&q=80" alt="Harbor Ridge Suites" />
-                  <span class="booking-badge pending">Application Under Review</span>
-                </div>
-
-                <div class="booking-card-body">
-                  <div class="booking-top">
-                    <div>
-                      <h3>Harbor Ridge Suites</h3>
-                      <p class="booking-location"><i class="fa-solid fa-location-dot"></i> Ayensudo, Cape Coast</p>
-                    </div>
-                    <div class="booking-price">
-                      <strong>GH₵ 7,100</strong>
-                      <span>Pending payment</span>
-                    </div>
-                  </div>
-
-                  <div class="booking-ref-row">
-                    <span>Reference: <strong>STN-51022</strong></span>
-                    <span><i class="fa-solid fa-house"></i> Studio</span>
-                  </div>
-
-                  <div class="booking-meta-grid">
-                    <div class="booking-meta-item">
-                      <span class="label">Submitted</span>
-                      <strong>Aug 11, 2026</strong>
-                    </div>
-                    <div class="booking-meta-item">
-                      <span class="label">Expected response</span>
-                      <strong>Aug 15, 2026</strong>
-                    </div>
-                  </div>
-
-                  <div class="booking-timeline">
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Application Submitted</strong>
-                        <p>Waiting on hostel review</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item current">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Booking Reviewed</strong>
-                        <p>In progress</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Payment Confirmed</strong>
-                        <p>Will unlock after approval</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Move-In Day</strong>
-                        <p>Awaiting booking confirmation</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="booking-actions">
-                    <a href="details.html?id=harbor-ridge-suites" class="btn btn-primary">View Application</a>
-                    <button class="btn btn-outline" type="button">Cancel Request</button>
-                  </div>
-                </div>
-              </article>
-
-              <!-- Previous Booking -->
-              <article class="booking-card" data-status="previous" data-search="blue horizon hostel anomabo cape coast stn-19921 shared room completed gh₵ 3900">
-                <div class="booking-card-image-wrap">
-                  <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1400&q=80" alt="Blue Horizon Hostel" />
-                  <span class="booking-badge expired">Completed</span>
-                </div>
-
-                <div class="booking-card-body">
-                  <div class="booking-top">
-                    <div>
-                      <h3>Blue Horizon Hostel</h3>
-                      <p class="booking-location"><i class="fa-solid fa-location-dot"></i> Anomabo, Cape Coast</p>
-                    </div>
-                    <div class="booking-price">
-                      <strong>GH₵ 3,900</strong>
-                      <span>Completed</span>
-                    </div>
-                  </div>
-
-                  <div class="booking-ref-row">
-                    <span>Reference: <strong>STN-19921</strong></span>
-                    <span><i class="fa-solid fa-people-roof"></i> Shared Room</span>
-                  </div>
-
-                  <div class="booking-meta-grid">
-                    <div class="booking-meta-item">
-                      <span class="label">Stayed</span>
-                      <strong>Jan – Jun 2026</strong>
-                    </div>
-                    <div class="booking-meta-item">
-                      <span class="label">Status</span>
-                      <strong>Completed</strong>
-                    </div>
-                  </div>
-
-                  <div class="booking-timeline">
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Application Submitted</strong>
-                        <p>Completed</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Booking Reviewed</strong>
-                        <p>Completed</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Payment Confirmed</strong>
-                        <p>Completed</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Move-In Day</strong>
-                        <p>Completed</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="booking-actions">
-                    <a href="details.html?id=blue-horizon-hostel" class="btn btn-primary">View Stay Details</a>
-                    <a href="explore.html" class="btn btn-outline">Book Again</a>
-                  </div>
-                </div>
-              </article>
-
-              <!-- Previous Booking -->
-              <article class="booking-card" data-status="previous" data-search="city gate hostel kotokuraba cape coast stn-11520 shared room completed gh₵ 3550">
-                <div class="booking-card-image-wrap">
-                  <img src="https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1400&q=80" alt="City Gate Hostel" />
-                  <span class="booking-badge expired">Completed</span>
-                </div>
-
-                <div class="booking-card-body">
-                  <div class="booking-top">
-                    <div>
-                      <h3>City Gate Hostel</h3>
-                      <p class="booking-location"><i class="fa-solid fa-location-dot"></i> Kotokuraba, Cape Coast</p>
-                    </div>
-                    <div class="booking-price">
-                      <strong>GH₵ 3,550</strong>
-                      <span>Completed</span>
-                    </div>
-                  </div>
-
-                  <div class="booking-ref-row">
-                    <span>Reference: <strong>STN-11520</strong></span>
-                    <span><i class="fa-solid fa-people-roof"></i> Shared Room</span>
-                  </div>
-
-                  <div class="booking-meta-grid">
-                    <div class="booking-meta-item">
-                      <span class="label">Stayed</span>
-                      <strong>Aug – Nov 2025</strong>
-                    </div>
-                    <div class="booking-meta-item">
-                      <span class="label">Status</span>
-                      <strong>Completed</strong>
-                    </div>
-                  </div>
-
-                  <div class="booking-timeline">
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Application Submitted</strong>
-                        <p>Completed</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Booking Reviewed</strong>
-                        <p>Completed</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Payment Confirmed</strong>
-                        <p>Completed</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Move-In Day</strong>
-                        <p>Completed</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="booking-actions">
-                    <a href="details.html?id=city-gate-hostel" class="btn btn-primary">View Stay Details</a>
-                    <a href="explore.html" class="btn btn-outline">Book Again</a>
-                  </div>
-                </div>
-              </article>
-
-              <!-- Previous Booking -->
-              <article class="booking-card" data-status="previous" data-search="oak residence ayensudo cape coast stn-88441 studio completed gh₵ 6100">
-                <div class="booking-card-image-wrap">
-                  <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80" alt="Oak Residence" />
-                  <span class="booking-badge expired">Completed</span>
-                </div>
-
-                <div class="booking-card-body">
-                  <div class="booking-top">
-                    <div>
-                      <h3>Oak Residence</h3>
-                      <p class="booking-location"><i class="fa-solid fa-location-dot"></i> Ayensudo, Cape Coast</p>
-                    </div>
-                    <div class="booking-price">
-                      <strong>GH₵ 6,100</strong>
-                      <span>Completed</span>
-                    </div>
-                  </div>
-
-                  <div class="booking-ref-row">
-                    <span>Reference: <strong>STN-88441</strong></span>
-                    <span><i class="fa-solid fa-house"></i> Studio</span>
-                  </div>
-
-                  <div class="booking-meta-grid">
-                    <div class="booking-meta-item">
-                      <span class="label">Stayed</span>
-                      <strong>Jan – Mar 2026</strong>
-                    </div>
-                    <div class="booking-meta-item">
-                      <span class="label">Status</span>
-                      <strong>Completed</strong>
-                    </div>
-                  </div>
-
-                  <div class="booking-timeline">
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Application Submitted</strong>
-                        <p>Completed</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Booking Reviewed</strong>
-                        <p>Completed</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Payment Confirmed</strong>
-                        <p>Completed</p>
-                      </div>
-                    </div>
-                    <div class="timeline-item done">
-                      <span class="timeline-dot"></span>
-                      <div>
-                        <strong>Move-In Day</strong>
-                        <p>Completed</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="booking-actions">
-                    <a href="details.html?id=oak-residence" class="btn btn-primary">View Stay Details</a>
-                    <a href="explore.html" class="btn btn-outline">Book Again</a>
-                  </div>
-                </div>
-              </article>
-            </div>
-
-            <div id="bookingsEmptyState" class="bookings-empty" hidden>
-              <svg viewBox="0 0 360 260" role="img" aria-label="Empty bookings illustration">
-                <defs>
-                  <linearGradient id="bookingEmptyGrad" x1="0%" x2="100%" y1="0%" y2="100%">
-                    <stop offset="0%" stop-color="#d8f3dc"></stop>
-                    <stop offset="100%" stop-color="#ffffff"></stop>
-                  </linearGradient>
-                </defs>
-                <rect x="58" y="58" width="244" height="150" rx="26" fill="url(#bookingEmptyGrad)" stroke="#dbe7e1" stroke-width="3"></rect>
-                <rect x="88" y="90" width="96" height="16" rx="8" fill="#1b4332" opacity="0.86"></rect>
-                <rect x="88" y="122" width="176" height="12" rx="6" fill="#5b6f67" opacity="0.35"></rect>
-                <rect x="88" y="146" width="154" height="12" rx="6" fill="#5b6f67" opacity="0.25"></rect>
-                <circle cx="256" cy="128" r="26" fill="#d8f3dc" stroke="#c7e5ce"></circle>
-                <path d="M246 128l8 8 16-18" stroke="#1b4332" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M84 214c34 12 66 18 102 18 42 0 69-10 95-10 28 0 51 6 69 16" stroke="#d8f3dc" stroke-width="18" stroke-linecap="round"></path>
-              </svg>
-              <h2>No bookings yet</h2>
-              <p>Start exploring available hostels and reserve a place that fits your needs.</p>
-              <a href="explore.html" class="btn btn-primary">Explore Hostels</a>
             </div>
           </section>
         </div>
 
-        <aside class="bookings-aside">
-          <section class="section-card reminder-card">
-            <span class="eyebrow"><i class="fa-solid fa-bell"></i> Move-In Reminder</span>
-            <h2>Atlantic View Hostel</h2>
-            <p>Move in within <strong>14 days</strong>.</p>
-
-            <div class="reminder-list">
-              <h3>Documents required</h3>
-              <ul>
-                <li>Student ID</li>
-                <li>Admission Letter</li>
-                <li>Payment Receipt</li>
-              </ul>
+        <aside class="bookings-side-panel">
+          <section class="bookings-side-card" aria-label="How bookings work">
+            <div class="side-card-top">
+              <h3>Booking flow</h3>
+              <p>These pages are wired to grow with Firebase auth and your future bookings.js update.</p>
             </div>
 
-            <a href="#" class="btn btn-primary btn-full">View Checklist</a>
-          </section>
-
-          <section class="section-card payment-card">
-            <span class="eyebrow"><i class="fa-solid fa-wallet"></i> Payment Summary</span>
-            <div class="payment-row">
-              <span>Total Bookings</span>
-              <strong>GH₵ 12,600</strong>
-            </div>
-            <div class="payment-row">
-              <span>Paid</span>
-              <strong>GH₵ 10,200</strong>
-            </div>
-            <div class="payment-row">
-              <span>Outstanding</span>
-              <strong>GH₵ 2,400</strong>
+            <div class="side-list">
+              <div class="side-list-item">
+                <i class="fa-solid fa-user-check"></i>
+                <div>
+                  <strong>Signed-in only</strong>
+                  <span>Bookings belong to the current user account, not the whole site.</span>
+                </div>
+              </div>
+              <div class="side-list-item">
+                <i class="fa-solid fa-house-circle-check"></i>
+                <div>
+                  <strong>From hostel pages</strong>
+                  <span>Students book directly from explore or details and the booking appears here.</span>
+                </div>
+              </div>
+              <div class="side-list-item">
+                <i class="fa-solid fa-bell"></i>
+                <div>
+                  <strong>Track updates</strong>
+                  <span>Later you can show approval, payment, and move-in status in this panel.</span>
+                </div>
+              </div>
             </div>
           </section>
 
-          <section class="section-card support-card">
-            <span class="eyebrow"><i class="fa-solid fa-circle-question"></i> Need help?</span>
-            <h2>Need help with your booking?</h2>
-            <p>Use the support options below if you need help with timing, payment, or hostel communication.</p>
+          <section class="bookings-side-card" aria-label="Quick links">
+            <div class="side-card-top">
+              <h3>Quick links</h3>
+              <p>Jump back into the main parts of the app.</p>
+            </div>
 
-            <div class="support-actions">
-              <a href="messages.html" class="btn btn-primary btn-full">Message Hostel</a>
-              <a href="mailto:support@staynest.com" class="btn btn-outline btn-full">Contact Support</a>
+            <div class="side-links">
+              <a href="explore.html">
+                <span>Explore hostels</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
+              <a href="details.html">
+                <span>Open a hostel page</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
+              <a href="profile.html">
+                <span>Review profile</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
             </div>
           </section>
         </aside>
@@ -644,6 +1120,7 @@
     </div>
   </main>
 
-  <script src="bookings.js"></script>
+  <script src="auth.js" defer></script>
+  <script src="bookings.js" defer></script>
 </body>
 </html>
