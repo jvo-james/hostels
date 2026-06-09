@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const priceRange = document.getElementById("priceRange");
   const priceLabel = document.getElementById("priceLabel");
   const resetBtn = document.getElementById("resetFilters");
+
   const viewButtons = document.querySelectorAll(".view-btn");
   const chipButtons = document.querySelectorAll(".chip");
   const zoneButtons = document.querySelectorAll(".zone-btn");
@@ -13,10 +14,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const amenityChecks = document.querySelectorAll('input[data-amenity]');
   const saveButtons = document.querySelectorAll(".save-btn");
   const hostelCards = Array.from(document.querySelectorAll(".listing-card"));
+
   const header = document.querySelector(".site-header");
   const menuToggle = document.querySelector(".menu-toggle");
   const siteNav = document.querySelector(".site-nav");
   const headerActions = document.querySelector(".header-actions");
+  const navLinks = document.querySelectorAll(".site-nav a");
+
+  const accordionCards = document.querySelectorAll("[data-accordion-card]");
+  const accordionButtons = document.querySelectorAll("[data-accordion-btn]");
+
+  const MOBILE_BREAKPOINT = 640;
 
   const state = {
     query: "",
@@ -25,8 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
     zone: "all",
     view: "grid",
     sort: "recommended",
-    types: new Set(Array.from(typeChecks).map((input) => input.dataset.type)),
-    amenities: new Set(Array.from(amenityChecks).map((input) => input.dataset.amenity)),
+    types: new Set(Array.from(typeChecks).map((input) => input.dataset.type).filter(Boolean)),
+    amenities: new Set(Array.from(amenityChecks).map((input) => input.dataset.amenity).filter(Boolean)),
   };
 
   const formatPrice = (value) =>
@@ -41,8 +49,14 @@ document.addEventListener("DOMContentLoaded", () => {
     header.classList.toggle("is-scrolled", window.scrollY > 8);
   };
 
-  setHeaderScrolled();
-  window.addEventListener("scroll", setHeaderScrolled, { passive: true });
+  const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
+
+  const setMenuIcon = (open) => {
+    if (!menuToggle) return;
+    menuToggle.innerHTML = open
+      ? '<i class="fa-solid fa-xmark"></i>'
+      : '<i class="fa-solid fa-bars"></i>';
+  };
 
   const closeMobileMenu = () => {
     if (!siteNav || !menuToggle) return;
@@ -50,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
     headerActions?.classList.remove("open");
     menuToggle.setAttribute("aria-expanded", "false");
     document.body.classList.remove("nav-open");
+    setMenuIcon(false);
   };
 
   const openMobileMenu = () => {
@@ -58,13 +73,47 @@ document.addEventListener("DOMContentLoaded", () => {
     headerActions?.classList.add("open");
     menuToggle.setAttribute("aria-expanded", "true");
     document.body.classList.add("nav-open");
+    setMenuIcon(true);
   };
+
+  const closeAllAccordionsOnMobile = () => {
+    accordionCards.forEach((card) => {
+      if (!card || !isMobile()) return;
+      card.classList.remove("open");
+      const button = card.querySelector("[data-accordion-btn]");
+      if (button) button.setAttribute("aria-expanded", "false");
+    });
+  };
+
+  const openAllAccordionsOnDesktop = () => {
+    accordionCards.forEach((card) => {
+      if (!card) return;
+      card.classList.add("open");
+      const button = card.querySelector("[data-accordion-btn]");
+      if (button) button.setAttribute("aria-expanded", "true");
+    });
+  };
+
+  const syncAccordionModes = () => {
+    if (isMobile()) {
+      closeAllAccordionsOnMobile();
+    } else {
+      openAllAccordionsOnDesktop();
+    }
+  };
+
+  setHeaderScrolled();
+  window.addEventListener("scroll", setHeaderScrolled, { passive: true });
 
   if (menuToggle && siteNav) {
     menuToggle.addEventListener("click", () => {
       const isOpen = siteNav.classList.contains("open");
       if (isOpen) closeMobileMenu();
       else openMobileMenu();
+    });
+
+    navLinks.forEach((link) => {
+      link.addEventListener("click", () => closeMobileMenu());
     });
 
     document.addEventListener("click", (event) => {
@@ -79,14 +128,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const savedHostels = JSON.parse(localStorage.getItem("staynest_saved_hostels") || "[]");
+
   const syncSaveButtons = () => {
     saveButtons.forEach((button) => {
       const card = button.closest(".listing-card");
       const title = card?.querySelector("h3")?.textContent?.trim();
       const isSaved = title ? savedHostels.includes(title) : false;
+
       button.classList.toggle("saved", isSaved);
       button.setAttribute("aria-pressed", String(isSaved));
-      button.innerHTML = isSaved ? '<i class="fa-solid fa-heart"></i>' : '<i class="fa-regular fa-heart"></i>';
+      button.innerHTML = isSaved
+        ? '<i class="fa-solid fa-heart"></i>'
+        : '<i class="fa-regular fa-heart"></i>';
     });
   };
 
@@ -118,6 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const amenityMatch = [...state.amenities].every((item) => amenities.includes(item));
 
       const visible = queryMatch && areaMatch && zoneMatch && priceMatch && typeMatch && amenityMatch;
+
       card.style.display = visible ? "flex" : "none";
       card.dataset.visible = visible ? "true" : "false";
       card.dataset.score = String(rating);
@@ -126,9 +180,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const updateCount = () => {
     const visibleCards = hostelCards.filter((card) => card.dataset.visible !== "false");
-    if (resultsCount) {
-      resultsCount.textContent = `${visibleCards.length} hostel${visibleCards.length === 1 ? "" : "s"} found`;
-    }
+    if (!resultsCount) return;
+
+    resultsCount.textContent = `${visibleCards.length} hostel${visibleCards.length === 1 ? "" : "s"} found`;
   };
 
   const sortCards = () => {
@@ -168,6 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
     chipButtons.forEach((button) => {
       button.classList.toggle("active", button.dataset.area === state.area);
     });
+
     zoneButtons.forEach((button) => {
       button.classList.toggle("active", button.dataset.zone === state.zone);
     });
@@ -176,6 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const applyView = () => {
     document.body.classList.toggle("view-list", state.view === "list");
     document.body.classList.toggle("view-grid", state.view === "grid");
+
     viewButtons.forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
@@ -218,6 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
   chipButtons.forEach((button) => {
     button.addEventListener("click", () => {
       state.area = button.dataset.area || "all";
+      state.zone = "all";
       updateChips();
       refresh();
     });
@@ -233,29 +290,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
   typeChecks.forEach((input) => {
     input.addEventListener("change", () => {
-      if (input.checked) state.types.add(input.dataset.type);
-      else state.types.delete(input.dataset.type);
+      const type = input.dataset.type;
+      if (!type) return;
+
+      if (input.checked) state.types.add(type);
+      else state.types.delete(type);
+
       refresh();
     });
   });
 
   amenityChecks.forEach((input) => {
     input.addEventListener("change", () => {
-      if (input.checked) state.amenities.add(input.dataset.amenity);
-      else state.amenities.delete(input.dataset.amenity);
+      const amenity = input.dataset.amenity;
+      if (!amenity) return;
+
+      if (input.checked) state.amenities.add(amenity);
+      else state.amenities.delete(amenity);
+
       refresh();
     });
   });
 
-  sortSelect?.addEventListener("change", () => {
-    state.sort = sortSelect.value;
-    sortCards();
-  });
+  if (sortSelect) {
+    sortSelect.addEventListener("change", () => {
+      state.sort = sortSelect.value;
+      sortCards();
+    });
+  }
 
   viewButtons.forEach((button) => {
     button.addEventListener("click", () => {
       state.view = button.dataset.view || "grid";
       applyView();
+      sortCards();
     });
   });
 
@@ -288,39 +356,53 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  resetBtn?.addEventListener("click", () => {
-    state.query = "";
-    state.maxPrice = Number(priceRange?.max || 8000);
-    state.area = "all";
-    state.zone = "all";
-    state.sort = "recommended";
-    state.view = "grid";
-    state.types = new Set(Array.from(typeChecks).map((input) => input.dataset.type));
-    state.amenities = new Set(Array.from(amenityChecks).map((input) => input.dataset.amenity));
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      state.query = "";
+      state.maxPrice = Number(priceRange?.max || 8000);
+      state.area = "all";
+      state.zone = "all";
+      state.sort = "recommended";
+      state.view = "grid";
+      state.types = new Set(Array.from(typeChecks).map((input) => input.dataset.type).filter(Boolean));
+      state.amenities = new Set(Array.from(amenityChecks).map((input) => input.dataset.amenity).filter(Boolean));
 
-    if (searchInput) searchInput.value = "";
-    if (priceRange && priceLabel) {
-      priceRange.value = String(state.maxPrice);
-      priceLabel.textContent = formatPrice(state.maxPrice);
-    }
-    if (sortSelect) sortSelect.value = "recommended";
-    typeChecks.forEach((input) => (input.checked = true));
-    amenityChecks.forEach((input) => (input.checked = true));
-    updateChips();
-    applyView();
-    refresh();
-  });
+      if (searchInput) searchInput.value = "";
+      if (priceRange && priceLabel) {
+        priceRange.value = String(state.maxPrice);
+        priceLabel.textContent = formatPrice(state.maxPrice);
+      }
+      if (sortSelect) sortSelect.value = "recommended";
 
-  // Keep the hero chips and side zone buttons in sync with direct URLs.
+      typeChecks.forEach((input) => (input.checked = true));
+      amenityChecks.forEach((input) => (input.checked = true));
+
+      updateChips();
+      applyView();
+      refresh();
+    });
+  }
+
   const params = new URLSearchParams(window.location.search);
   const initialArea = params.get("area");
   if (initialArea) {
     state.area = initialArea;
     state.zone = initialArea;
-    updateChips();
-  } else {
-    updateChips();
   }
+
+  updateChips();
+  syncAccordionModes();
+  window.addEventListener("resize", syncAccordionModes);
+
+  accordionButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const card = button.closest("[data-accordion-card]");
+      if (!card) return;
+
+      const open = card.classList.toggle("open");
+      button.setAttribute("aria-expanded", String(open));
+    });
+  });
 
   applyView();
   refresh();
