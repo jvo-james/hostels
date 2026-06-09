@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="View hostel details, amenities, room types, and booking information on StayNest." />
+  <title>StayNest | Hostel Details</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    .details-shell {
+      padding: 28px 0 80px;
+    }
+
+    .details-crumbs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .details-crumbs a {
+      color: var(--green-2);
+      font-weight: 800;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) 380px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .details-main,
+    .details-aside {
+      display: grid;
+      gap: 20px;
+    }
+
+    .details-card {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      border-radius: 28px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .details-hero {
+      position: relative;
+      min-height: 420px;
+      display: grid;
+      align-items: end;
+      background: #dfeee5;
+    }
+
+    .details-hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      inset: 0;
+    }
+
+    .details-hero-overlay {
+      position: relative;
+      z-index: 1;
+      padding: 24px;
+      background: linear-gradient(180deg, rgba(10, 21, 16, 0.00) 0%, rgba(10, 21, 16, 0.68) 100%);
+      color: #fff;
+    }
+
+    .details-badges {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .details-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+
+    .details-badge.gold {
+      background: rgba(200, 155, 60, 0.95);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .details-title {
+      margin: 0;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(2rem, 1.5rem + 1.6vw, 3.4rem);
+      line-height: 0.96;
+      letter-spacing: -0.04em;
+      max-width: 12ch;
+    }
+
+    .details-subtitle {
+      margin: 12px 0 0;
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.84);
+      max-width: 62ch;
+    }
+
+    .details-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .details-topbar .left,
+    .details-topbar .right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .details-rating {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(27, 67, 50, 0.08);
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .details-fav-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(16, 33, 26, 0.10);
+      background: #fff;
+      color: #b63e4b;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 14px 24px rgba(16, 33, 26, 0.10);
+      cursor: pointer;
+    }
+
+    .details-body {
+      padding: 24px;
+    }
+
+    .details-section {
+      padding-top: 20px;
+      margin-top: 20px;
+      border-top: 1px solid rgba(16, 33, 26, 0.08);
+    }
+
+    .details-section:first-child {
+      padding-top: 0;
+      margin-top: 0;
+      border-top: 0;
+    }
+
+    .details-section h2,
+    .details-section h3 {
+      margin: 0 0 12px;
+    }
+
+    .details-section h2 {
+      font-size: 1.08rem;
+    }
+
+    .details-section p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .stat-box {
+      border-radius: 22px;
+      background: rgba(27, 67, 50, 0.05);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      padding: 14px;
+    }
+
+    .stat-box .label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-box strong {
+      font-size: 1.05rem;
+      color: var(--text);
+    }
+
+    .amenity-grid,
+    .room-grid,
+    .review-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .amenity-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .amenity-pill,
+    .room-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(16, 33, 26, 0.10);
+      background: #fff;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .room-pill {
+      justify-content: space-between;
+    }
+
+    .room-pill span:last-child {
+      color: var(--green);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .review-card {
+      border-radius: 22px;
+      background: rgba(27, 67, 50, 0.04);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      padding: 14px 16px;
+    }
+
+    .review-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .review-top strong {
+      font-size: 0.98rem;
+    }
+
+    .review-top span {
+      color: var(--gold);
+      font-weight: 800;
+      font-size: 0.92rem;
+    }
+
+    .review-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .aside-card {
+      padding: 22px;
+    }
+
+    .price-card {
+      background: linear-gradient(145deg, rgba(27, 67, 50, 0.98), rgba(45, 106, 79, 0.94));
+      color: #fff;
+    }
+
+    .price-card .eyebrow,
+    .price-card p,
+    .price-card .muted,
+    .price-card .mini-note {
+      color: rgba(255, 255, 255, 0.80);
+    }
+
+    .price-amount {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 2.35rem;
+      line-height: 1;
+      margin: 8px 0 6px;
+      color: #fff;
+    }
+
+    .action-stack {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .btn-full {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .contact-box {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(27, 67, 50, 0.05);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+    }
+
+    .contact-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .contact-row strong {
+      color: var(--text);
+    }
+
+    .contact-row a,
+    .contact-row span {
+      color: var(--green-2);
+      font-weight: 800;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .gallery-grid img {
+      width: 100%;
+      aspect-ratio: 1 / 0.82;
+      object-fit: cover;
+      border-radius: 18px;
+      border: 1px solid rgba(16, 33, 26, 0.08);
+    }
+
+    .not-found {
+      padding: 80px 24px;
+      text-align: center;
+    }
+
+    .not-found h1 {
+      margin: 18px 0 8px;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(2rem, 1.4rem + 1.4vw, 3rem);
+    }
+
+    .not-found p {
+      margin: 0 auto 22px;
+      max-width: 60ch;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 1100px) {
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .details-aside {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .details-shell {
+        padding-top: 18px;
+      }
+
+      .details-hero {
+        min-height: 360px;
+      }
+
+      .details-body,
+      .aside-card,
+      .details-hero-overlay {
+        padding: 18px;
+      }
+
+      .stats-row,
+      .amenity-grid,
+      .gallery-grid,
+      .details-aside {
+        grid-template-columns: 1fr;
+      }
+
+      .details-topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#details-main">Skip to content</a>
+
+  <header class="site-header is-scrolled">
+    <div class="container header-inner">
+      <a href="index.html" class="brand" aria-label="StayNest home">
+        <span class="brand-mark"><i class="fa-solid fa-house-chimney"></i></span>
+        <span class="brand-text">StayNest</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="explore.html" class="active">Explore</a>
+        <a href="saved.html">Saved</a>
+        <a href="bookings.html">Bookings</a>
+        <a href="messages.html">Messages</a>
+        <a href="profile.html">Profile</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="login.html" class="text-link">Sign in</a>
+        <a href="register.html" class="btn btn-primary">Create account</a>
+      </div>
+
+      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <main id="details-main">
+    <div class="container details-shell" id="detailsApp">
+      <div class="details-crumbs">
+        <a href="explore.html">Explore</a>
+        <span>/</span>
+        <span id="crumbArea">Hostel details</span>
+      </div>
+
+      <div id="detailsContent" class="details-grid"></div>
+    </div>
+  </main>
+
+  <script>
+    const HOSTELS = [
+      {
+        id: "sunrise-court-hostel",
+        name: "Sunrise Court Hostel",
+        area: "Ayensudo",
+        location: "Ayensudo, Cape Coast",
+        rating: 4.8,
+        reviews: 124,
+        price: 4600,
+        distance: 0.7,
+        type: "Self-contained",
+        label: "Popular",
+        short: "A polished, student-friendly hostel with a calm setting and easy access to UCC.",
+        description:
+          "Sunrise Court is designed for students who want comfort, security, and a tidy layout close to campus. The rooms are spacious, the compound is well maintained, and the hostel works well for students who want a quiet place to settle in during the semester.",
+        phone: "+233 24 000 0001",
+        whatsapp: "+233240000001",
+        facebook: "SunriseCourtHostel",
+        instagram: "sunrisecourt_hostel",
+        heroImage:
+          "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1600&q=80",
+        gallery: [
+          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
+        ],
+        amenities: ["Wi‑Fi", "Water available", "Security", "Furnished", "Parking"],
+        rooms: [
+          { title: "Self-contained room", price: "GH₵ 4,600" },
+          { title: "2-in-1 shared option", price: "GH₵ 3,200" },
+          { title: "Short-stay room", price: "GH₵ 1,100 / month" },
+        ],
+        reviewsList: [
+          { name: "Ama Mensah", rating: 5, text: "Very neat hostel and the walk to campus is manageable. The rooms look exactly like the photos." },
+          { name: "Kwesi Appiah", rating: 4, text: "Good security and calm environment. Booking was simple and the owner responded quickly." },
+        ],
+      },
+      {
+        id: "campus-view-lodge",
+        name: "Campus View Lodge",
+        area: "UCC Road",
+        location: "UCC Road, Cape Coast",
+        rating: 4.7,
+        reviews: 98,
+        price: 5200,
+        distance: 0.4,
+        type: "Private room",
+        label: "New",
+        short: "A modern lodge with private rooms and very close access to the university road.",
+        description:
+          "Campus View Lodge is a great fit for students who want a private-room setup and quick access to the UCC road corridor. It balances modern interiors with a convenient location, making it easy to get to class, transport, and nearby shops.",
+        phone: "+233 24 000 0002",
+        whatsapp: "+233240000002",
+        facebook: "CampusViewLodge",
+        instagram: "campusview_lodge",
+        heroImage:
+          "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1600&q=80",
+        gallery: [
+          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
+        ],
+        amenities: ["Wi‑Fi", "Security", "Furnished", "Water available"],
+        rooms: [
+          { title: "Private room", price: "GH₵ 5,200" },
+          { title: "Premium private room", price: "GH₵ 6,000" },
+          { title: "Monthly stay", price: "GH₵ 1,300 / month" },
+        ],
+        reviewsList: [
+          { name: "Yaa Owusu", rating: 5, text: "The room was clean and the location is super convenient for lectures and shopping." },
+          { name: "Nana Boateng", rating: 4, text: "Nice private room setup. The place feels secure and well managed." },
+        ],
+      },
+      {
+        id: "blue-horizon-hostel",
+        name: "Blue Horizon Hostel",
+        area: "Anomabo",
+        location: "Anomabo, Cape Coast",
+        rating: 4.6,
+        reviews: 86,
+        price: 3900,
+        distance: 1.3,
+        type: "Shared room",
+        label: "Value",
+        short: "A budget-conscious choice with shared rooms and practical amenities.",
+        description:
+          "Blue Horizon Hostel gives students an affordable option without feeling too bare-bones. The shared-room arrangement is suited to students who want to spend less while still getting the basics they need for the semester.",
+        phone: "+233 24 000 0003",
+        whatsapp: "+233240000003",
+        facebook: "BlueHorizonHostel",
+        instagram: "bluehorizon_hostel",
+        heroImage:
+          "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1600&q=80",
+        gallery: [
+          "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80",
+        ],
+        amenities: ["Wi‑Fi", "Water available", "Security", "Furnished"],
+        rooms: [
+          { title: "Shared room", price: "GH₵ 3,900" },
+          { title: "Double occupancy", price: "GH₵ 3,400" },
+          { title: "Monthly stay", price: "GH₵ 950 / month" },
+        ],
+        reviewsList: [
+          { name: "Josephine Badu", rating: 4, text: "Affordable and practical. Good for students who care more about value than luxury." },
+          { name: "Kofi Antwi", rating: 5, text: "The room was comfortable and the security at night was reassuring." },
+        ],
+      },
+      {
+        id: "harbor-ridge-suites",
+        name: "Harbor Ridge Suites",
+        area: "Ayensudo",
+        location: "Ayensudo, Cape Coast",
+        rating: 4.9,
+        reviews: 157,
+        price: 7100,
+        distance: 0.9,
+        type: "Studio",
+        label: "Premium",
+        short: "A higher-end studio-style hostel with a premium finish and strong ratings.",
+        description:
+          "Harbor Ridge Suites is built for students who want a more premium experience. It has studio rooms, modern furnishing, and a stronger sense of privacy than typical hostel options in the area.",
+        phone: "+233 24 000 0004",
+        whatsapp: "+233240000004",
+        facebook: "HarborRidgeSuites",
+        instagram: "harborridge_suites",
+        heroImage:
+          "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1600&q=80",
+        gallery: [
+          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
+        ],
+        amenities: ["Wi‑Fi", "Security", "Furnished", "Water available", "Studio kitchen"],
+        rooms: [
+          { title: "Studio room", price: "GH₵ 7,100" },
+          { title: "Executive studio", price: "GH₵ 7,900" },
+          { title: "Monthly stay", price: "GH₵ 1,700 / month" },
+        ],
+        reviewsList: [
+          { name: "Esi Frimpong", rating: 5, text: "Very polished and worth the price if you want something quiet and comfortable." },
+          { name: "Daniel Quaye", rating: 5, text: "Everything feels premium here. The place is neat and the service is excellent." },
+        ],
+      },
+      {
+        id: "palmside-lodge",
+        name: "Palmside Lodge",
+        area: "Bakaano",
+        location: "Bakaano, Cape Coast",
+        rating: 4.5,
+        reviews: 72,
+        price: 4300,
+        distance: 1.1,
+        type: "Private room",
+        label: "Quiet",
+        short: "A quieter hostel for students who prefer a calmer atmosphere.",
+        description:
+          "Palmside Lodge offers private rooms in a quieter part of town. It is a good choice for students who want fewer distractions and a more relaxed environment while still staying within reach of UCC.",
+        phone: "+233 24 000 0005",
+        whatsapp: "+233240000005",
+        facebook: "PalmsideLodge",
+        instagram: "palmside_lodge",
+        heroImage:
+          "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=80",
+        gallery: [
+          "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
+        ],
+        amenities: ["Security", "Water available", "Wi‑Fi"],
+        rooms: [
+          { title: "Private room", price: "GH₵ 4,300" },
+          { title: "Single room", price: "GH₵ 4,900" },
+          { title: "Monthly stay", price: "GH₵ 1,050 / month" },
+        ],
+        reviewsList: [
+          { name: "Mabel Aidoo", rating: 4, text: "Nice and quiet. Exactly what I wanted for studying." },
+          { name: "Ernest Kyei", rating: 5, text: "Great management and a peaceful compound." },
+        ],
+      },
+      {
+        id: "city-gate-hostel",
+        name: "City Gate Hostel",
+        area: "Kotokuraba",
+        location: "Kotokuraba, Cape Coast",
+        rating: 4.4,
+        reviews: 64,
+        price: 3550,
+        distance: 1.6,
+        type: "Shared room",
+        label: "Budget",
+        short: "A more affordable hostel with basic but useful amenities.",
+        description:
+          "City Gate Hostel is designed for students who want to keep costs low. It offers shared-room accommodation and the essentials needed for a semester stay without adding unnecessary extras.",
+        phone: "+233 24 000 0006",
+        whatsapp: "+233240000006",
+        facebook: "CityGateHostel",
+        instagram: "citygate_hostel",
+        heroImage:
+          "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1600&q=80",
+        gallery: [
+          "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
+        ],
+        amenities: ["Water available", "Security"],
+        rooms: [
+          { title: "Shared room", price: "GH₵ 3,550" },
+          { title: "Double occupancy", price: "GH₵ 3,100" },
+          { title: "Monthly stay", price: "GH₵ 880 / month" },
+        ],
+        reviewsList: [
+          { name: "Akosua Nyarko", rating: 4, text: "Simple and affordable. It does the job for a student budget." },
+          { name: "Prince Ofori", rating: 4, text: "Good location for the price, and the place feels secure enough." },
+        ],
+      },
+      {
+        id: "meridian-court",
+        name: "Meridian Court",
+        area: "UCC Road",
+        location: "UCC Road, Cape Coast",
+        rating: 4.6,
+        reviews: 104,
+        price: 4800,
+        distance: 0.8,
+        type: "Self-contained",
+        label: "Top pick",
+        short: "A balanced option with a modern feel and a convenient location.",
+        description:
+          "Meridian Court offers a clean self-contained layout close to campus. It is a balanced choice for students who want comfort, Wi‑Fi, and a location that makes day-to-day life easy.",
+        phone: "+233 24 000 0007",
+        whatsapp: "+233240000007",
+        facebook: "MeridianCourt",
+        instagram: "meridian_court",
+        heroImage:
+          "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1600&q=80",
+        gallery: [
+          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
+        ],
+        amenities: ["Wi‑Fi", "Water available", "Security", "Furnished"],
+        rooms: [
+          { title: "Self-contained room", price: "GH₵ 4,800" },
+          { title: "Single deluxe", price: "GH₵ 5,400" },
+          { title: "Monthly stay", price: "GH₵ 1,200 / month" },
+        ],
+        reviewsList: [
+          { name: "Linda Asare", rating: 5, text: "Easy to recommend. The rooms are neat and the location is very practical." },
+          { name: "Foster Tetteh", rating: 4, text: "Good value for the price, especially because it is close to campus." },
+        ],
+      },
+      {
+        id: "bridge-house-hostel",
+        name: "Bridge House Hostel",
+        area: "Kotokuraba",
+        location: "Kotokuraba, Cape Coast",
+        rating: 4.3,
+        reviews: 58,
+        price: 2950,
+        distance: 1.8,
+        type: "Shared room",
+        label: "Affordable",
+        short: "An economical hostel for students who need the lowest price point.",
+        description:
+          "Bridge House Hostel is one of the more affordable choices on the platform. It is best suited to students who care most about getting a safe place to stay at a lower rate.",
+        phone: "+233 24 000 0008",
+        whatsapp: "+233240000008",
+        facebook: "BridgeHouseHostel",
+        instagram: "bridgehouse_hostel",
+        heroImage:
+          "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1600&q=80",
+        gallery: [
+          "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80",
+        ],
+        amenities: ["Water available", "Security"],
+        rooms: [
+          { title: "Shared room", price: "GH₵ 2,950" },
+          { title: "Budget twin", price: "GH₵ 2,650" },
+          { title: "Monthly stay", price: "GH₵ 760 / month" },
+        ],
+        reviewsList: [
+          { name: "Ibrahim Seidu", rating: 4, text: "Basic but solid for the cost. Good if you are trying to save money." },
+          { name: "Naana Koomson", rating: 4, text: "Cheap and functional. The owner was easy to contact." },
+        ],
+      },
+      {
+        id: "oak-residence",
+        name: "Oak Residence",
+        area: "Ayensudo",
+        location: "Ayensudo, Cape Coast",
+        rating: 4.8,
+        reviews: 139,
+        price: 6100,
+        distance: 0.6,
+        type: "Studio",
+        label: "Recommended",
+        short: "A polished studio residence with premium furnishing and strong reviews.",
+        description:
+          "Oak Residence is one of the standout premium options on the platform. It pairs stylish interiors with a compact, studio-style layout that students can settle into quickly.",
+        phone: "+233 24 000 0009",
+        whatsapp: "+233240000009",
+        facebook: "OakResidence",
+        instagram: "oak_residence",
+        heroImage:
+          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&q=80",
+        gallery: [
+          "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
+        ],
+        amenities: ["Wi‑Fi", "Security", "Furnished", "Water available", "Studio kitchen"],
+        rooms: [
+          { title: "Studio room", price: "GH₵ 6,100" },
+          { title: "Executive studio", price: "GH₵ 6,900" },
+          { title: "Monthly stay", price: "GH₵ 1,500 / month" },
+        ],
+        reviewsList: [
+          { name: "Martha Serwaa", rating: 5, text: "Beautiful interior and very comfortable for solo living." },
+          { name: "Richard Yeboah", rating: 4, text: "The best mix of style and convenience in this price range." },
+        ],
+      },
+      {
+        id: "seaview-hostel",
+        name: "Seaview Hostel",
+        area: "Anomabo",
+        location: "Anomabo, Cape Coast",
+        rating: 4.5,
+        reviews: 69,
+        price: 4450,
+        distance: 1.0,
+        type: "Private room",
+        label: "Comfort",
+        short: "Private rooms with a straightforward, comfortable feel.",
+        description:
+          "Seaview Hostel offers private rooms and practical amenities. It is a comfortable middle-ground option for students who want a calm place to stay without jumping into the premium tier.",
+        phone: "+233 24 000 0010",
+        whatsapp: "+233240000010",
+        facebook: "SeaviewHostel",
+        instagram: "seaview_hostel",
+        heroImage:
+          "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1600&q=80",
+        gallery: [
+          "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
+        ],
+        amenities: ["Wi‑Fi", "Water available", "Security"],
+        rooms: [
+          { title: "Private room", price: "GH₵ 4,450" },
+          { title: "Twin private room", price: "GH₵ 4,050" },
+          { title: "Monthly stay", price: "GH₵ 1,080 / month" },
+        ],
+        reviewsList: [
+          { name: "Joan Agyeman", rating: 4, text: "Comfortable room and decent security. Good value overall." },
+          { name: "Michael Donkor", rating: 5, text: "The room felt spacious and peaceful. I would stay again." },
+        ],
+      },
+      {
+        id: "greenline-suites",
+        name: "Greenline Suites",
+        area: "UCC Road",
+        location: "UCC Road, Cape Coast",
+        rating: 4.7,
+        reviews: 111,
+        price: 5150,
+        distance: 0.5,
+        type: "Self-contained",
+        label: "Close to campus",
+        short: "A close-to-campus self-contained option with reliable features.",
+        description:
+          "Greenline Suites is positioned for students who want quick access to campus and a clean self-contained layout. It is a strong match for anyone who values convenience over extra space.",
+        phone: "+233 24 000 0011",
+        whatsapp: "+233240000011",
+        facebook: "GreenlineSuites",
+        instagram: "greenline_suites",
+        heroImage:
+          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1600&q=80",
+        gallery: [
+          "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
+        ],
+        amenities: ["Wi‑Fi", "Water available", "Security", "Furnished"],
+        rooms: [
+          { title: "Self-contained room", price: "GH₵ 5,150" },
+          { title: "Deluxe room", price: "GH₵ 5,850" },
+          { title: "Monthly stay", price: "GH₵ 1,250 / month" },
+        ],
+        reviewsList: [
+          { name: "Patricia Ansah", rating: 5, text: "Very convenient for campus life. Fast to get in and out every day." },
+          { name: "Samuel Koomson", rating: 4, text: "Clean, simple, and dependable." },
+        ],
+      },
+      {
+        id: "harbour-nest-hostel",
+        name: "Harbour Nest Hostel",
+        area: "Bakaano",
+        location: "Bakaano, Cape Coast",
+        rating: 4.2,
+        reviews: 50,
+        price: 3400,
+        distance: 1.9,
+        type: "Shared room",
+        label: "Budget",
+        short: "A value-friendly hostel with the basics covered.",
+        description:
+          "Harbour Nest Hostel is for students who want a simple shared-room option at an approachable price. The experience is straightforward, practical, and affordable.",
+        phone: "+233 24 000 0012",
+        whatsapp: "+233240000012",
+        facebook: "HarbourNestHostel",
+        instagram: "harbour_nest_hostel",
+        heroImage:
+          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&q=80",
+        gallery: [
+          "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
+        ],
+        amenities: ["Water available", "Security"],
+        rooms: [
+          { title: "Shared room", price: "GH₵ 3,400" },
+          { title: "Twin room", price: "GH₵ 3,050" },
+          { title: "Monthly stay", price: "GH₵ 790 / month" },
+        ],
+        reviewsList: [
+          { name: "Nii Armah", rating: 4, text: "Decent budget option. No surprises, which is good." },
+          { name: "Diana Bortei", rating: 4, text: "Affordable and safe enough for a semester stay." },
+        ],
+      },
+      {
+        id: "crescent-house",
+        name: "Crescent House",
+        area: "Ayensudo",
+        location: "Ayensudo, Cape Coast",
+        rating: 4.6,
+        reviews: 88,
+        price: 5800,
+        distance: 0.8,
+        type: "Private room",
+        label: "Best for pairs",
+        short: "A private-room option that works well for two students sharing.",
+        description:
+          "Crescent House is especially useful for two students who want to stay together in a more private setup. It has a comfortable arrangement and the amenities most students look for during the semester.",
+        phone: "+233 24 000 0013",
+        whatsapp: "+233240000013",
+        facebook: "CrescentHouse",
+        instagram: "crescent_house",
+        heroImage:
+          "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1600&q=80",
+        gallery: [
+          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80",
+        ],
+        amenities: ["Wi‑Fi", "Security", "Furnished", "Water available"],
+        rooms: [
+          { title: "Private room", price: "GH₵ 5,800" },
+          { title: "Shared pair room", price: "GH₵ 4,900" },
+          { title: "Monthly stay", price: "GH₵ 1,400 / month" },
+        ],
+        reviewsList: [
+          { name: "Akua Serwaa", rating: 5, text: "Perfect if you want to stay with a roommate and still have your privacy." },
+          { name: "Tariq Ibrahim", rating: 4, text: "Good location and a nice room layout." },
+        ],
+      },
+    ];
+
+    const state = {
+      saved: JSON.parse(localStorage.getItem("staynest_saved_hostels") || "[]"),
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const hostelIdFromUrl = params.get("id") || params.get("hostel") || params.get("slug");
+    const hostel = HOSTELS.find((item) => item.id === hostelIdFromUrl) || null;
+
+    const formatMoney = (value) =>
+      new Intl.NumberFormat("en-GH", {
+        style: "currency",
+        currency: "GHS",
+        maximumFractionDigits: 0,
+      }).format(Number(value)).replace("GHS", "GH₵");
+
+    const isSaved = () => state.saved.includes(hostel.id);
+
+    const toggleSaved = () => {
+      const index = state.saved.indexOf(hostel.id);
+      if (index >= 0) state.saved.splice(index, 1);
+      else state.saved.push(hostel.id);
+      localStorage.setItem("staynest_saved_hostels", JSON.stringify(state.saved));
+      render();
+    };
+
+    const renderStars = (rating) => {
+      const full = Math.round(Number(rating));
+      return "★".repeat(full) + "☆".repeat(Math.max(0, 5 - full));
+    };
+
+    const render = () => {
+      const content = document.getElementById("detailsContent");
+      const crumbArea = document.getElementById("crumbArea");
+      if (!hostel) {
+      crumbArea.textContent = 'Missing hostel link';
+      document.title = 'StayNest | Hostel not found';
+      content.innerHTML = '<section class="details-card not-found" style="grid-column: 1 / -1;"><div style="font-size: 3rem;">🧭</div><h1>Hostel details could not be loaded</h1><p>The details page needs a unique hostel id in the URL, such as <code>details.html?id=blue-horizon-hostel</code>. Right now, the link is opening without that id, so the page cannot know which hostel to show.</p><a href="explore.html" class="btn btn-primary">Back to explore</a></section>';
+      return;
+    }
+
+    crumbArea.textContent = hostel.location;
+      document.title = `StayNest | ${hostel.name}`;
+
+      content.innerHTML = `
+        <section class="details-main">
+          <article class="details-card details-hero">
+            <img src="${hostel.heroImage}" alt="${hostel.name}" />
+            <div class="details-hero-overlay">
+              <div class="details-badges">
+                <span class="details-badge gold">${hostel.label}</span>
+                <span class="details-badge"><i class="fa-solid fa-location-dot"></i> ${hostel.area}</span>
+                <span class="details-badge"><i class="fa-solid fa-bed"></i> ${hostel.type}</span>
+              </div>
+              <h1 class="details-title">${hostel.name}</h1>
+              <p class="details-subtitle">${hostel.short}</p>
+            </div>
+          </article>
+
+          <article class="details-card details-body">
+            <div class="details-topbar">
+              <div class="left">
+                <span class="details-rating"><i class="fa-solid fa-star"></i> ${hostel.rating.toFixed(1)} • ${hostel.reviews} reviews</span>
+                <span class="details-rating"><i class="fa-solid fa-walkie-talkie"></i> ${hostel.distance.toFixed(1)} km from UCC</span>
+              </div>
+              <div class="right">
+                <button class="details-fav-btn" type="button" id="favBtn" aria-label="Save hostel" aria-pressed="${isSaved()}">
+                  <i class="${isSaved() ? "fa-solid" : "fa-regular"} fa-heart"></i>
+                </button>
+              </div>
+            </div>
+
+            <section class="details-section">
+              <h2>About this hostel</h2>
+              <p>${hostel.description}</p>
+
+              <div class="stats-row">
+                <div class="stat-box"><span class="label">Price</span><strong>${formatMoney(hostel.price)}</strong></div>
+                <div class="stat-box"><span class="label">Location</span><strong>${hostel.area}</strong></div>
+                <div class="stat-box"><span class="label">Distance</span><strong>${hostel.distance.toFixed(1)} km</strong></div>
+                <div class="stat-box"><span class="label">Rating</span><strong>${hostel.rating.toFixed(1)} / 5</strong></div>
+              </div>
+            </section>
+
+            <section class="details-section">
+              <h2>Amenities</h2>
+              <div class="amenity-grid">
+                ${hostel.amenities.map((item) => `<span class="amenity-pill"><i class="fa-solid fa-circle-check"></i> ${item}</span>`).join("")}
+              </div>
+            </section>
+
+            <section class="details-section">
+              <h2>Room options</h2>
+              <div class="room-grid">
+                ${hostel.rooms.map((room) => `<div class="room-pill"><span>${room.title}</span><span>${room.price}</span></div>`).join("")}
+              </div>
+            </section>
+
+            <section class="details-section">
+              <h2>Gallery</h2>
+              <div class="gallery-grid">
+                ${hostel.gallery.map((src) => `<img src="${src}" alt="${hostel.name} gallery image" />`).join("")}
+              </div>
+            </section>
+
+            <section class="details-section">
+              <h2>Reviews</h2>
+              <div class="review-list">
+                ${hostel.reviewsList.map((review) => `
+                  <div class="review-card">
+                    <div class="review-top">
+                      <strong>${review.name}</strong>
+                      <span>${renderStars(review.rating)} ${review.rating.toFixed(0)}</span>
+                    </div>
+                    <p>${review.text}</p>
+                  </div>
+                `).join("")}
+              </div>
+            </section>
+          </article>
+        </section>
+
+        <aside class="details-aside">
+          <article class="details-card aside-card price-card">
+            <span class="eyebrow">Semester price</span>
+            <div class="price-amount">${formatMoney(hostel.price)}</div>
+            <p class="mini-note">Per semester • ${hostel.type} • ${hostel.area}</p>
+
+            <div class="action-stack">
+              <a class="btn btn-primary btn-full" href="bookings.html">Book now</a>
+              <a class="btn btn-secondary btn-full" href="messages.html">Message owner</a>
+            </div>
+          </article>
+
+          <article class="details-card aside-card">
+            <h3>Contact</h3>
+            <div class="contact-box">
+              <div class="contact-row"><strong>Phone</strong><a href="tel:${hostel.phone}">${hostel.phone}</a></div>
+              <div class="contact-row"><strong>WhatsApp</strong><a href="https://wa.me/${hostel.whatsapp.replace(/\D/g, "")}" target="_blank" rel="noreferrer">Chat now</a></div>
+              <div class="contact-row"><strong>Facebook</strong><span>${hostel.facebook}</span></div>
+              <div class="contact-row"><strong>Instagram</strong><span>@${hostel.instagram}</span></div>
+            </div>
+          </article>
+
+          <article class="details-card aside-card">
+            <h3>Quick facts</h3>
+            <div class="contact-box">
+              <div class="contact-row"><strong>Room type</strong><span>${hostel.type}</span></div>
+              <div class="contact-row"><strong>Distance</strong><span>${hostel.distance.toFixed(1)} km</span></div>
+              <div class="contact-row"><strong>Rating</strong><span>${hostel.rating.toFixed(1)} / 5</span></div>
+              <div class="contact-row"><strong>Reviews</strong><span>${hostel.reviews}</span></div>
+            </div>
+          </article>
+        </aside>
+      `;
+
+      document.getElementById("favBtn")?.addEventListener("click", toggleSaved);
+    };
+
+    // Simple header menu support for small screens
+    const menuToggle = document.querySelector(".menu-toggle");
+    const siteNav = document.querySelector(".site-nav");
+    const headerActions = document.querySelector(".header-actions");
+
+    if (menuToggle && siteNav) {
+      menuToggle.addEventListener("click", () => {
+        const isOpen = siteNav.classList.contains("open");
+        siteNav.classList.toggle("open", !isOpen);
+        headerActions?.classList.toggle("open", !isOpen);
+        menuToggle.setAttribute("aria-expanded", String(!isOpen));
+      });
+    }
+
+    // Update the page title even if no hostel ID is found.
+    render();
+  </script>
+</body>
+</html>
