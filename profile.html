@@ -3,2399 +3,1330 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Manage your StayNest profile, preferences, saved hostels, and accommodation dashboard in one place." />
-  <title>StayNest | Profile</title>
+  <meta
+    name="description"
+    content="Manage your Hostel Link Ghana profile, booking details, and saved account information."
+  />
+  <title>Hostel Link Ghana | Profile</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  >
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <link rel="stylesheet" href="style.css" />
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <style>
-    .profile-shell {
-      padding: 28px 0 88px;
+    :root {
+      --bg: #f4f8f5;
+      --surface: rgba(255, 255, 255, 0.88);
+      --surface-strong: #ffffff;
+      --text: #10211a;
+      --muted: #66756f;
+      --green: #1b4332;
+      --green-2: #2d6a4f;
+      --mint: #d8f3dc;
+      --line: rgba(16, 33, 26, 0.10);
+      --shadow: 0 26px 70px rgba(16, 33, 26, 0.16);
+      --shadow-soft: 0 14px 34px rgba(16, 33, 26, 0.08);
+      --radius-lg: 36px;
     }
 
-    .profile-hero {
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(216, 243, 220, 0.75), transparent 28%),
+        radial-gradient(circle at top right, rgba(247, 239, 217, 0.68), transparent 24%),
+        radial-gradient(circle at bottom center, rgba(45, 106, 79, 0.10), transparent 28%),
+        var(--bg);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font: inherit; }
+
+    .skip-link {
+      position: absolute;
+      left: -999px;
+      top: 12px;
+      z-index: 200;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .skip-link:focus { left: 12px; }
+
+    .page-wrap {
+      min-height: 100vh;
+      padding: 24px 0 30px;
       position: relative;
       overflow: hidden;
-      border-radius: 36px;
-      padding: 34px;
-      background: linear-gradient(135deg, rgba(27, 67, 50, 0.98), rgba(45, 106, 79, 0.94));
-      color: #fff;
-      box-shadow: 0 24px 50px rgba(16, 33, 26, 0.18);
-      margin-bottom: 22px;
     }
 
-    .profile-hero::after {
-      content: "";
+    .bg-orb {
       position: absolute;
-      right: -120px;
-      bottom: -120px;
-      width: 320px;
-      height: 320px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
-      filter: blur(10px);
+      border-radius: 999px;
+      filter: blur(14px);
+      opacity: 0.75;
       pointer-events: none;
     }
 
-    .profile-hero-grid {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      grid-template-columns: minmax(0, 1.18fr) minmax(300px, 360px);
-      gap: 28px;
-      align-items: center;
+    .bg-orb.one {
+      width: 320px;
+      height: 320px;
+      left: -120px;
+      top: -110px;
+      background: rgba(216, 243, 220, 0.55);
     }
 
-    .profile-identity {
-      display: grid;
-      grid-template-columns: 92px minmax(0, 1fr);
+    .bg-orb.two {
+      width: 280px;
+      height: 280px;
+      right: -90px;
+      top: 70px;
+      background: rgba(200, 155, 60, 0.15);
+    }
+
+    .bg-orb.three {
+      width: 360px;
+      height: 360px;
+      right: 8%;
+      bottom: -160px;
+      background: rgba(27, 67, 50, 0.10);
+    }
+
+    .container {
+      width: min(calc(100% - 32px), 1180px);
+      margin-inline: auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .site-header {
+      margin-bottom: 22px;
+    }
+
+    .header-bar {
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      border-radius: 999px;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .brand-row {
+      display: inline-flex;
       align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      white-space: nowrap;
     }
 
-    .avatar-wrap {
-      position: relative;
-      width: 92px;
-      height: 92px;
-      flex-shrink: 0;
-    }
-
-    .avatar-ring {
-      position: absolute;
-      inset: -6px;
-      border-radius: 50%;
-      background: conic-gradient(from 210deg, #d8f3dc, #fff, #c89b3c, #d8f3dc);
-      filter: blur(0.2px);
-      opacity: 0.95;
-    }
-
-    .avatar-btn {
-      position: relative;
-      z-index: 1;
-      width: 92px;
-      height: 92px;
-      border: 4px solid rgba(255, 255, 255, 0.35);
-      border-radius: 50%;
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #ffffff, rgba(216, 243, 220, 0.84));
+      color: var(--green);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.10);
       overflow: hidden;
-      background: rgba(255, 255, 255, 0.12);
-      display: grid;
-      place-items: center;
-      color: #fff;
-      cursor: pointer;
-      box-shadow: 0 18px 34px rgba(10, 21, 16, 0.18);
+      flex: none;
     }
 
-    .avatar-btn img {
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 8px;
+    }
+
+    .brand-text {
+      font-size: 1.05rem;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .nav-links a.active {
+      color: var(--green);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+
+    .profile-trigger {
+      border: 1px solid rgba(16, 33, 26, 0.10);
+      background: #fff;
+      border-radius: 999px;
+      padding: 8px 10px 8px 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .profile-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--green), var(--green-2));
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 900;
+      overflow: hidden;
+      flex: none;
+    }
+
+    .profile-avatar img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: none;
     }
 
-    .avatar-fallback {
-      font-family: "Playfair Display", Georgia, serif;
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: -0.05em;
-    }
-
-    .avatar-upload-badge {
+    .profile-dropdown {
       position: absolute;
-      right: -2px;
-      bottom: -2px;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.9);
+      top: calc(100% + 12px);
+      right: 0;
+      width: 290px;
       background: #fff;
-      color: var(--green);
+      border: 1px solid rgba(16, 33, 26, 0.10);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+      z-index: 50;
+    }
+
+    .profile-dropdown-top {
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(16, 33, 26, 0.08);
+      margin-bottom: 12px;
+    }
+
+    .profile-dropdown-top strong {
+      display: block;
+      font-size: 1rem;
+    }
+
+    .profile-dropdown-top span {
+      color: var(--muted);
+      font-size: 0.9rem;
+      display: block;
+      margin-top: 4px;
+      word-break: break-word;
+    }
+
+    .profile-dropdown-links {
       display: grid;
-      place-items: center;
-      box-shadow: 0 10px 20px rgba(16, 33, 26, 0.14);
-      cursor: pointer;
-      z-index: 2;
+      gap: 8px;
+      margin-bottom: 12px;
     }
 
-    .profile-hero-copy h1 {
-      margin: 8px 0 0;
-      font-family: "Playfair Display", Georgia, serif;
-      font-size: clamp(2.2rem, 1.5rem + 2vw, 4rem);
-      line-height: 0.98;
-      letter-spacing: -0.04em;
-    }
-
-    .profile-hero-copy p {
-      margin: 14px 0 0;
-      color: rgba(255, 255, 255, 0.84);
-      line-height: 1.7;
-      max-width: 62ch;
-    }
-
-    .profile-tags {
+    .profile-dropdown-links a,
+    .profile-logout {
+      width: 100%;
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      background: rgba(244, 248, 245, 0.65);
+      border-radius: 16px;
+      padding: 12px 14px;
       display: flex;
+      align-items: center;
       gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 16px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
     }
 
-    .profile-tag {
+    .profile-logout {
+      background: rgba(201, 75, 75, 0.08);
+      color: #9c2f2f;
+    }
+
+    .profile-dropdown[hidden] { display: none; }
+
+    .hero-panel {
+      background: var(--surface);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+      padding: 26px;
+      margin-bottom: 22px;
+    }
+
+    .hero-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 9px 13px;
+      padding: 8px 12px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      font-size: 0.86rem;
-      font-weight: 800;
-      backdrop-filter: blur(12px);
-    }
-
-    .profile-hero-card {
-      padding: 20px;
-      border-radius: 30px;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      box-shadow: 0 24px 50px rgba(10, 21, 16, 0.18);
-      backdrop-filter: blur(16px);
-    }
-
-    .profile-ring-row {
-      display: flex;
-      gap: 18px;
-      align-items: center;
-    }
-
-    .profile-ring {
-      --p: 0.78;
-      width: 112px;
-      height: 112px;
-      border-radius: 50%;
-      background:
-        conic-gradient(#d8f3dc calc(var(--p) * 1turn), rgba(255, 255, 255, 0.14) 0);
-      display: grid;
-      place-items: center;
-      flex-shrink: 0;
-      position: relative;
-    }
-
-    .profile-ring::before {
-      content: "";
-      position: absolute;
-      inset: 10px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(8px);
-    }
-
-    .profile-ring span {
-      position: relative;
-      z-index: 1;
-      font-size: 1.55rem;
+      background: rgba(27, 67, 50, 0.08);
+      color: var(--green);
       font-weight: 900;
-      color: #fff;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
-    .profile-ring-copy strong {
-      display: block;
-      font-size: 1.1rem;
-      margin-bottom: 4px;
+    .hero-title {
+      margin: 10px 0 0;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(2rem, 1.5rem + 1.2vw, 3rem);
+      line-height: 1.04;
+      letter-spacing: -0.03em;
     }
 
-    .profile-ring-copy p {
-      margin: 0;
-      color: rgba(255, 255, 255, 0.76);
-      line-height: 1.6;
-      font-size: 0.92rem;
+    .hero-subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 60ch;
     }
 
-    .profile-progress {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
-    }
-
-    .progress-line {
+    .hero-actions {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      font-size: 0.88rem;
-      color: rgba(255, 255, 255, 0.82);
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    .progress-track {
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.14);
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      width: var(--fill, 70%);
-      height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, #d8f3dc, #fff);
-    }
-
-    .profile-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      padding: 16px 18px;
-      border-radius: 28px;
-      background: rgba(255, 255, 255, 0.92);
-      border: 1px solid rgba(16, 33, 26, 0.08);
-      box-shadow: var(--shadow-sm);
-      backdrop-filter: blur(12px);
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .profile-tabs {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .profile-tab {
-      border: 1.5px solid rgba(16, 33, 26, 0.10);
-      border-radius: 999px;
-      background: rgba(27, 67, 50, 0.03);
-      padding: 11px 16px;
-      color: var(--text-muted);
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-    }
-
-    .profile-tab:hover {
-      transform: translateY(-1px);
-    }
-
-    .profile-tab.active {
-      background: var(--green);
-      color: #fff;
-      border-color: var(--green);
-    }
-
-    .profile-actions {
-      display: flex;
       gap: 10px;
       flex-wrap: wrap;
     }
 
-    .profile-layout {
+    .btn {
+      border: 0;
+      border-radius: 16px;
+      padding: 12px 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--green-2));
+      color: #fff;
+      box-shadow: 0 18px 36px rgba(27, 67, 50, 0.20);
+    }
+
+    .btn-ghost {
+      background: #fff;
+      color: var(--green);
+      border: 1px solid rgba(27, 67, 50, 0.12);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .content-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 340px;
-      gap: 24px;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 22px;
       align-items: start;
     }
 
-    .profile-main {
-      display: grid;
-      gap: 18px;
-      min-width: 0;
-    }
-
-    .profile-side {
-      display: grid;
-      gap: 18px;
-      position: sticky;
-      top: 104px;
-      min-width: 0;
-    }
-
-    .section-card {
-      background: rgba(255, 255, 255, 0.92);
+    .panel {
+      background: var(--surface);
       border: 1px solid rgba(16, 33, 26, 0.08);
-      border-radius: 30px;
-      box-shadow: var(--shadow-sm);
-      backdrop-filter: blur(12px);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 22px 22px 0;
+    }
+
+    .panel-body {
       padding: 22px;
     }
 
-    .section-head {
+    .summary-card {
       display: flex;
-      justify-content: space-between;
-      align-items: start;
-      gap: 14px;
-      margin-bottom: 18px;
-      flex-wrap: wrap;
+      gap: 18px;
+      align-items: center;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(27, 67, 50, 0.08), rgba(216, 243, 220, 0.65));
+      border-bottom: 1px solid rgba(16, 33, 26, 0.08);
     }
 
-    .section-head h2 {
+    .summary-avatar {
+      width: 86px;
+      height: 86px;
+      border-radius: 26px;
+      background: linear-gradient(135deg, var(--green), var(--green-2));
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 1.8rem;
+      font-weight: 900;
+      overflow: hidden;
+      flex: none;
+      box-shadow: 0 18px 36px rgba(27, 67, 50, 0.24);
+    }
+
+    .summary-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .summary-meta h2 {
       margin: 0;
-      font-size: 1.12rem;
+      font-size: 1.5rem;
+      letter-spacing: -0.03em;
     }
 
-    .section-head p {
+    .summary-meta p {
       margin: 6px 0 0;
       color: var(--muted);
       line-height: 1.6;
     }
 
-    .profile-grid {
-      display: grid;
-      gap: 18px;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .summary-card {
-      position: relative;
-      overflow: hidden;
-      border-radius: 24px;
-      padding: 16px;
-      background: rgba(27, 67, 50, 0.04);
-      border: 1px solid rgba(16, 33, 26, 0.08);
-      min-height: 126px;
-    }
-
-    .summary-card::after {
-      content: "";
-      position: absolute;
-      right: -20px;
-      bottom: -24px;
-      width: 94px;
-      height: 94px;
-      border-radius: 50%;
-      background: radial-gradient(circle at center, rgba(27, 67, 50, 0.10), transparent 68%);
-    }
-
-    .summary-card .icn {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      background: rgba(27, 67, 50, 0.10);
-      color: var(--green);
-      margin-bottom: 12px;
-    }
-
-    .summary-card strong {
-      display: block;
-      font-size: 1.55rem;
-      color: var(--text);
-      line-height: 1;
-    }
-
-    .summary-card span {
-      display: block;
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 0.9rem;
-      line-height: 1.45;
-      font-weight: 600;
-    }
-
-    .split-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
-      gap: 18px;
-    }
-
-    .sub-card {
-      border-radius: 24px;
-      background: rgba(27, 67, 50, 0.04);
-      border: 1px solid rgba(16, 33, 26, 0.08);
-      padding: 18px;
-    }
-
-    .mini-list {
-      display: grid;
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .mini-item {
-      display: flex;
+    .status-pill {
+      display: inline-flex;
       align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(27, 67, 50, 0.08);
+      color: var(--green);
+      font-size: 0.82rem;
+      font-weight: 900;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
-      padding: 12px 14px;
-      border-radius: 18px;
+      margin-top: 18px;
+    }
+
+    .stat-box {
       background: #fff;
       border: 1px solid rgba(16, 33, 26, 0.08);
+      border-radius: 22px;
+      padding: 16px;
+      box-shadow: var(--shadow-soft);
     }
 
-    .mini-item img {
-      width: 52px;
-      height: 52px;
-      object-fit: cover;
-      border-radius: 16px;
-      flex-shrink: 0;
-    }
-
-    .mini-item strong {
+    .stat-box strong {
       display: block;
-      font-size: 0.95rem;
-      margin-bottom: 2px;
+      font-size: 1.35rem;
+      line-height: 1;
+      color: var(--green);
     }
 
-    .mini-item span {
+    .stat-box span {
       display: block;
+      margin-top: 6px;
       color: var(--muted);
       font-size: 0.85rem;
+      line-height: 1.4;
     }
 
-    .activity-list {
-      display: grid;
-      gap: 12px;
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
     }
 
-    .activity-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 14px;
-      border-radius: 18px;
-      background: rgba(27, 67, 50, 0.04);
-      border: 1px solid rgba(16, 33, 26, 0.08);
-    }
-
-    .activity-row .icn {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: rgba(27, 67, 50, 0.10);
-      color: var(--green);
-      display: grid;
-      place-items: center;
-      flex-shrink: 0;
-    }
-
-    .activity-row strong {
-      display: block;
-      margin-bottom: 2px;
-      color: var(--text);
-      font-size: 0.94rem;
-    }
-
-    .activity-row p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.9rem;
-      line-height: 1.55;
-    }
-
-    .activity-row span {
-      display: block;
-      margin-top: 6px;
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      font-weight: 700;
-    }
-
-    .saved-preview {
-      display: grid;
-      gap: 12px;
-    }
-
-    .saved-inline {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 14px;
-      border-radius: 18px;
-      background: #fff;
-      border: 1px solid rgba(16, 33, 26, 0.08);
-    }
-
-    .saved-inline .left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-
-    .saved-inline img {
-      width: 50px;
-      height: 50px;
-      object-fit: cover;
-      border-radius: 16px;
-      flex-shrink: 0;
-    }
-
-    .saved-inline strong {
-      display: block;
-      margin-bottom: 2px;
-      font-size: 0.95rem;
-    }
-
-    .saved-inline span {
-      display: block;
-      color: var(--muted);
-      font-size: 0.84rem;
-    }
-
-    .saved-inline .right {
-      text-align: right;
-      color: var(--green);
-      font-weight: 900;
-      white-space: nowrap;
-    }
-
-    .profile-form-grid {
+    .field-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 14px;
     }
 
-    .fg {
+    .field {
       display: grid;
-      gap: 6px;
+      gap: 8px;
     }
 
-    .fg.full {
-      grid-column: 1 / -1;
-    }
-
-    .fg label {
-      font-size: 0.82rem;
+    .field label {
+      font-size: 0.88rem;
       font-weight: 800;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      color: #23342d;
     }
 
-    .fg input,
-    .fg select,
-    .fg textarea {
-      width: 100%;
-      border: 1.5px solid rgba(16, 33, 26, 0.10);
-      border-radius: 16px;
-      background: #fff;
-      padding: 12px 14px;
-      color: var(--text);
-      font: inherit;
-      outline: none;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease;
-    }
-
-    .fg textarea {
-      min-height: 124px;
-      resize: vertical;
-      line-height: 1.65;
-    }
-
-    .fg input:focus,
-    .fg select:focus,
-    .fg textarea:focus {
-      border-color: rgba(27, 67, 50, 0.28);
-      box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.06);
-    }
-
-    .helper-text {
-      color: var(--muted);
-      font-size: 0.88rem;
-      line-height: 1.55;
-      margin: 0;
-    }
-
-    .upload-strip {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-      padding: 14px;
-      border-radius: 20px;
-      background: rgba(27, 67, 50, 0.04);
-      border: 1px solid rgba(16, 33, 26, 0.08);
-      margin-bottom: 14px;
-    }
-
-    .upload-strip strong {
-      display: block;
-      margin-bottom: 2px;
-    }
-
-    .upload-strip span {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .preferences-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    .toggle-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 14px 16px;
-      border-radius: 18px;
-      border: 1px solid rgba(16, 33, 26, 0.08);
-      background: rgba(27, 67, 50, 0.04);
-    }
-
-    .toggle-card strong {
-      display: block;
-      margin-bottom: 3px;
-      color: var(--text);
-    }
-
-    .toggle-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.88rem;
-      line-height: 1.45;
-    }
-
-    .switch {
+    .input-wrap {
       position: relative;
-      width: 52px;
-      height: 30px;
-      flex-shrink: 0;
     }
 
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
+    .input-icon {
       position: absolute;
-      cursor: pointer;
-      inset: 0;
-      background: rgba(16, 33, 26, 0.14);
-      transition: 0.2s ease;
-      border-radius: 999px;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(16, 33, 26, 0.48);
+      pointer-events: none;
     }
 
-    .slider::before {
-      position: absolute;
-      content: "";
-      height: 22px;
-      width: 22px;
-      left: 4px;
-      bottom: 4px;
-      background: white;
-      transition: 0.2s ease;
-      border-radius: 50%;
-      box-shadow: 0 8px 16px rgba(16, 33, 26, 0.18);
+    .input,
+    .select,
+    .textarea {
+      width: 100%;
+      border: 1.5px solid rgba(16, 33, 26, 0.12);
+      background: rgba(255, 255, 255, 0.98);
+      color: var(--text);
+      border-radius: 18px;
+      padding: 15px 16px 15px 48px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
 
-    .switch input:checked + .slider {
-      background: var(--green);
+    .textarea {
+      min-height: 120px;
+      resize: vertical;
+      padding-left: 16px;
     }
 
-    .switch input:checked + .slider::before {
-      transform: translateX(22px);
-    }
-
-    .chip-grid {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    .filter-chip {
-      border: 1.5px solid rgba(16, 33, 26, 0.10);
-      background: #fff;
-      color: var(--text-muted);
-      border-radius: 999px;
-      padding: 9px 13px;
-      font-weight: 800;
-      font-size: 0.88rem;
-      cursor: pointer;
-      transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-    }
-
-    .filter-chip:hover {
+    .input:focus,
+    .select:focus,
+    .textarea:focus {
+      border-color: rgba(27, 67, 50, 0.45);
+      box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.08);
       transform: translateY(-1px);
     }
 
-    .filter-chip.active {
-      background: var(--green);
-      color: #fff;
-      border-color: var(--green);
-    }
-
-    .security-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    .security-card {
+    .notes-box {
+      margin-top: 16px;
+      background: linear-gradient(135deg, rgba(27, 67, 50, 0.05), rgba(216, 243, 220, 0.55));
+      border: 1px solid rgba(27, 67, 50, 0.08);
+      border-radius: 22px;
       padding: 16px;
-      border-radius: 18px;
-      background: rgba(27, 67, 50, 0.04);
-      border: 1px solid rgba(16, 33, 26, 0.08);
-      display: grid;
-      gap: 10px;
     }
 
-    .security-row {
+    .notes-box strong {
+      display: block;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+
+    .notes-box p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.94rem;
+    }
+
+    .save-row {
+      margin-top: 18px;
       display: flex;
-      justify-content: space-between;
-      gap: 14px;
-      align-items: center;
+      gap: 12px;
       flex-wrap: wrap;
-      color: var(--text);
-    }
-
-    .security-row span {
-      color: var(--muted);
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-
-    .session-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .session-item {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
       align-items: center;
-      padding: 12px 14px;
-      border-radius: 18px;
-      border: 1px solid rgba(16, 33, 26, 0.08);
-      background: #fff;
     }
 
-    .session-item strong {
-      display: block;
-      margin-bottom: 2px;
-    }
-
-    .session-item span {
-      display: block;
+    .hint {
       color: var(--muted);
-      font-size: 0.86rem;
-      line-height: 1.45;
+      font-size: 0.92rem;
+      line-height: 1.55;
     }
 
-    .panel-title {
-      font-size: 0.88rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--text-muted);
+    .info-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .info-card {
+      background: #fff;
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .info-card-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       margin-bottom: 10px;
     }
 
-    .profile-side-card {
-      padding: 20px;
-      border-radius: 30px;
-      background: rgba(255, 255, 255, 0.92);
-      border: 1px solid rgba(16, 33, 26, 0.08);
-      box-shadow: var(--shadow-sm);
-      backdrop-filter: blur(12px);
-      display: grid;
-      gap: 14px;
-    }
-
-    .passport-card {
-      background: linear-gradient(145deg, rgba(27, 67, 50, 0.98), rgba(45, 106, 79, 0.94));
-      color: #fff;
-    }
-
-    .passport-card .panel-title,
-    .passport-card p,
-    .passport-card span {
-      color: rgba(255, 255, 255, 0.82);
-    }
-
-    .passport-header {
-      display: flex;
+    .icon-bubble {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: inline-flex;
       align-items: center;
-      gap: 12px;
+      justify-content: center;
+      background: rgba(27, 67, 50, 0.08);
+      color: var(--green);
+      flex: none;
     }
 
-    .passport-header img,
-    .passport-header .avatar-fallback-small {
-      width: 56px;
-      height: 56px;
-      border-radius: 18px;
-      object-fit: cover;
-      display: grid;
-      place-items: center;
-      background: rgba(255, 255, 255, 0.14);
-      color: #fff;
-      font-weight: 900;
-    }
-
-    .passport-header strong {
-      display: block;
-      font-size: 1rem;
-      margin-bottom: 2px;
-    }
-
-    .passport-header span {
-      font-size: 0.88rem;
-    }
-
-    .passport-meta {
-      display: grid;
-      gap: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
-    }
-
-    .passport-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: center;
-      font-size: 0.92rem;
-      font-weight: 700;
-    }
-
-    .passport-row strong {
-      color: #fff;
-    }
-
-    .quick-links {
-      display: grid;
-      gap: 10px;
-    }
-
-    .quick-link {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      padding: 13px 14px;
-      border-radius: 18px;
-      background: rgba(27, 67, 50, 0.04);
-      border: 1px solid rgba(16, 33, 26, 0.08);
-      font-weight: 800;
-      color: var(--text);
-    }
-
-    .quick-link span {
-      color: var(--muted);
-      font-weight: 600;
-      font-size: 0.88rem;
-    }
-
-    .support-card {
-      padding: 18px;
-      border-radius: 24px;
-      background: rgba(27, 67, 50, 0.04);
-      border: 1px solid rgba(16, 33, 26, 0.08);
-    }
-
-    .support-card h3 {
-      margin: 0 0 8px;
+    .info-card h3 {
+      margin: 0;
       font-size: 1rem;
     }
 
-    .support-card p {
-      margin: 0 0 14px;
-      color: var(--muted);
-      line-height: 1.65;
-      font-size: 0.92rem;
-    }
-
-    .hidden-panel {
-      display: none;
-      animation: fadeInUp 0.32s ease;
-    }
-
-    .hidden-panel.active {
-      display: grid;
-    }
-
-    .profile-empty-note {
+    .info-card p {
       margin: 0;
       color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.65;
+      line-height: 1.6;
+      font-size: 0.94rem;
     }
 
-    .site-header.is-scrolled {
-      box-shadow: 0 12px 28px rgba(16, 33, 26, 0.08);
+    .activity-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
     }
 
-    .site-nav.open,
-    .header-actions.open {
+    .activity-item {
       display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(244, 248, 245, 0.72);
+      border: 1px solid rgba(16, 33, 26, 0.06);
     }
 
-    .reveal-item {
+    .activity-item strong {
+      display: block;
+      font-size: 0.92rem;
+      margin-bottom: 4px;
+    }
+
+    .activity-item span {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .activity-item em {
+      font-style: normal;
+      color: var(--green-2);
+      font-weight: 800;
+      white-space: nowrap;
+      font-size: 0.85rem;
+    }
+
+    .message {
+      margin-top: 6px;
+      padding: 13px 14px;
+      border-radius: 16px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      display: none;
+    }
+
+    .message.show { display: block; }
+
+    .message.error {
+      background: rgba(201, 75, 75, 0.10);
+      color: #9c2f2f;
+      border: 1px solid rgba(201, 75, 75, 0.16);
+    }
+
+    .message.success {
+      background: rgba(27, 67, 50, 0.10);
+      color: var(--green);
+      border: 1px solid rgba(27, 67, 50, 0.14);
+    }
+
+    .footer-row {
+      margin-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .footer-row a {
+      color: var(--green-2);
+      font-weight: 800;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(18px);
+      padding: 14px 18px;
+      border-radius: 999px;
+      background: rgba(16, 33, 26, 0.94);
+      color: #fff;
+      font-weight: 700;
+      box-shadow: var(--shadow);
       opacity: 0;
-      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 50;
+      max-width: calc(100% - 24px);
+      text-align: center;
     }
 
-    .reveal-item.in-view {
-      animation: fadeUp 0.38s ease forwards;
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    body.nav-open {
-      overflow: hidden;
-    }
-
-    @media (max-width: 1100px) {
-      .profile-hero-grid,
-      .profile-layout {
+    @media (max-width: 1040px) {
+      .content-grid {
         grid-template-columns: 1fr;
-      }
-
-      .profile-side {
-        position: static;
-      }
-
-      .summary-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .split-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 900px) {
-      .profile-hero {
-        padding: 24px;
-      }
-
-      .profile-toolbar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .profile-actions {
-        width: 100%;
-      }
-
-      .profile-tabs {
-        width: 100%;
       }
     }
 
     @media (max-width: 760px) {
-      .profile-shell {
-        padding-top: 18px;
+      .page-wrap { padding: 16px 0 22px; }
+
+      .header-bar,
+      .hero-panel {
+        border-radius: 26px;
       }
 
-      .profile-hero,
-      .profile-toolbar,
-      .section-card,
-      .profile-side-card {
-        border-radius: 22px;
+      .hero-panel {
+        padding: 22px;
       }
 
-      .profile-identity {
-        grid-template-columns: 1fr;
-        justify-items: start;
-      }
-
-      .profile-hero-card {
-        border-radius: 24px;
-      }
-
-      .profile-ring-row {
+      .summary-card {
         align-items: flex-start;
       }
 
-      .summary-grid {
+      .stats-grid {
         grid-template-columns: 1fr;
       }
 
-      .profile-form-grid {
+      .field-grid {
         grid-template-columns: 1fr;
       }
 
-      .profile-tabs {
-        gap: 6px;
+      .hero-top {
+        flex-direction: column;
+        align-items: flex-start;
       }
 
-      .profile-tab {
-        flex: 1 1 calc(50% - 6px);
-        justify-content: center;
+      .nav-links {
+        gap: 12px;
       }
     }
 
-    @media (max-width: 520px) {
-      .profile-hero-copy h1 {
-        max-width: 10ch;
+    @media (max-width: 480px) {
+      .container {
+        width: min(calc(100% - 18px), 1180px);
       }
 
-      .profile-tag {
-        width: 100%;
-        justify-content: center;
+      .summary-card {
+        flex-direction: column;
+        align-items: flex-start;
       }
 
-      .profile-actions .btn,
-      .quick-link {
-        width: 100%;
+      .input,
+      .select {
+        padding-left: 44px;
       }
 
-      .profile-tab {
-        flex: 1 1 100%;
-      }
-
-      .avatar-wrap {
-        width: 84px;
-        height: 84px;
-      }
-
-      .avatar-btn {
-        width: 84px;
-        height: 84px;
+      .btn,
+      .profile-trigger {
+        border-radius: 16px;
       }
     }
   </style>
 </head>
-<body>
-  <a class="skip-link" href="#profile-main">Skip to content</a>
 
-  <header class="site-header is-scrolled">
-    <div class="container header-inner">
-      <a href="index.html" class="brand" aria-label="StayNest home">
-        <span class="brand-mark"><i class="fa-solid fa-house-chimney"></i></span>
-        <span class="brand-text">StayNest</span>
-      </a>
+<body data-page="profile">
+  <a class="skip-link" href="#profile-content">Skip to content</a>
 
-      <nav class="site-nav" aria-label="Primary navigation">
-        <a href="index.html">Home</a>
-        <a href="explore.html">Explore</a>
-        <a href="saved.html">Saved</a>
-        <a href="bookings.html">Bookings</a>
-        <a href="messages.html">Messages</a>
-        <a href="profile.html" class="active">Profile</a>
-      </nav>
+  <div class="page-wrap">
+    <div class="bg-orb one" aria-hidden="true"></div>
+    <div class="bg-orb two" aria-hidden="true"></div>
+    <div class="bg-orb three" aria-hidden="true"></div>
 
-      <div class="header-actions">
-        <a href="login.html" class="text-link">Sign in</a>
-        <a href="register.html" class="btn btn-primary">Create account</a>
-      </div>
+    <div class="container">
+      <header class="site-header">
+        <div class="header-bar">
+          <a href="index.html" class="brand-row" aria-label="Hostel Link Ghana home">
+            <span class="brand-mark" aria-hidden="true">
+              <img src="assets/logo.svg" alt="" />
+            </span>
+            <span class="brand-text">Hostel Link Ghana</span>
+          </a>
 
-      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
-        <i class="fa-solid fa-bars"></i>
-      </button>
-    </div>
-  </header>
+          <nav class="nav-links" aria-label="Primary navigation">
+            <a href="index.html">Home</a>
+            <a href="explore.html">Explore</a>
+            <a href="saved.html">Saved</a>
+            <a href="bookings.html">Bookings</a>
+            <a href="messages.html">Messages</a>
+            <a href="profile.html" class="active">Profile</a>
+          </nav>
 
-  <main id="profile-main">
-    <div class="container profile-shell">
-      <section class="profile-hero">
-        <div class="profile-hero-grid">
-          <div class="profile-hero-copy">
-            <div class="profile-identity">
-              <div class="avatar-wrap">
-                <div class="avatar-ring"></div>
-                <button class="avatar-btn" type="button" id="avatarBtn" aria-label="Change profile photo">
-                  <img id="avatarImg" alt="Profile photo" />
-                  <span class="avatar-fallback" id="avatarFallback">AM</span>
-                </button>
-                <label class="avatar-upload-badge" for="avatarInput" aria-label="Upload profile photo">
-                  <i class="fa-solid fa-camera"></i>
-                </label>
-                <input type="file" id="avatarInput" accept="image/*" hidden />
+          <div class="header-actions">
+            <button
+              class="profile-trigger"
+              type="button"
+              aria-label="Open profile menu"
+              aria-expanded="false"
+              aria-controls="profile-menu"
+              data-profile-trigger
+            >
+              <span class="profile-avatar" data-profile-avatar>U</span>
+              <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+            </button>
+
+            <div class="profile-dropdown" id="profile-menu" data-profile-dropdown hidden>
+              <div class="profile-dropdown-top">
+                <strong data-user-name>User Name</strong>
+                <span data-user-email>user@email.com</span>
               </div>
 
-              <div>
-                <span class="eyebrow"><i class="fa-solid fa-id-card"></i> Student profile</span>
-                <h1 id="profileName">Ama Mensah</h1>
-                <p id="profileSubtitle">Looking for a quiet, secure place close to campus and easy to manage during the semester.</p>
-                <div class="profile-tags" id="profileTags">
-                  <span class="profile-tag"><i class="fa-solid fa-graduation-cap"></i> UCC Student</span>
-                  <span class="profile-tag"><i class="fa-solid fa-shield-heart"></i> Prefers secure stays</span>
-                  <span class="profile-tag"><i class="fa-solid fa-wifi"></i> Needs Wi-Fi</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="profile-hero-card">
-            <div class="profile-ring-row">
-              <div class="profile-ring" id="progressRing" style="--p: 0.84;">
-                <span id="progressText">84%</span>
+              <div class="profile-dropdown-links">
+                <a href="bookings.html">
+                  <i class="fa-regular fa-calendar-check"></i>
+                  My bookings
+                </a>
+                <a href="saved.html">
+                  <i class="fa-regular fa-heart"></i>
+                  Saved hostels
+                </a>
               </div>
 
-              <div class="profile-ring-copy">
-                <strong>Profile completion</strong>
-                <p>Fill out the details once, then use them across bookings, messages, and saved hostel comparisons.</p>
-              </div>
-            </div>
-
-            <div class="profile-progress">
-              <div class="progress-line">
-                <span id="progressLabel">Almost ready</span>
-                <span id="progressCount">7 / 8 complete</span>
-              </div>
-              <div class="progress-track">
-                <div class="progress-fill" id="progressFill" style="--fill: 84%;"></div>
-              </div>
+              <button type="button" class="profile-logout" data-logout-btn>
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Log out
+              </button>
             </div>
           </div>
         </div>
-      </section>
+      </header>
 
-      <section class="profile-toolbar">
-        <div class="profile-tabs" id="profileTabs" role="tablist" aria-label="Profile sections">
-          <button class="profile-tab active" type="button" data-panel="overview" role="tab" aria-selected="true">Overview</button>
-          <button class="profile-tab" type="button" data-panel="account" role="tab" aria-selected="false">Account</button>
-          <button class="profile-tab" type="button" data-panel="preferences" role="tab" aria-selected="false">Preferences</button>
-          <button class="profile-tab" type="button" data-panel="security" role="tab" aria-selected="false">Security</button>
-        </div>
-
-        <div class="profile-actions">
-          <button class="btn btn-secondary" type="button" id="exportBtn">Copy profile summary</button>
-          <a href="explore.html" class="btn btn-primary">Continue browsing</a>
-        </div>
-      </section>
-
-      <section class="profile-layout">
-        <div class="profile-main">
-          <section class="profile-grid hidden-panel active" data-panel-content="overview">
-            <div class="section-card reveal-item">
-              <div class="section-head">
-                <div>
-                  <h2>Your dashboard at a glance</h2>
-                  <p>See how your shortlist, conversations, and bookings are shaping up.</p>
-                </div>
-                <span class="eyebrow" id="statusBadge"><i class="fa-solid fa-circle-check"></i> On track</span>
-              </div>
-
-              <div class="summary-grid">
-                <article class="summary-card">
-                  <div class="icn"><i class="fa-solid fa-bookmark"></i></div>
-                  <strong id="savedCount">0</strong>
-                  <span>Saved hostels you are considering</span>
-                </article>
-
-                <article class="summary-card">
-                  <div class="icn"><i class="fa-solid fa-message"></i></div>
-                  <strong id="unreadCount">0</strong>
-                  <span>Unread hostel messages waiting</span>
-                </article>
-
-                <article class="summary-card">
-                  <div class="icn"><i class="fa-solid fa-calendar-check"></i></div>
-                  <strong id="bookingCount">0</strong>
-                  <span>Bookings in your accommodation flow</span>
-                </article>
-
-                <article class="summary-card">
-                  <div class="icn"><i class="fa-solid fa-bolt"></i></div>
-                  <strong id="profileScore">84%</strong>
-                  <span>Profile completeness score</span>
-                </article>
-              </div>
+      <main id="profile-content">
+        <section class="hero-panel">
+          <div class="hero-top">
+            <div>
+              <span class="eyebrow"><i class="fa-solid fa-shield-heart"></i> Account overview</span>
+              <h1 class="hero-title">Manage your profile in one place.</h1>
+              <p class="hero-subtitle">
+                Keep your contact details, student info, and booking preferences ready whenever you return.
+              </p>
             </div>
 
-            <div class="split-grid">
-              <article class="section-card reveal-item">
-                <div class="section-head">
-                  <div>
-                    <h2>Saved shortlist snapshot</h2>
-                    <p>A quick look at the places you are already considering.</p>
-                  </div>
-                  <a href="saved.html" class="text-link">Open saved</a>
-                </div>
-                <div id="savedPreview" class="saved-preview"></div>
-                <p class="profile-empty-note" id="savedEmptyNote" hidden>No saved hostels yet. Once you favorite a hostel, it will appear here.</p>
-              </article>
+            <div class="hero-actions">
+              <a href="explore.html" class="btn btn-ghost"><i class="fa-solid fa-magnifying-glass"></i> Browse hostels</a>
+              <button type="button" class="btn btn-primary" data-logout-btn><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
+            </div>
+          </div>
 
-              <article class="section-card reveal-item">
-                <div class="section-head">
-                  <div>
-                    <h2>Recent activity</h2>
-                    <p>Small updates that keep your profile feeling alive.</p>
-                  </div>
-                  <button class="btn btn-secondary" type="button" id="clearActivityBtn">Clear activity</button>
-                </div>
-                <div id="activityList" class="activity-list"></div>
-              </article>
+          <div class="summary-card">
+            <div class="summary-avatar" data-profile-avatar-large>U</div>
+
+            <div class="summary-meta">
+              <h2 data-profile-name>User Name</h2>
+              <p data-profile-email>user@email.com</p>
+              <div class="status-pill"><i class="fa-solid fa-circle-check"></i> Signed in</div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-box">
+              <strong data-stat-saved>0</strong>
+              <span>saved hostels</span>
+            </div>
+            <div class="stat-box">
+              <strong data-stat-bookings>0</strong>
+              <span>booking requests</span>
+            </div>
+            <div class="stat-box">
+              <strong data-stat-messages>0</strong>
+              <span>open conversations</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="content-grid">
+          <section class="panel">
+            <div class="panel-head">
+              <h2 class="section-title">Profile details</h2>
             </div>
 
-            <div class="section-card reveal-item">
-              <div class="section-head">
-                <div>
-                  <h2>Accommodation snapshot</h2>
-                  <p>Useful numbers from the rest of your StayNest journey.</p>
-                </div>
-              </div>
-              <div class="summary-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
-                <article class="summary-card">
-                  <div class="icn"><i class="fa-solid fa-location-dot"></i></div>
-                  <strong id="campusDistance">0.7 km</strong>
-                  <span>Closest shortlisted hostel distance</span>
-                </article>
-                <article class="summary-card">
-                  <div class="icn"><i class="fa-solid fa-star"></i></div>
-                  <strong id="topRating">4.8</strong>
-                  <span>Best saved rating so far</span>
-                </article>
-                <article class="summary-card">
-                  <div class="icn"><i class="fa-solid fa-wallet"></i></div>
-                  <strong id="budgetRange">GH₵ 2,950 - 7,100</strong>
-                  <span>Current budget range</span>
-                </article>
-              </div>
-            </div>
-          </section>
-
-          <section class="profile-grid hidden-panel" data-panel-content="account">
-            <div class="section-card reveal-item">
-              <div class="section-head">
-                <div>
-                  <h2>Edit your details</h2>
-                  <p>Update the information you want attached to your StayNest profile.</p>
-                </div>
-              </div>
-
-              <div class="upload-strip">
-                <div>
-                  <strong>Profile photo</strong>
-                  <span>Upload an image or keep the initials avatar.</span>
-                </div>
-                <label class="btn btn-secondary" for="avatarInput">Change photo</label>
-              </div>
-
-              <form id="profileForm">
-                <div class="profile-form-grid">
-                  <div class="fg">
+            <div class="panel-body">
+              <form id="profileForm" class="auth-form">
+                <div class="field-grid">
+                  <div class="field">
                     <label for="fullName">Full name</label>
-                    <input id="fullName" name="fullName" type="text" placeholder="Your full name" />
+                    <div class="input-wrap">
+                      <i class="fa-solid fa-id-card input-icon"></i>
+                      <input class="input" id="fullName" type="text" placeholder="Your full name" />
+                    </div>
                   </div>
 
-                  <div class="fg">
+                  <div class="field">
                     <label for="email">Email address</label>
-                    <input id="email" name="email" type="email" placeholder="name@ucc.edu.gh" />
+                    <div class="input-wrap">
+                      <i class="fa-solid fa-envelope input-icon"></i>
+                      <input class="input" id="email" type="email" placeholder="you@example.com" disabled />
+                    </div>
                   </div>
+                </div>
 
-                  <div class="fg">
+                <div class="field-grid">
+                  <div class="field">
                     <label for="phone">Phone number</label>
-                    <input id="phone" name="phone" type="tel" placeholder="+233..." />
+                    <div class="input-wrap">
+                      <i class="fa-solid fa-phone input-icon"></i>
+                      <input class="input" id="phone" type="tel" placeholder="0xx xxx xxxx" />
+                    </div>
                   </div>
 
-                  <div class="fg">
+                  <div class="field">
                     <label for="studentId">Student ID</label>
-                    <input id="studentId" name="studentId" type="text" placeholder="UCC/24/0000" />
+                    <div class="input-wrap">
+                      <i class="fa-solid fa-hashtag input-icon"></i>
+                      <input class="input" id="studentId" type="text" placeholder="Student ID" />
+                    </div>
                   </div>
+                </div>
 
-                  <div class="fg">
+                <div class="field-grid">
+                  <div class="field">
                     <label for="institution">Institution</label>
-                    <input id="institution" name="institution" type="text" placeholder="University of Cape Coast" />
+                    <div class="input-wrap">
+                      <i class="fa-solid fa-building-columns input-icon"></i>
+                      <input class="input" id="institution" type="text" placeholder="Your school or institution" />
+                    </div>
                   </div>
 
-                  <div class="fg">
+                  <div class="field">
                     <label for="department">Department</label>
-                    <input id="department" name="department" type="text" placeholder="Computer Science" />
+                    <div class="input-wrap">
+                      <i class="fa-solid fa-book-open input-icon"></i>
+                      <input class="input" id="department" type="text" placeholder="Your department" />
+                    </div>
                   </div>
+                </div>
 
-                  <div class="fg">
+                <div class="field-grid">
+                  <div class="field">
                     <label for="year">Level / Year</label>
-                    <select id="year" name="year">
-                      <option value="Level 100">Level 100</option>
-                      <option value="Level 200">Level 200</option>
-                      <option value="Level 300">Level 300</option>
-                      <option value="Level 400">Level 400</option>
-                      <option value="Postgraduate">Postgraduate</option>
-                    </select>
+                    <div class="input-wrap">
+                      <i class="fa-solid fa-graduation-cap input-icon"></i>
+                      <select class="select" id="year">
+                        <option value="">Select your level</option>
+                        <option value="Level 100">Level 100</option>
+                        <option value="Level 200">Level 200</option>
+                        <option value="Level 300">Level 300</option>
+                        <option value="Level 400">Level 400</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
                   </div>
 
-                  <div class="fg">
-                    <label for="location">Location</label>
-                    <input id="location" name="location" type="text" placeholder="Cape Coast" />
-                  </div>
-
-                  <div class="fg full">
-                    <label for="bio">About you</label>
-                    <textarea id="bio" name="bio" placeholder="Write a short profile bio..."></textarea>
+                  <div class="field">
+                    <label for="photoURL">Profile photo link</label>
+                    <div class="input-wrap">
+                      <i class="fa-solid fa-image input-icon"></i>
+                      <input class="input" id="photoURL" type="url" placeholder="Optional image URL" />
+                    </div>
                   </div>
                 </div>
 
-                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:18px;">
-                  <button class="btn btn-primary" type="submit">Save changes</button>
-                  <button class="btn btn-outline" type="button" id="resetProfileBtn">Reset demo data</button>
+                <div class="field">
+                  <label for="bio">Short bio</label>
+                  <textarea class="textarea" id="bio" placeholder="Write a short note about what you are looking for in a hostel..."></textarea>
                 </div>
-                <p class="helper-text" style="margin-top:12px;">Changes are stored in this browser only, which is perfect for a prototype.</p>
+
+                <div class="save-row">
+                  <button type="submit" class="btn btn-primary" id="saveBtn">
+                    <i class="fa-solid fa-floppy-disk"></i> Save profile
+                  </button>
+                  <span class="hint">Changes are saved to your account profile and can also sync to Firebase if enabled.</span>
+                </div>
+
+                <div class="message" id="formMessage" aria-live="polite"></div>
+
+                <div class="notes-box">
+                  <strong>What stays here</strong>
+                  <p>
+                    These profile details are used across the site so your account feels connected, from bookings to saved hostels.
+                  </p>
+                </div>
               </form>
             </div>
           </section>
 
-          <section class="profile-grid hidden-panel" data-panel-content="preferences">
-            <div class="section-card reveal-item">
-              <div class="section-head">
+          <aside class="info-stack">
+            <section class="info-card">
+              <div class="info-card-top">
+                <div class="icon-bubble"><i class="fa-solid fa-user-shield"></i></div>
                 <div>
-                  <h2>Notifications</h2>
-                  <p>Choose how StayNest should keep you updated.</p>
+                  <h3>Account status</h3>
+                  <p>Protected by your shared auth flow.</p>
                 </div>
               </div>
+              <p>
+                Signed-in users can view and update this page. Signed-out visitors are redirected automatically.
+              </p>
+            </section>
 
-              <div class="preferences-grid">
-                <div class="toggle-card">
-                  <div>
-                    <strong>Email updates</strong>
-                    <p>Receive booking confirmations and accommodation reminders.</p>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="emailUpdates" />
-                    <span class="slider"></span>
-                  </label>
-                </div>
-
-                <div class="toggle-card">
-                  <div>
-                    <strong>Booking reminders</strong>
-                    <p>Get notified before a move-in date or payment deadline.</p>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="bookingReminders" />
-                    <span class="slider"></span>
-                  </label>
-                </div>
-
-                <div class="toggle-card">
-                  <div>
-                    <strong>Saved hostel alerts</strong>
-                    <p>Hear when a saved place changes price or availability.</p>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="savedAlerts" />
-                    <span class="slider"></span>
-                  </label>
-                </div>
-
-                <div class="toggle-card">
-                  <div>
-                    <strong>Quiet hours</strong>
-                    <p>Keep notifications calm during study time.</p>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="quietHours" />
-                    <span class="slider"></span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="section-card reveal-item">
-              <div class="section-head">
+            <section class="info-card">
+              <div class="info-card-top">
+                <div class="icon-bubble"><i class="fa-solid fa-calendar-check"></i></div>
                 <div>
-                  <h2>Neighborhood preferences</h2>
-                  <p>Tag the areas you are most likely to check first.</p>
+                  <h3>Recent activity</h3>
+                  <p>Keep track of what you did last.</p>
                 </div>
               </div>
 
-              <div class="chip-grid" id="areaChips">
-                <button class="filter-chip active" type="button" data-area="Ayensudo">Ayensudo</button>
-                <button class="filter-chip active" type="button" data-area="UCC Road">UCC Road</button>
-                <button class="filter-chip" type="button" data-area="Anomabo">Anomabo</button>
-                <button class="filter-chip" type="button" data-area="Bakaano">Bakaano</button>
-                <button class="filter-chip" type="button" data-area="Kotokuraba">Kotokuraba</button>
-              </div>
-              <p class="helper-text" style="margin-top:12px;">These are saved as preferences so your shortlist can feel more personal.</p>
-            </div>
-          </section>
+              <div class="activity-list">
+                <div class="activity-item">
+                  <div>
+                    <strong>Profile updated</strong>
+                    <span>Update your contact details and student info anytime.</span>
+                  </div>
+                  <em>Now</em>
+                </div>
 
-          <section class="profile-grid hidden-panel" data-panel-content="security">
-            <div class="section-card reveal-item">
-              <div class="section-head">
+                <div class="activity-item">
+                  <div>
+                    <strong>Saved hostels</strong>
+                    <span>Shortlist the rooms and locations you like most.</span>
+                  </div>
+                  <em>0</em>
+                </div>
+
+                <div class="activity-item">
+                  <div>
+                    <strong>Booking requests</strong>
+                    <span>Submit a room request once the booking page is connected.</span>
+                  </div>
+                  <em>0</em>
+                </div>
+              </div>
+            </section>
+
+            <section class="info-card">
+              <div class="info-card-top">
+                <div class="icon-bubble"><i class="fa-solid fa-heart"></i></div>
                 <div>
-                  <h2>Security & privacy</h2>
-                  <p>Lightweight protections for a prototype account.</p>
+                  <h3>Saved preferences</h3>
+                  <p>Useful for faster hostel choices.</p>
                 </div>
               </div>
+              <p>
+                Your profile can hold the details that make booking easier, including your level, institution, and contact info.
+              </p>
+            </section>
 
-              <div class="security-grid">
-                <div class="security-card">
-                  <div class="security-row">
-                    <strong>Two-step login</strong>
-                    <label class="switch">
-                      <input type="checkbox" id="twoFactor" />
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-                  <span class="helper-text">Adds a little extra protection before sign in.</span>
-                </div>
-
-                <div class="security-card">
-                  <div class="security-row">
-                    <strong>Profile visibility</strong>
-                    <label class="switch">
-                      <input type="checkbox" id="privateMode" />
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-                  <span class="helper-text">Keep your profile minimal and private from the app side.</span>
-                </div>
-
-                <div class="session-list">
-                  <div class="session-item">
-                    <div>
-                      <strong>Current session</strong>
-                      <span id="currentSessionText">This browser • Active now</span>
-                    </div>
-                    <span class="eyebrow"><i class="fa-solid fa-laptop"></i> Active</span>
-                  </div>
-
-                  <div class="session-item">
-                    <div>
-                      <strong>Last profile update</strong>
-                      <span id="lastUpdateText">Just now</span>
-                    </div>
-                    <span class="eyebrow"><i class="fa-solid fa-clock-rotate-left"></i> Local</span>
-                  </div>
-                </div>
-
-                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
-                  <button class="btn btn-secondary" type="button" id="logoutBtn">Log out all sessions</button>
-                  <button class="btn btn-outline" type="button" id="privacyBtn">Review privacy note</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="section-card reveal-item">
-              <div class="section-head">
+            <section class="info-card">
+              <div class="info-card-top">
+                <div class="icon-bubble"><i class="fa-solid fa-lock"></i></div>
                 <div>
-                  <h2>Connected account snapshot</h2>
-                  <p>Quick facts pulled from the profile you are editing here.</p>
+                  <h3>Security</h3>
+                  <p>Keep your account safe and up to date.</p>
                 </div>
               </div>
-
-              <div class="summary-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-                <article class="summary-card">
-                  <div class="icn"><i class="fa-solid fa-envelope"></i></div>
-                  <strong id="accountEmail">name@ucc.edu.gh</strong>
-                  <span>Primary contact email</span>
-                </article>
-                <article class="summary-card">
-                  <div class="icn"><i class="fa-solid fa-phone"></i></div>
-                  <strong id="accountPhone">+233...</strong>
-                  <span>Primary contact phone</span>
-                </article>
-              </div>
-            </div>
-          </section>
+              <p>
+                Use the log out button when you are done on a shared device.
+              </p>
+            </section>
+          </aside>
         </div>
 
-        <aside class="profile-side">
-          <section class="profile-side-card passport-card reveal-item">
-            <div class="panel-title">Student passport</div>
-            <div class="passport-header">
-              <img id="passportAvatar" alt="Profile avatar" />
-              <div>
-                <strong id="passportName">Ama Mensah</strong>
-                <span id="passportLabel">UCC • Level 300</span>
-              </div>
-            </div>
-
-            <div class="passport-meta">
-              <div class="passport-row">
-                <span>Department</span>
-                <strong id="passportDept">Computer Science</strong>
-              </div>
-              <div class="passport-row">
-                <span>Residence area</span>
-                <strong id="passportArea">Cape Coast</strong>
-              </div>
-              <div class="passport-row">
-                <span>Saved hostels</span>
-                <strong id="passportSaved">0</strong>
-              </div>
-            </div>
-          </section>
-
-          <section class="profile-side-card reveal-item">
-            <div class="panel-title">Quick links</div>
-            <div class="quick-links">
-              <a class="quick-link" href="explore.html">
-                <span><i class="fa-solid fa-compass"></i> Explore hostels</span>
-                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              </a>
-              <a class="quick-link" href="saved.html">
-                <span><i class="fa-solid fa-bookmark"></i> Open saved</span>
-                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              </a>
-              <a class="quick-link" href="bookings.html">
-                <span><i class="fa-solid fa-calendar-check"></i> View bookings</span>
-                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              </a>
-              <a class="quick-link" href="messages.html">
-                <span><i class="fa-solid fa-comment-dots"></i> Read messages</span>
-                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              </a>
-            </div>
-          </section>
-
-          <section class="profile-side-card reveal-item">
-            <div class="panel-title">Support</div>
-            <div class="support-card">
-              <h3>Need a hand?</h3>
-              <p>Use the message hub to ask hostel owners about availability, or browse the details page for room-level information.</p>
-              <div style="display:grid; gap:10px;">
-                <a href="messages.html" class="btn btn-primary btn-full">Message hostel</a>
-                <a href="mailto:support@staynest.com" class="btn btn-outline btn-full">Contact support</a>
-              </div>
-            </div>
-          </section>
-        </aside>
-      </section>
+        <div class="footer-row">
+          <span>Hostel Link Ghana profile dashboard</span>
+          <a href="index.html">Back to home</a>
+        </div>
+      </main>
     </div>
-  </main>
+  </div>
 
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="auth.js" defer></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const PROFILE_KEY = "staynest_profile_v1";
-      const ACTIVITY_KEY = "staynest_profile_activity_v1";
-      const SETTINGS_KEY = "staynest_profile_settings_v1";
-      const MESSAGES_KEY = "staynest_messages_state";
-      const SAVED_KEY = "staynest_saved_hostels";
-      const BOOKING_KEY = "staynest_bookings_state_v1";
 
-      const HOSTEL_LIBRARY = [
-        { id: "sunrise-court-hostel", name: "Sunrise Court Hostel", area: "Ayensudo", location: "Ayensudo, Cape Coast", rating: 4.8, price: 4600, distance: 0.7, image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80" },
-        { id: "campus-view-lodge", name: "Campus View Lodge", area: "UCC Road", location: "UCC Road, Cape Coast", rating: 4.7, price: 5200, distance: 0.4, image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80" },
-        { id: "blue-horizon-hostel", name: "Blue Horizon Hostel", area: "Anomabo", location: "Anomabo, Cape Coast", rating: 4.6, price: 3900, distance: 1.3, image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80" },
-        { id: "harbor-ridge-suites", name: "Harbor Ridge Suites", area: "Ayensudo", location: "Ayensudo, Cape Coast", rating: 4.9, price: 7100, distance: 0.9, image: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1200&q=80" },
-        { id: "palmside-lodge", name: "Palmside Lodge", area: "Bakaano", location: "Bakaano, Cape Coast", rating: 4.5, price: 4300, distance: 1.1, image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80" },
-        { id: "city-gate-hostel", name: "City Gate Hostel", area: "Kotokuraba", location: "Kotokuraba, Cape Coast", rating: 4.4, price: 3550, distance: 1.6, image: "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1200&q=80" },
-        { id: "meridian-court", name: "Meridian Court", area: "UCC Road", location: "UCC Road, Cape Coast", rating: 4.6, price: 4800, distance: 0.8, image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80" },
-        { id: "bridge-house-hostel", name: "Bridge House Hostel", area: "Kotokuraba", location: "Kotokuraba, Cape Coast", rating: 4.3, price: 2950, distance: 1.8, image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80" },
-        { id: "oak-residence", name: "Oak Residence", area: "Ayensudo", location: "Ayensudo, Cape Coast", rating: 4.8, price: 6100, distance: 0.6, image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80" },
-        { id: "seaview-hostel", name: "Seaview Hostel", area: "Anomabo", location: "Anomabo, Cape Coast", rating: 4.5, price: 4450, distance: 1.0, image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80" },
-        { id: "greenline-suites", name: "Greenline Suites", area: "UCC Road", location: "UCC Road, Cape Coast", rating: 4.7, price: 5150, distance: 0.5, image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80" },
-        { id: "harbour-nest-hostel", name: "Harbour Nest Hostel", area: "Bakaano", location: "Bakaano, Cape Coast", rating: 4.2, price: 3400, distance: 1.9, image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80" },
-        { id: "crescent-house", name: "Crescent House", area: "Ayensudo", location: "Ayensudo, Cape Coast", rating: 4.6, price: 5800, distance: 0.8, image: "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1200&q=80" },
-      ];
+const firebaseConfig = {
+    apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
+    authDomain: "vitra-ai-712ea.firebaseapp.com",
+    projectId: "vitra-ai-712ea",
+    storageBucket: "vitra-ai-712ea.appspot.com",
+    messagingSenderId: "306868103753",
+    appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
 
-      const BOOKING_LIBRARY = [
-        { status: "active", price: 5200 },
-        { status: "active", price: 4800 },
-        { status: "pending", price: 7100 },
-        { status: "previous", price: 3900 },
-        { status: "previous", price: 3550 },
-        { status: "previous", price: 6100 },
-      ];
 
-      const DEFAULT_PROFILE = {
-        fullName: "Ama Mensah",
-        email: "ama.mensah@ucc.edu.gh",
-        phone: "+233 24 555 0184",
-        studentId: "UCC/24/0418",
-        institution: "University of Cape Coast",
-        department: "Computer Science",
-        year: "Level 300",
-        location: "Cape Coast",
-        bio: "Looking for a quiet, secure place close to campus and easy to manage during the semester.",
-        avatar: "",
-      };
+      const form = document.getElementById("profileForm");
+      const fullName = document.getElementById("fullName");
+      const email = document.getElementById("email");
+      const phone = document.getElementById("phone");
+      const studentId = document.getElementById("studentId");
+      const institution = document.getElementById("institution");
+      const department = document.getElementById("department");
+      const year = document.getElementById("year");
+      const photoURL = document.getElementById("photoURL");
+      const bio = document.getElementById("bio");
+      const formMessage = document.getElementById("formMessage");
+      const toast = document.getElementById("toast");
+      const saveBtn = document.getElementById("saveBtn");
 
-      const DEFAULT_SETTINGS = {
-        emailUpdates: true,
-        bookingReminders: true,
-        savedAlerts: true,
-        quietHours: false,
-        twoFactor: true,
-        privateMode: false,
-        areas: ["Ayensudo", "UCC Road"],
-      };
+      const profileName = document.querySelector("[data-profile-name]");
+      const profileEmail = document.querySelector("[data-profile-email]");
+      const avatarSmall = document.querySelector("[data-profile-avatar]");
+      const avatarLarge = document.querySelector("[data-profile-avatar-large]");
+      const userNameEls = document.querySelectorAll("[data-user-name]");
+      const userEmailEls = document.querySelectorAll("[data-user-email]");
+      const statSaved = document.querySelector("[data-stat-saved]");
+      const statBookings = document.querySelector("[data-stat-bookings]");
+      const statMessages = document.querySelector("[data-stat-messages]");
 
-      const el = {
-        header: document.querySelector(".site-header"),
-        menuToggle: document.querySelector(".menu-toggle"),
-        siteNav: document.querySelector(".site-nav"),
-        headerActions: document.querySelector(".header-actions"),
-        avatarBtn: document.getElementById("avatarBtn"),
-        avatarImg: document.getElementById("avatarImg"),
-        avatarFallback: document.getElementById("avatarFallback"),
-        avatarInput: document.getElementById("avatarInput"),
-        profileName: document.getElementById("profileName"),
-        profileSubtitle: document.getElementById("profileSubtitle"),
-        profileTags: document.getElementById("profileTags"),
-        profileRing: document.getElementById("progressRing"),
-        progressText: document.getElementById("progressText"),
-        progressLabel: document.getElementById("progressLabel"),
-        progressCount: document.getElementById("progressCount"),
-        progressFill: document.getElementById("progressFill"),
-        statusBadge: document.getElementById("statusBadge"),
-        savedCount: document.getElementById("savedCount"),
-        unreadCount: document.getElementById("unreadCount"),
-        bookingCount: document.getElementById("bookingCount"),
-        profileScore: document.getElementById("profileScore"),
-        savedPreview: document.getElementById("savedPreview"),
-        savedEmptyNote: document.getElementById("savedEmptyNote"),
-        activityList: document.getElementById("activityList"),
-        clearActivityBtn: document.getElementById("clearActivityBtn"),
-        campusDistance: document.getElementById("campusDistance"),
-        topRating: document.getElementById("topRating"),
-        budgetRange: document.getElementById("budgetRange"),
-        profileForm: document.getElementById("profileForm"),
-        fullName: document.getElementById("fullName"),
-        email: document.getElementById("email"),
-        phone: document.getElementById("phone"),
-        studentId: document.getElementById("studentId"),
-        institution: document.getElementById("institution"),
-        department: document.getElementById("department"),
-        year: document.getElementById("year"),
-        location: document.getElementById("location"),
-        bio: document.getElementById("bio"),
-        resetProfileBtn: document.getElementById("resetProfileBtn"),
-        exportBtn: document.getElementById("exportBtn"),
-        emailUpdates: document.getElementById("emailUpdates"),
-        bookingReminders: document.getElementById("bookingReminders"),
-        savedAlerts: document.getElementById("savedAlerts"),
-        quietHours: document.getElementById("quietHours"),
-        twoFactor: document.getElementById("twoFactor"),
-        privateMode: document.getElementById("privateMode"),
-        areaChips: Array.from(document.querySelectorAll(".filter-chip")),
-        profileTabs: Array.from(document.querySelectorAll(".profile-tab")),
-        panelContents: Array.from(document.querySelectorAll("[data-panel-content]")),
-        passportAvatar: document.getElementById("passportAvatar"),
-        passportName: document.getElementById("passportName"),
-        passportLabel: document.getElementById("passportLabel"),
-        passportDept: document.getElementById("passportDept"),
-        passportArea: document.getElementById("passportArea"),
-        passportSaved: document.getElementById("passportSaved"),
-        accountEmail: document.getElementById("accountEmail"),
-        accountPhone: document.getElementById("accountPhone"),
-        currentSessionText: document.getElementById("currentSessionText"),
-        lastUpdateText: document.getElementById("lastUpdateText"),
-        logoutBtn: document.getElementById("logoutBtn"),
-        privacyBtn: document.getElementById("privacyBtn"),
-      };
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      const readJSON = (key, fallback) => {
+      function showMessage(text, type = "success") {
+        formMessage.textContent = text;
+        formMessage.className = `message show ${type}`;
+      }
+
+      function showToast(text) {
+        toast.textContent = text;
+        toast.classList.add("show");
+        clearTimeout(window.__hostelLinkToast);
+        window.__hostelLinkToast = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 2200);
+      }
+
+      function getStoredProfile() {
         try {
-          const value = JSON.parse(localStorage.getItem(key) || "null");
-          return value ?? fallback;
+          return JSON.parse(localStorage.getItem("staynest_profile") || "{}");
         } catch {
-          return fallback;
+          return {};
         }
-      };
+      }
 
-      const writeJSON = (key, value) => {
-        localStorage.setItem(key, JSON.stringify(value));
-      };
+      function saveStoredProfile(profile) {
+        try {
+          localStorage.setItem("staynest_profile", JSON.stringify(profile));
+        } catch {
+          // ignore storage issues
+        }
+      }
 
-      const profile = { ...DEFAULT_PROFILE, ...readJSON(PROFILE_KEY, {}) };
-      const settings = { ...DEFAULT_SETTINGS, ...readJSON(SETTINGS_KEY, {}) };
+      function initials(value) {
+        if (!value) return "U";
+        const clean = String(value).trim();
+        const parts = clean.replace(/[@._-]+/g, " ").split(/\s+/).filter(Boolean);
+        if (!parts.length) return "U";
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
 
-      const activitySeed = readJSON(ACTIVITY_KEY, []);
-      const activityLog = Array.isArray(activitySeed) ? activitySeed : [];
+      function setAvatar(imageUrl, fallbackText) {
+        const txt = fallbackText || "U";
+        const avatars = [avatarSmall, avatarLarge];
+        avatars.forEach((avatar) => {
+          if (!avatar) return;
 
-      const messagesState = readJSON(MESSAGES_KEY, {});
-      const savedList = Array.isArray(readJSON(SAVED_KEY, [])) ? readJSON(SAVED_KEY, []) : [];
-      const bookingsState = readJSON(BOOKING_KEY, null);
+          avatar.innerHTML = "";
 
-      const normalizeText = (value) => String(value || "").trim();
-      const initials = (name) => {
-        const parts = normalizeText(name).split(/\s+/).filter(Boolean);
-        return (parts[0]?.[0] || "S") + (parts[1]?.[0] || "N");
-      };
-
-      const formatMoney = (value) =>
-        new Intl.NumberFormat("en-GH", {
-          style: "currency",
-          currency: "GHS",
-          maximumFractionDigits: 0,
-        }).format(Number(value)).replace("GHS", "GH₵");
-
-      const addActivity = (icon, title, detail) => {
-        activityLog.unshift({
-          icon,
-          title,
-          detail,
-          time: new Date().toISOString(),
+          if (imageUrl) {
+            const img = document.createElement("img");
+            img.src = imageUrl;
+            img.alt = "";
+            avatar.appendChild(img);
+          } else {
+            avatar.textContent = txt;
+          }
         });
-        while (activityLog.length > 8) activityLog.pop();
-        writeJSON(ACTIVITY_KEY, activityLog);
-      };
+      }
 
-      const getSavedHostels = () => {
-        const results = [];
-        const seen = new Set();
+      function populate(profile, user) {
+        const name = profile.fullName || user?.displayName || user?.email?.split("@")?.[0] || "User";
+        const mail = user?.email || profile.email || "";
 
-        savedList.forEach((item) => {
-          const resolved = HOSTEL_LIBRARY.find(
-            (hostel) =>
-              hostel.id === item ||
-              hostel.name.toLowerCase() === String(item).toLowerCase()
-          );
+        fullName.value = profile.fullName || "";
+        email.value = mail;
+        phone.value = profile.phone || "";
+        studentId.value = profile.studentId || "";
+        institution.value = profile.institution || "";
+        department.value = profile.department || "";
+        year.value = profile.year || "";
+        photoURL.value = profile.photoURL || "";
+        bio.value = profile.bio || "";
 
-          const fallback = {
-            id: `saved-${String(item).toLowerCase().replace(/\s+/g, "-")}`,
-            name: String(item),
-            area: "Cape Coast",
-            location: "Cape Coast",
-            rating: 4.4,
-            price: 4500,
-            distance: 1.1,
-            image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+        profileName.textContent = name;
+        profileEmail.textContent = mail;
+
+        userNameEls.forEach((el) => (el.textContent = name));
+        userEmailEls.forEach((el) => (el.textContent = mail));
+
+        setAvatar(profile.photoURL || user?.photoURL || "", initials(name));
+        statSaved.textContent = String(profile.savedCount ?? 0);
+        statBookings.textContent = String(profile.bookingCount ?? 0);
+        statMessages.textContent = String(profile.messageCount ?? 0);
+      }
+
+      function mergeProfileFromInputs(user) {
+        const existing = getStoredProfile();
+        return {
+          ...existing,
+          fullName: fullName.value.trim(),
+          email: email.value.trim() || user?.email || "",
+          phone: phone.value.trim(),
+          studentId: studentId.value.trim(),
+          institution: institution.value.trim(),
+          department: department.value.trim(),
+          year: year.value,
+          photoURL: photoURL.value.trim(),
+          bio: bio.value.trim(),
+          uid: user?.uid || existing.uid || "",
+          savedCount: existing.savedCount ?? 0,
+          bookingCount: existing.bookingCount ?? 0,
+          messageCount: existing.messageCount ?? 0,
+        };
+      }
+
+      function friendlyError(error) {
+        return error?.message || "Could not save your profile. Please try again.";
+      }
+
+      if (auth) {
+        auth.onAuthStateChanged(async (user) => {
+          if (!user) return;
+
+          const stored = getStoredProfile();
+          const merged = {
+            ...stored,
+            email: user.email || stored.email || "",
+            fullName: stored.fullName || user.displayName || user.email?.split("@")?.[0] || "User",
+            photoURL: stored.photoURL || user.photoURL || "",
           };
 
-          const hostel = resolved || fallback;
-          if (!seen.has(hostel.name)) {
-            seen.add(hostel.name);
-            results.push(hostel);
+          saveStoredProfile(merged);
+          populate(merged, user);
+        });
+      } else {
+        const stored = getStoredProfile();
+        populate(stored, null);
+      }
+
+      document.querySelectorAll("[data-logout-btn]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          try {
+            if (auth) {
+              await auth.signOut();
+            }
+          } finally {
+            localStorage.removeItem("staynest_profile");
+            window.location.href = "index.html";
           }
         });
+      });
 
-        return results;
-      };
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-      const getUnreadMessagesCount = () => {
-        const convs = messagesState.conversations || {};
-        return Object.values(convs).reduce((sum, conversation) => {
-          const unread = Number(conversation?.unread || 0);
-          return sum + unread;
-        }, 0);
-      };
+        const currentUser = auth?.currentUser || null;
 
-      const getBookingCounts = () => {
-        if (Array.isArray(bookingsState?.bookings)) {
-          const active = bookingsState.bookings.filter((b) => b.status === "active").length;
-          const pending = bookingsState.bookings.filter((b) => b.status === "pending").length;
-          const previous = bookingsState.bookings.filter((b) => b.status === "previous").length;
-          return { active, pending, previous, total: bookingsState.bookings.length };
-        }
-
-        return {
-          active: BOOKING_LIBRARY.filter((item) => item.status === "active").length,
-          pending: BOOKING_LIBRARY.filter((item) => item.status === "pending").length,
-          previous: BOOKING_LIBRARY.filter((item) => item.status === "previous").length,
-          total: BOOKING_LIBRARY.length,
-        };
-      };
-
-      const computeCompletion = () => {
-        const checks = [
-          profile.fullName,
-          profile.email,
-          profile.phone,
-          profile.studentId,
-          profile.institution,
-          profile.department,
-          profile.bio,
-          profile.avatar,
-        ].filter(Boolean).length;
-
-        const total = 8;
-        const pct = Math.round((checks / total) * 100);
-        return { pct, checks, total };
-      };
-
-      const computeBudgetRange = (hostels) => {
-        if (!hostels.length) return "GH₵ 0 - 0";
-        const prices = hostels.map((h) => Number(h.price)).filter(Number.isFinite);
-        const min = Math.min(...prices);
-        const max = Math.max(...prices);
-        return `${formatMoney(min)} - ${formatMoney(max)}`;
-      };
-
-      const computeTopRating = (hostels) => {
-        if (!hostels.length) return "0.0";
-        return Math.max(...hostels.map((h) => Number(h.rating) || 0)).toFixed(1);
-      };
-
-      const getClosestDistance = (hostels) => {
-        if (!hostels.length) return "0.0 km";
-        return `${Math.min(...hostels.map((h) => Number(h.distance) || 0)).toFixed(1)} km`;
-      };
-
-      const getPreviewIcon = (name) => {
-        const lower = name.toLowerCase();
-        if (lower.includes("court")) return "fa-building";
-        if (lower.includes("lodge")) return "fa-house";
-        if (lower.includes("suite")) return "fa-door-closed";
-        if (lower.includes("residence")) return "fa-shapes";
-        return "fa-bed";
-      };
-
-      const formatRelative = (iso) => {
-        const diff = Date.now() - new Date(iso).getTime();
-        const mins = Math.max(1, Math.round(diff / 60000));
-        if (mins < 60) return `${mins}m ago`;
-        const hrs = Math.round(mins / 60);
-        if (hrs < 24) return `${hrs}h ago`;
-        const days = Math.round(hrs / 24);
-        return `${days}d ago`;
-      };
-
-      const setHeaderScrolled = () => {
-        if (!el.header) return;
-        el.header.classList.toggle("is-scrolled", window.scrollY > 8);
-      };
-
-      const closeMobileMenu = () => {
-        if (!el.siteNav || !el.menuToggle) return;
-        el.siteNav.classList.remove("open");
-        el.headerActions?.classList.remove("open");
-        el.menuToggle.setAttribute("aria-expanded", "false");
-        document.body.classList.remove("nav-open");
-      };
-
-      const openMobileMenu = () => {
-        if (!el.siteNav || !el.menuToggle) return;
-        el.siteNav.classList.add("open");
-        el.headerActions?.classList.add("open");
-        el.menuToggle.setAttribute("aria-expanded", "true");
-        document.body.classList.add("nav-open");
-      };
-
-      const setProfilePhoto = (src) => {
-        if (src) {
-          el.avatarImg.src = src;
-          el.avatarImg.style.display = "block";
-          el.avatarFallback.style.display = "none";
-          el.passportAvatar.src = src;
-          el.passportAvatar.style.display = "block";
-          el.passportAvatar.nextElementSibling && (el.passportAvatar.nextElementSibling.style.display = "none");
-        } else {
-          el.avatarImg.removeAttribute("src");
-          el.avatarImg.style.display = "none";
-          el.avatarFallback.style.display = "block";
-          el.avatarFallback.textContent = initials(profile.fullName);
-          el.passportAvatar.removeAttribute("src");
-          el.passportAvatar.style.display = "grid";
-          const fallback = el.passportAvatar.parentElement.querySelector(".avatar-fallback-small");
-          if (fallback) fallback.remove();
-          if (!el.passportAvatar.dataset.fallbackShown) {
-            const small = document.createElement("div");
-            small.className = "avatar-fallback-small";
-            small.textContent = initials(profile.fullName);
-            el.passportAvatar.insertAdjacentElement("afterend", small);
-            el.passportAvatar.dataset.fallbackShown = "1";
-          }
-          el.passportAvatar.style.display = "none";
-        }
-      };
-
-      const syncAvatarFallback = () => {
-        const letters = initials(profile.fullName);
-        el.avatarFallback.textContent = letters;
-        const smallFallback = el.passportAvatar.parentElement.querySelector(".avatar-fallback-small");
-        if (smallFallback) smallFallback.textContent = letters;
-      };
-
-      const updateProfileHeader = () => {
-        el.profileName.textContent = profile.fullName || DEFAULT_PROFILE.fullName;
-        el.profileSubtitle.textContent = profile.bio || DEFAULT_PROFILE.bio;
-        el.passportName.textContent = profile.fullName || DEFAULT_PROFILE.fullName;
-        el.passportLabel.textContent = `${profile.institution || DEFAULT_PROFILE.institution} • ${profile.year || DEFAULT_PROFILE.year}`;
-        el.passportDept.textContent = profile.department || DEFAULT_PROFILE.department;
-        el.passportArea.textContent = profile.location || DEFAULT_PROFILE.location;
-        el.accountEmail.textContent = profile.email || DEFAULT_PROFILE.email;
-        el.accountPhone.textContent = profile.phone || DEFAULT_PROFILE.phone;
-        el.currentSessionText.textContent = `${navigator.platform || "This browser"} • Active now`;
-        el.lastUpdateText.textContent = activityLog[0] ? formatRelative(activityLog[0].time) : "Just now";
-
-        const tags = [
-          { icon: "fa-graduation-cap", label: profile.institution || "UCC Student" },
-          { icon: "fa-user-shield", label: settings.privateMode ? "Private profile" : "Open profile" },
-          { icon: "fa-location-dot", label: profile.location || "Cape Coast" },
-        ];
-
-        el.profileTags.innerHTML = tags
-          .map((tag) => `<span class="profile-tag"><i class="fa-solid ${tag.icon}"></i> ${tag.label}</span>`)
-          .join("");
-      };
-
-      const updateStats = () => {
-        const savedHostels = getSavedHostels();
-        const unread = getUnreadMessagesCount();
-        const bookingCounts = getBookingCounts();
-        const completion = computeCompletion();
-
-        el.savedCount.textContent = String(savedHostels.length);
-        el.unreadCount.textContent = String(unread);
-        el.bookingCount.textContent = String(bookingCounts.total);
-        el.profileScore.textContent = `${completion.pct}%`;
-
-        el.progressText.textContent = `${completion.pct}%`;
-        el.progressFill.style.setProperty("--fill", `${completion.pct}%`);
-        el.profileRing.style.setProperty("--p", `${completion.pct / 100}`);
-        el.progressCount.textContent = `${completion.checks} / ${completion.total} complete`;
-
-        if (completion.pct >= 85) {
-          el.progressLabel.textContent = "Almost ready";
-          el.statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> On track';
-        } else if (completion.pct >= 60) {
-          el.progressLabel.textContent = "In progress";
-          el.statusBadge.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Nearly there';
-        } else {
-          el.progressLabel.textContent = "Getting started";
-          el.statusBadge.innerHTML = '<i class="fa-solid fa-sparkles"></i> Setup in progress';
-        }
-
-        const topRating = computeTopRating(savedHostels);
-        const distance = getClosestDistance(savedHostels);
-        const budgetRange = computeBudgetRange(savedHostels);
-
-        el.topRating.textContent = topRating;
-        el.campusDistance.textContent = distance;
-        el.budgetRange.textContent = budgetRange;
-
-        if (!savedHostels.length) {
-          el.savedEmptyNote.hidden = false;
-        } else {
-          el.savedEmptyNote.hidden = true;
-        }
-
-        el.passportSaved.textContent = String(savedHostels.length);
-      };
-
-      const renderSavedPreview = () => {
-        const savedHostels = getSavedHostels().slice(0, 3);
-        el.savedPreview.innerHTML = "";
-
-        if (!savedHostels.length) {
+        if (!currentUser) {
+          showMessage("You are not signed in.", "error");
           return;
         }
 
-        savedHostels.forEach((hostel) => {
-          const item = document.createElement("div");
-          item.className = "saved-inline";
-          item.innerHTML = `
-            <div class="left">
-              <img src="${hostel.image}" alt="${hostel.name}" />
-              <div>
-                <strong>${hostel.name}</strong>
-                <span>${hostel.location}</span>
-              </div>
-            </div>
-            <div class="right">
-              <div>${formatMoney(hostel.price)}</div>
-              <span>${hostel.rating.toFixed(1)} ★</span>
-            </div>
-          `;
-          el.savedPreview.appendChild(item);
-        });
-      };
-
-      const renderActivity = () => {
-        const savedHostels = getSavedHostels();
-        const bookingCounts = getBookingCounts();
-        const unread = getUnreadMessagesCount();
-
-        const derived = [
-          {
-            icon: "fa-bookmark",
-            title: `${savedHostels.length} saved hostel${savedHostels.length === 1 ? "" : "s"} in your shortlist`,
-            detail: savedHostels.length
-              ? `Your current range sits around ${computeBudgetRange(savedHostels)}.`
-              : "Save a hostel from Explore to start building your shortlist.",
-          },
-          {
-            icon: "fa-message",
-            title: `${unread} unread message${unread === 1 ? "" : "s"} waiting`,
-            detail: unread
-              ? "Open Messages to reply to hostel managers and confirm details."
-              : "Your inbox is quiet right now.",
-          },
-          {
-            icon: "fa-calendar-check",
-            title: `${bookingCounts.active} active booking${bookingCounts.active === 1 ? "" : "s"} tracked`,
-            detail: `${bookingCounts.pending} pending and ${bookingCounts.previous} previous booking${bookingCounts.previous === 1 ? "" : "s"} are also on file.`,
-          },
-        ];
-
-        const combined = [
-          ...derived,
-          ...activityLog.slice(0, 5).map((item) => ({
-            icon: item.icon || "fa-circle-check",
-            title: item.title,
-            detail: item.detail,
-            time: formatRelative(item.time),
-          })),
-        ];
-
-        el.activityList.innerHTML = combined
-          .map((item, index) => {
-            const time = item.time || (index < derived.length ? "Live snapshot" : formatRelative(item.time || new Date()));
-            return `
-              <div class="activity-row">
-                <div class="icn"><i class="fa-solid ${item.icon}"></i></div>
-                <div>
-                  <strong>${item.title}</strong>
-                  <p>${item.detail}</p>
-                  <span>${time}</span>
-                </div>
-              </div>
-            `;
-          })
-          .join("");
-      };
-
-      const fillForm = () => {
-        el.fullName.value = profile.fullName || "";
-        el.email.value = profile.email || "";
-        el.phone.value = profile.phone || "";
-        el.studentId.value = profile.studentId || "";
-        el.institution.value = profile.institution || "";
-        el.department.value = profile.department || "";
-        el.year.value = profile.year || "Level 300";
-        el.location.value = profile.location || "";
-        el.bio.value = profile.bio || "";
-
-        el.emailUpdates.checked = Boolean(settings.emailUpdates);
-        el.bookingReminders.checked = Boolean(settings.bookingReminders);
-        el.savedAlerts.checked = Boolean(settings.savedAlerts);
-        el.quietHours.checked = Boolean(settings.quietHours);
-        el.twoFactor.checked = Boolean(settings.twoFactor);
-        el.privateMode.checked = Boolean(settings.privateMode);
-
-        el.areaChips.forEach((chip) => {
-          chip.classList.toggle("active", settings.areas?.includes(chip.dataset.area));
-        });
-      };
-
-      const saveProfile = (silent = false) => {
-        profile.fullName = normalizeText(el.fullName.value) || DEFAULT_PROFILE.fullName;
-        profile.email = normalizeText(el.email.value) || DEFAULT_PROFILE.email;
-        profile.phone = normalizeText(el.phone.value) || DEFAULT_PROFILE.phone;
-        profile.studentId = normalizeText(el.studentId.value) || DEFAULT_PROFILE.studentId;
-        profile.institution = normalizeText(el.institution.value) || DEFAULT_PROFILE.institution;
-        profile.department = normalizeText(el.department.value) || DEFAULT_PROFILE.department;
-        profile.year = normalizeText(el.year.value) || DEFAULT_PROFILE.year;
-        profile.location = normalizeText(el.location.value) || DEFAULT_PROFILE.location;
-        profile.bio = normalizeText(el.bio.value) || DEFAULT_PROFILE.bio;
-
-        writeJSON(PROFILE_KEY, profile);
-        updateProfileHeader();
-        syncAvatarFallback();
-        updateStats();
-        renderSavedPreview();
-        renderActivity();
-
-        if (!silent) addActivity("fa-pen-to-square", "Profile updated", "Your account details were saved locally in this browser.");
-        writeJSON(PROFILE_KEY, profile);
-        writeJSON(SETTINGS_KEY, settings);
-        updateProfileHeader();
-        updateStats();
-        renderSavedPreview();
-        renderActivity();
-      };
-
-      const loadAvatar = (dataUrl) => {
-        profile.avatar = dataUrl || "";
-        writeJSON(PROFILE_KEY, profile);
-        setProfilePhoto(profile.avatar);
-        updateProfileHeader();
-        updateStats();
-        addActivity("fa-camera", "Profile photo changed", "Your avatar was updated successfully.");
-        renderActivity();
-      };
-
-      const applyPanels = (panelName) => {
-        el.profileTabs.forEach((tab) => {
-          const active = tab.dataset.panel === panelName;
-          tab.classList.toggle("active", active);
-          tab.setAttribute("aria-selected", String(active));
-        });
-
-        el.panelContents.forEach((panel) => {
-          panel.classList.toggle("active", panel.dataset.panelContent === panelName);
-        });
-      };
-
-      const updateSettings = (patch, activityText) => {
-        Object.assign(settings, patch);
-        writeJSON(SETTINGS_KEY, settings);
-        updateProfileHeader();
-        updateStats();
-        if (activityText) {
-          addActivity("fa-sliders", activityText, "Preference changes are stored locally.");
-          renderActivity();
+        if (email.value && !emailRegex.test(email.value.trim())) {
+          showMessage("Enter a valid email address.", "error");
+          email.focus();
+          return;
         }
-      };
 
-      const copySummary = async () => {
-        const savedHostels = getSavedHostels();
-        const bookingCounts = getBookingCounts();
-        const completion = computeCompletion();
-        const summary = [
-          `Name: ${profile.fullName}`,
-          `Email: ${profile.email}`,
-          `Phone: ${profile.phone}`,
-          `Department: ${profile.department}`,
-          `Saved hostels: ${savedHostels.length}`,
-          `Active bookings: ${bookingCounts.active}`,
-          `Profile completion: ${completion.pct}%`,
-        ].join("\n");
+        const updated = mergeProfileFromInputs(currentUser);
 
         try {
-          await navigator.clipboard.writeText(summary);
-          addActivity("fa-copy", "Profile summary copied", "You can paste it anywhere you need a quick overview.");
-          showToast("Profile summary copied to clipboard.");
-        } catch {
-          showToast("Clipboard access was blocked by the browser.");
-        }
+          saveBtn.disabled = true;
+          saveBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
 
-        renderActivity();
-      };
+          saveStoredProfile(updated);
 
-      const showToast = (message) => {
-        let toast = document.getElementById("profileToast");
-        if (!toast) {
-          toast = document.createElement("div");
-          toast.id = "profileToast";
-          toast.setAttribute("role", "status");
-          toast.setAttribute("aria-live", "polite");
-          toast.style.position = "fixed";
-          toast.style.left = "50%";
-          toast.style.bottom = "22px";
-          toast.style.transform = "translateX(-50%) translateY(20px)";
-          toast.style.opacity = "0";
-          toast.style.transition = "all 0.25s ease";
-          toast.style.zIndex = "9999";
-          toast.style.padding = "12px 16px";
-          toast.style.borderRadius = "16px";
-          toast.style.background = "rgba(27, 67, 50, 0.96)";
-          toast.style.color = "#fff";
-          toast.style.fontWeight = "700";
-          toast.style.boxShadow = "0 16px 30px rgba(16, 33, 26, 0.2)";
-          document.body.appendChild(toast);
-        }
-
-        toast.textContent = message;
-        toast.style.opacity = "1";
-        toast.style.transform = "translateX(-50%) translateY(0)";
-        clearTimeout(showToast._timer);
-        showToast._timer = setTimeout(() => {
-          toast.style.opacity = "0";
-          toast.style.transform = "translateX(-50%) translateY(20px)";
-        }, 1800);
-      };
-
-      const initMobileNav = () => {
-        if (!el.menuToggle || !el.siteNav) return;
-
-        el.menuToggle.addEventListener("click", () => {
-          const isOpen = el.siteNav.classList.contains("open");
-          if (isOpen) closeMobileMenu();
-          else openMobileMenu();
-        });
-
-        document.addEventListener("click", (event) => {
-          if (!el.header?.contains(event.target) && el.siteNav.classList.contains("open")) {
-            closeMobileMenu();
-          }
-        });
-
-        window.addEventListener("resize", () => {
-          if (window.innerWidth > 900) closeMobileMenu();
-        });
-      };
-
-      const initTabButtons = () => {
-        el.profileTabs.forEach((tab) => {
-          tab.addEventListener("click", () => {
-            applyPanels(tab.dataset.panel);
-            tab.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-            addActivity("fa-layer-group", `${tab.textContent.trim()} section opened`, "You switched to a different profile section.");
-            renderActivity();
-          });
-        });
-      };
-
-      const initAreaChips = () => {
-        el.areaChips.forEach((chip) => {
-          chip.addEventListener("click", () => {
-            chip.classList.toggle("active");
-            settings.areas = el.areaChips.filter((btn) => btn.classList.contains("active")).map((btn) => btn.dataset.area);
-            writeJSON(SETTINGS_KEY, settings);
-            updateProfileHeader();
-            addActivity("fa-location-dot", `${chip.dataset.area} preference updated`, chip.classList.contains("active") ? "That area is now part of your shortlist bias." : "That area was removed from your preferred areas.");
-            renderActivity();
-          });
-        });
-      };
-
-      const initFileUpload = () => {
-        el.avatarInput.addEventListener("change", () => {
-          const file = el.avatarInput.files?.[0];
-          if (!file) return;
-
-          if (!file.type.startsWith("image/")) {
-            showToast("Please choose an image file.");
-            return;
+          if (currentUser.updateProfile) {
+            await currentUser.updateProfile({
+              displayName: updated.fullName || "",
+              photoURL: updated.photoURL || "",
+            });
           }
 
-          const reader = new FileReader();
-          reader.onload = () => loadAvatar(String(reader.result || ""));
-          reader.readAsDataURL(file);
-        });
-      };
-
-      const initForms = () => {
-        el.profileForm.addEventListener("submit", (event) => {
-          event.preventDefault();
-          saveProfile(false);
-          showToast("Profile changes saved.");
-        });
-
-        [el.fullName, el.email, el.phone, el.studentId, el.institution, el.department, el.year, el.location, el.bio].forEach((input) => {
-          input.addEventListener("input", () => {
-            if (input === el.fullName || input === el.bio) {
-              profile[input.name] = input.value;
-              if (input === el.fullName) syncAvatarFallback();
-              updateProfileHeader();
+          if (db && currentUser) {
+            try {
+              await db.collection("users").doc(currentUser.uid).set(
+                {
+                  ...updated,
+                  updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                },
+                { merge: true }
+              );
+            } catch (dbError) {
+              console.warn("Firestore profile save skipped:", dbError);
             }
-          });
-        });
-
-        const preferenceMap = [
-          [el.emailUpdates, "emailUpdates", "Email updates enabled", "Email updates disabled"],
-          [el.bookingReminders, "bookingReminders", "Booking reminders enabled", "Booking reminders disabled"],
-          [el.savedAlerts, "savedAlerts", "Saved hostel alerts enabled", "Saved hostel alerts disabled"],
-          [el.quietHours, "quietHours", "Quiet hours enabled", "Quiet hours disabled"],
-          [el.twoFactor, "twoFactor", "Two-step login enabled", "Two-step login disabled"],
-          [el.privateMode, "privateMode", "Profile visibility set to private", "Profile visibility set to open"],
-        ];
-
-        preferenceMap.forEach(([input, key, onText, offText]) => {
-          input.addEventListener("change", () => {
-            settings[key] = input.checked;
-            writeJSON(SETTINGS_KEY, settings);
-            updateProfileHeader();
-            updateStats();
-            addActivity("fa-toggle-on", input.checked ? onText : offText, "Preference state stored locally.");
-            renderActivity();
-          });
-        });
-      };
-
-      const initButtons = () => {
-        el.resetProfileBtn.addEventListener("click", () => {
-          Object.assign(profile, DEFAULT_PROFILE);
-          Object.assign(settings, DEFAULT_SETTINGS);
-          writeJSON(PROFILE_KEY, profile);
-          writeJSON(SETTINGS_KEY, settings);
-          setProfilePhoto("");
-          fillForm();
-          updateProfileHeader();
-          updateStats();
-          renderSavedPreview();
-          renderActivity();
-          showToast("Demo profile restored.");
-          addActivity("fa-rotate-left", "Demo profile restored", "Your local profile data was reset to the default example.");
-          renderActivity();
-        });
-
-        el.exportBtn.addEventListener("click", copySummary);
-
-        el.clearActivityBtn.addEventListener("click", () => {
-          activityLog.length = 0;
-          writeJSON(ACTIVITY_KEY, activityLog);
-          renderActivity();
-          addActivity("fa-broom", "Activity cleared", "The activity feed has been reset.");
-          renderActivity();
-          showToast("Activity feed cleared.");
-        });
-
-        el.logoutBtn.addEventListener("click", () => {
-          showToast("All local sessions cleared.");
-          addActivity("fa-right-from-bracket", "Logged out all sessions", "This is a prototype action for the browser only.");
-          renderActivity();
-        });
-
-        el.privacyBtn.addEventListener("click", () => {
-          showToast("Your profile data stays in this browser until you clear it.");
-        });
-
-        el.avatarBtn.addEventListener("click", () => {
-          el.avatarInput.click();
-        });
-      };
-
-      const initReveal = () => {
-        const revealItems = document.querySelectorAll(".reveal-item");
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("in-view");
-              observer.unobserve(entry.target);
-            }
-          });
-        }, {
-          threshold: 0.14,
-          rootMargin: "0px 0px -40px 0px",
-        });
-
-        revealItems.forEach((item) => observer.observe(item));
-      };
-
-      const initCurrentPageNav = () => {
-        const currentPage = location.pathname.split("/").pop() || "index.html";
-        document.querySelectorAll(".site-nav a").forEach((link) => {
-          const href = link.getAttribute("href") || "";
-          const target = href.split("/").pop();
-          if (target === currentPage) link.classList.add("active");
-        });
-      };
-
-      const init = () => {
-        setHeaderScrolled();
-        window.addEventListener("scroll", setHeaderScrolled, { passive: true });
-
-        initMobileNav();
-        initTabButtons();
-        initAreaChips();
-        initFileUpload();
-        initForms();
-        initButtons();
-        initReveal();
-        initCurrentPageNav();
-
-        fillForm();
-        setProfilePhoto(profile.avatar || "");
-        updateProfileHeader();
-        updateStats();
-        renderSavedPreview();
-        renderActivity();
-
-        const initialTab = (location.hash || "#overview").replace("#", "");
-        const tabExists = el.profileTabs.some((tab) => tab.dataset.panel === initialTab);
-        applyPanels(tabExists ? initialTab : "overview");
-
-        const savedHostels = getSavedHostels();
-        if (!activityLog.length) {
-          addActivity("fa-sparkles", "Profile opened", "Your dashboard is ready and loaded from local storage.");
-          if (savedHostels.length) {
-            addActivity("fa-bookmark", `${savedHostels.length} saved hostel${savedHostels.length === 1 ? "" : "s"} available`, "Your shortlist is being tracked automatically.");
           }
-          if (getUnreadMessagesCount()) {
-            addActivity("fa-message", "Unread messages waiting", "Open the Messages page to catch up with hostel replies.");
-          }
-          renderActivity();
-        }
 
-        const completion = computeCompletion();
-        if (completion.pct < 100) {
-          showToast("Profile loaded. Finish the remaining details to complete your dashboard.");
+          populate(updated, currentUser);
+          showMessage("Profile saved successfully.", "success");
+          showToast("Profile updated");
+        } catch (error) {
+          showMessage(friendlyError(error), "error");
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save profile';
         }
-      };
-
-      init();
+      });
     });
   </script>
 </body>
