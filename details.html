@@ -3,66 +3,353 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="View hostel details, amenities, room types, and booking information on StayNest." />
+  <meta
+    name="description"
+    content="View hostel details, yearly prices, amenities, and booking information on StayNest."
+  />
   <title>StayNest | Hostel Details</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  >
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
   <link rel="stylesheet" href="style.css" />
 
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
   <style>
-    .details-shell {
-      padding: 28px 0 80px;
+    :root {
+      --bg: #f4f8f5;
+      --surface: rgba(255, 255, 255, 0.92);
+      --surface-strong: #ffffff;
+      --text: #10211a;
+      --muted: #66756f;
+      --green: #1b4332;
+      --green-2: #2d6a4f;
+      --gold: #c89b3c;
+      --line: rgba(16, 33, 26, 0.10);
+      --shadow: 0 26px 70px rgba(16, 33, 26, 0.16);
+      --shadow-soft: 0 14px 34px rgba(16, 33, 26, 0.08);
+      --radius-lg: 36px;
     }
 
-    .details-crumbs {
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(216, 243, 220, 0.75), transparent 28%),
+        radial-gradient(circle at top right, rgba(247, 239, 217, 0.68), transparent 24%),
+        radial-gradient(circle at bottom center, rgba(45, 106, 79, 0.10), transparent 28%),
+        var(--bg);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font: inherit; }
+
+    .skip-link {
+      position: absolute;
+      left: -999px;
+      top: 12px;
+      z-index: 200;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .skip-link:focus { left: 12px; }
+
+    .page-wrap {
+      min-height: 100vh;
+      padding: 24px 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bg-orb {
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(14px);
+      opacity: 0.75;
+      pointer-events: none;
+    }
+
+    .bg-orb.one {
+      width: 320px;
+      height: 320px;
+      left: -120px;
+      top: -110px;
+      background: rgba(216, 243, 220, 0.55);
+    }
+
+    .bg-orb.two {
+      width: 280px;
+      height: 280px;
+      right: -90px;
+      top: 70px;
+      background: rgba(200, 155, 60, 0.15);
+    }
+
+    .bg-orb.three {
+      width: 360px;
+      height: 360px;
+      right: 8%;
+      bottom: -160px;
+      background: rgba(27, 67, 50, 0.10);
+    }
+
+    .container {
+      width: min(calc(100% - 32px), 1180px);
+      margin-inline: auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .site-header {
+      margin-bottom: 22px;
+    }
+
+    .header-bar {
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      border-radius: 999px;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .brand-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #ffffff, rgba(216, 243, 220, 0.84));
+      color: var(--green);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.10);
+      overflow: hidden;
+      flex: none;
+    }
+
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 8px;
+    }
+
+    .brand-text {
+      font-size: 1.05rem;
+    }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .site-nav a.active {
+      color: var(--green);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+
+    .guest-actions {
       display: flex;
       align-items: center;
       gap: 10px;
       flex-wrap: wrap;
-      font-size: 0.92rem;
-      color: var(--muted);
-      margin-bottom: 18px;
     }
 
-    .details-crumbs a {
-      color: var(--green-2);
+    .text-link {
+      padding: 10px 14px;
+      border-radius: 999px;
       font-weight: 800;
-    }
-
-    .details-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.25fr) 380px;
-      gap: 24px;
-      align-items: start;
-    }
-
-    .details-main,
-    .details-aside {
-      display: grid;
-      gap: 20px;
-    }
-
-    .details-card {
-      background: rgba(255, 255, 255, 0.94);
       border: 1px solid rgba(16, 33, 26, 0.08);
-      border-radius: 28px;
-      box-shadow: var(--shadow-sm);
+      background: #fff;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 16px;
+      padding: 12px 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--green-2));
+      color: #fff;
+      box-shadow: 0 18px 36px rgba(27, 67, 50, 0.20);
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--green);
+      border: 1px solid rgba(27, 67, 50, 0.12);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .profile-trigger {
+      border: 1px solid rgba(16, 33, 26, 0.10);
+      background: #fff;
+      border-radius: 999px;
+      padding: 8px 10px 8px 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .profile-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--green), var(--green-2));
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 900;
+      overflow: hidden;
+      flex: none;
+    }
+
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-dropdown {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      width: 290px;
+      background: #fff;
+      border: 1px solid rgba(16, 33, 26, 0.10);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+      z-index: 50;
+    }
+
+    .profile-dropdown-top {
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(16, 33, 26, 0.08);
+      margin-bottom: 12px;
+    }
+
+    .profile-dropdown-top strong {
+      display: block;
+      font-size: 1rem;
+    }
+
+    .profile-dropdown-top span {
+      color: var(--muted);
+      font-size: 0.9rem;
+      display: block;
+      margin-top: 4px;
+      word-break: break-word;
+    }
+
+    .profile-dropdown-links {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .profile-dropdown-links a,
+    .profile-logout {
+      width: 100%;
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      background: rgba(244, 248, 245, 0.65);
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .profile-logout {
+      background: rgba(201, 75, 75, 0.08);
+      color: #9c2f2f;
+    }
+
+    .profile-dropdown[hidden] { display: none; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 22px;
+      align-items: start;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
       overflow: hidden;
     }
 
-    .details-hero {
+    .hero-media {
       position: relative;
-      min-height: 420px;
-      display: grid;
-      align-items: end;
+      min-height: 520px;
       background: #dfeee5;
     }
 
-    .details-hero img {
+    .hero-media img {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -70,11 +357,15 @@
       inset: 0;
     }
 
-    .details-hero-overlay {
+    .hero-overlay {
       position: relative;
       z-index: 1;
-      padding: 24px;
-      background: linear-gradient(180deg, rgba(10, 21, 16, 0.00) 0%, rgba(10, 21, 16, 0.68) 100%);
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 26px;
+      background: linear-gradient(180deg, rgba(10, 21, 16, 0.08) 0%, rgba(10, 21, 16, 0.76) 100%);
       color: #fff;
     }
 
@@ -82,7 +373,7 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
     .details-badge {
@@ -104,10 +395,14 @@
       border-color: transparent;
     }
 
+    .hero-copy {
+      margin-top: auto;
+    }
+
     .details-title {
       margin: 0;
       font-family: "Playfair Display", Georgia, serif;
-      font-size: clamp(2rem, 1.5rem + 1.6vw, 3.4rem);
+      font-size: clamp(2.2rem, 1.4rem + 2vw, 3.8rem);
       line-height: 0.96;
       letter-spacing: -0.04em;
       max-width: 12ch;
@@ -118,6 +413,7 @@
       font-size: 1rem;
       color: rgba(255, 255, 255, 0.84);
       max-width: 62ch;
+      line-height: 1.7;
     }
 
     .details-topbar {
@@ -126,13 +422,6 @@
       align-items: center;
       gap: 16px;
       margin-bottom: 18px;
-    }
-
-    .details-topbar .left,
-    .details-topbar .right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
       flex-wrap: wrap;
     }
 
@@ -299,6 +588,20 @@
       color: rgba(255, 255, 255, 0.80);
     }
 
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(27, 67, 50, 0.08);
+      color: var(--green);
+      font-weight: 900;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
     .price-amount {
       font-family: "Playfair Display", Georgia, serif;
       font-size: 2.35rem;
@@ -377,8 +680,210 @@
       line-height: 1.7;
     }
 
+    .booking-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(8, 20, 15, 0.58);
+      backdrop-filter: blur(10px);
+      z-index: 2000;
+    }
+
+    .booking-modal.open {
+      display: flex;
+    }
+
+    .booking-dialog {
+      width: min(100%, 980px);
+      background: #fff;
+      border-radius: 30px;
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.24);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+    }
+
+    .booking-visual {
+      position: relative;
+      min-height: 100%;
+      background: linear-gradient(135deg, #1b4332, #2d6a4f);
+      color: #fff;
+    }
+
+    .booking-visual img {
+      width: 100%;
+      height: 100%;
+      min-height: 320px;
+      object-fit: cover;
+      display: block;
+      opacity: 0.9;
+    }
+
+    .booking-visual-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(8, 20, 15, 0.06), rgba(8, 20, 15, 0.76));
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 22px;
+    }
+
+    .booking-visual-top,
+    .booking-visual-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .booking-visual-top strong {
+      font-size: 1.35rem;
+      line-height: 1.2;
+    }
+
+    .booking-visual-top span,
+    .booking-visual-bottom span {
+      color: rgba(255, 255, 255, 0.86);
+      line-height: 1.55;
+    }
+
+    .booking-form-panel {
+      padding: 24px;
+    }
+
+    .booking-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .booking-head h2 {
+      margin: 0;
+      font-size: 1.65rem;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+
+    .booking-head p {
+      margin: 8px 0 0;
+      color: #66756f;
+      line-height: 1.6;
+    }
+
+    .close-modal-btn {
+      border: 0;
+      background: rgba(16, 33, 26, 0.08);
+      color: #1b4332;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      cursor: pointer;
+      flex: none;
+    }
+
+    .booking-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .booking-field {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .booking-field label {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #23342d;
+    }
+
+    .booking-field input,
+    .booking-field select,
+    .booking-field textarea {
+      width: 100%;
+      border: 1.5px solid rgba(16, 33, 26, 0.12);
+      background: #fff;
+      color: #10211a;
+      border-radius: 18px;
+      padding: 14px 16px;
+      outline: none;
+    }
+
+    .booking-field textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .booking-message {
+      display: none;
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-top: 10px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .booking-message.show { display: block; }
+
+    .booking-message.success {
+      background: rgba(27, 67, 50, 0.08);
+      border: 1px solid rgba(27, 67, 50, 0.12);
+      color: #1b4332;
+    }
+
+    .booking-message.error {
+      background: rgba(201, 75, 75, 0.10);
+      border: 1px solid rgba(201, 75, 75, 0.14);
+      color: #9c2f2f;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(18px);
+      padding: 14px 18px;
+      border-radius: 999px;
+      background: rgba(16, 33, 26, 0.94);
+      color: #fff;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 3000;
+      max-width: calc(100% - 24px);
+      text-align: center;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .content-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) 380px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .details-main,
+    .details-aside {
+      display: grid;
+      gap: 20px;
+    }
+
     @media (max-width: 1100px) {
-      .details-grid {
+      .hero,
+      .content-layout {
         grid-template-columns: 1fr;
       }
 
@@ -388,17 +893,18 @@
     }
 
     @media (max-width: 760px) {
-      .details-shell {
-        padding-top: 18px;
+      .page-wrap {
+        padding-top: 16px;
       }
 
-      .details-hero {
+      .hero-media,
+      .hero-overlay {
         min-height: 360px;
       }
 
       .details-body,
       .aside-card,
-      .details-hero-overlay {
+      .hero-overlay {
         padding: 18px;
       }
 
@@ -409,1158 +915,941 @@
         grid-template-columns: 1fr;
       }
 
-      .details-topbar {
-        align-items: flex-start;
-        flex-direction: column;
+      .booking-dialog {
+        grid-template-columns: 1fr;
+      }
+
+      .booking-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .site-nav {
+        gap: 12px;
       }
     }
-.details-shell {
-  padding: 28px 0 80px;
-}
-
-.details-crumbs {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  font-size: 0.92rem;
-  color: var(--text-muted);
-  margin-bottom: 18px;
-}
-
-.details-crumbs a {
-  color: var(--green-2);
-  font-weight: 800;
-}
-
-.details-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) 380px;
-  gap: 24px;
-  align-items: start;
-}
-
-.details-main,
-.details-aside {
-  display: grid;
-  gap: 20px;
-}
-
-.details-card {
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(16, 33, 26, 0.08);
-  border-radius: 28px;
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-}
-
-.details-hero {
-  position: relative;
-  min-height: 420px;
-  display: grid;
-  align-items: end;
-  background: #dfeee5;
-}
-
-.details-hero img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  position: absolute;
-  inset: 0;
-}
-
-.details-hero-overlay {
-  position: relative;
-  z-index: 1;
-  padding: 24px;
-  background: linear-gradient(180deg, rgba(10, 21, 16, 0) 0%, rgba(10, 21, 16, 0.68) 100%);
-  color: #fff;
-}
-
-.details-badges {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 14px;
-}
-
-.details-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 7px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(8px);
-  font-weight: 800;
-  font-size: 0.85rem;
-}
-
-.details-badge.gold {
-  background: rgba(200, 155, 60, 0.95);
-  color: #fff;
-  border-color: transparent;
-}
-
-.details-title {
-  margin: 0;
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: clamp(2rem, 1.5rem + 1.6vw, 3.4rem);
-  line-height: 0.96;
-  letter-spacing: -0.04em;
-  max-width: 12ch;
-}
-
-.details-subtitle {
-  margin: 12px 0 0;
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.84);
-  max-width: 62ch;
-}
-
-.details-topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 18px;
-}
-
-.details-topbar .left,
-.details-topbar .right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.details-rating {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 10px 14px;
-  border-radius: 999px;
-  background: rgba(27, 67, 50, 0.08);
-  color: var(--green);
-  font-weight: 800;
-}
-
-.details-fav-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  border: 1.5px solid rgba(16, 33, 26, 0.10);
-  background: #fff;
-  color: #b63e4b;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 14px 24px rgba(16, 33, 26, 0.10);
-  cursor: pointer;
-}
-
-.details-body {
-  padding: 24px;
-}
-
-.details-section {
-  padding-top: 20px;
-  margin-top: 20px;
-  border-top: 1px solid rgba(16, 33, 26, 0.08);
-}
-
-.details-section:first-child {
-  padding-top: 0;
-  margin-top: 0;
-  border-top: 0;
-}
-
-.details-section h2,
-.details-section h3 {
-  margin: 0 0 12px;
-}
-
-.details-section h2 {
-  font-size: 1.08rem;
-}
-
-.details-section p {
-  margin: 0;
-  color: var(--text-muted);
-  line-height: 1.7;
-}
-
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.stat-box {
-  border-radius: 22px;
-  background: rgba(27, 67, 50, 0.05);
-  border: 1px solid rgba(16, 33, 26, 0.08);
-  padding: 14px;
-}
-
-.stat-box .label {
-  display: block;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-
-.stat-box strong {
-  font-size: 1.05rem;
-  color: var(--text);
-}
-
-.amenity-grid,
-.room-grid,
-.review-list {
-  display: grid;
-  gap: 10px;
-}
-
-.amenity-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.amenity-pill,
-.room-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  border: 1px solid rgba(16, 33, 26, 0.10);
-  background: #fff;
-  color: var(--text);
-  font-weight: 700;
-}
-
-.room-pill {
-  justify-content: space-between;
-}
-
-.room-pill span:last-child {
-  color: var(--green);
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.review-card {
-  border-radius: 22px;
-  background: rgba(27, 67, 50, 0.04);
-  border: 1px solid rgba(16, 33, 26, 0.08);
-  padding: 14px 16px;
-}
-
-.review-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.review-top strong {
-  font-size: 0.98rem;
-}
-
-.review-top span {
-  color: var(--gold);
-  font-weight: 800;
-  font-size: 0.92rem;
-}
-
-.review-card p {
-  margin: 0;
-  color: var(--text-muted);
-  line-height: 1.65;
-}
-
-.aside-card {
-  padding: 22px;
-}
-
-.price-card {
-  background: linear-gradient(145deg, rgba(27, 67, 50, 0.98), rgba(45, 106, 79, 0.94));
-  color: #fff;
-}
-
-.price-card .eyebrow,
-.price-card p,
-.price-card .muted,
-.price-card .mini-note {
-  color: rgba(255, 255, 255, 0.80);
-}
-
-.price-amount {
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 2.35rem;
-  line-height: 1;
-  margin: 8px 0 6px;
-  color: #fff;
-}
-
-.action-stack {
-  display: grid;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.btn-full {
-  width: 100%;
-  justify-content: center;
-}
-
-.contact-box {
-  display: grid;
-  gap: 10px;
-  padding: 16px;
-  border-radius: 22px;
-  background: rgba(27, 67, 50, 0.05);
-  border: 1px solid rgba(16, 33, 26, 0.08);
-}
-
-.contact-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.contact-row strong {
-  color: var(--text);
-}
-
-.contact-row a,
-.contact-row span {
-  color: var(--green-2);
-  font-weight: 800;
-}
-
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.gallery-grid img {
-  width: 100%;
-  aspect-ratio: 1 / 0.82;
-  object-fit: cover;
-  border-radius: 18px;
-  border: 1px solid rgba(16, 33, 26, 0.08);
-}
-
-.not-found {
-  padding: 80px 24px;
-  text-align: center;
-}
-
-.not-found h1 {
-  margin: 18px 0 8px;
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: clamp(2rem, 1.4rem + 1.4vw, 3rem);
-}
-
-.not-found p {
-  margin: 0 auto 22px;
-  max-width: 60ch;
-  color: var(--text-muted);
-  line-height: 1.7;
-}
-
-@media (max-width: 1100px) {
-  .details-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .details-aside {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .details-aside .aside-card:first-child {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 760px) {
-  .details-shell {
-    padding-top: 18px;
-  }
-
-  .details-hero {
-    min-height: 320px;
-  }
-
-  .details-body,
-  .aside-card,
-  .details-hero-overlay {
-    padding: 18px;
-  }
-
-  .details-topbar {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .stats-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .stats-row .stat-box:first-child {
-    grid-column: 1 / -1;
-  }
-
-  .amenity-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .room-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .room-pill {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  .review-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .review-card:first-child {
-    grid-column: 1 / -1;
-  }
-
-  .gallery-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .gallery-grid img:first-child {
-    grid-column: 1 / -1;
-  }
-
-  .details-aside {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .details-aside .aside-card:first-child {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 520px) {
-  .stats-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .amenity-grid,
-  .room-grid,
-  .review-list,
-  .gallery-grid,
-  .details-aside {
-    grid-template-columns: 1fr;
-  }
-}
   </style>
 </head>
-<body>
+
+<body data-page="details">
   <a class="skip-link" href="#details-main">Skip to content</a>
 
-  <header class="site-header is-scrolled">
-    <div class="container header-inner">
-      <a href="index.html" class="brand" aria-label="StayNest home">
-        <span class="brand-mark"><i class="fa-solid fa-house-chimney"></i></span>
-        <span class="brand-text">StayNest</span>
-      </a>
+  <div class="page-wrap">
+    <div class="bg-orb one" aria-hidden="true"></div>
+    <div class="bg-orb two" aria-hidden="true"></div>
+    <div class="bg-orb three" aria-hidden="true"></div>
 
-      <nav class="site-nav" aria-label="Primary navigation">
-        <a href="index.html">Home</a>
-        <a href="explore.html" class="active">Explore</a>
-        <a href="saved.html">Saved</a>
-        <a href="bookings.html">Bookings</a>
-        <a href="messages.html">Messages</a>
-        <a href="profile.html">Profile</a>
-      </nav>
+    <div class="container">
+      <header class="site-header">
+        <div class="header-bar">
+          <a href="index.html" class="brand-row" aria-label="StayNest home">
+            <span class="brand-mark" aria-hidden="true">
+              <img src="assets/logo.svg" alt="" onerror="this.style.display='none'; this.parentElement.textContent='S';">
+            </span>
+            <span class="brand-text">StayNest</span>
+          </a>
 
-      <div class="header-actions">
-        <a href="login.html" class="text-link">Sign in</a>
-        <a href="register.html" class="btn btn-primary">Create account</a>
-      </div>
+          <nav class="site-nav" aria-label="Primary navigation">
+            <a href="index.html">Home</a>
+            <a href="explore.html">Explore</a>
+            <a href="saved.html">Saved</a>
+            <a href="bookings.html">Bookings</a>
+            <a href="messages.html">Messages</a>
+            <a href="profile.html">Profile</a>
+          </nav>
 
-      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
-        <i class="fa-solid fa-bars"></i>
-      </button>
-    </div>
-  </header>
-
-  <main id="details-main">
-    <div class="container details-shell" id="detailsApp">
-      <div class="details-crumbs">
-        <a href="explore.html">Explore</a>
-        <span>/</span>
-        <span id="crumbArea">Hostel details</span>
-      </div>
-
-      <div id="detailsContent" class="details-grid"></div>
-    </div>
-  </main>
-
-  <script>
-    const HOSTELS = [
-      {
-        id: "sunrise-court-hostel",
-        name: "Sunrise Court Hostel",
-        area: "Ayensudo",
-        location: "Ayensudo, Cape Coast",
-        rating: 4.8,
-        reviews: 124,
-        price: 4600,
-        distance: 0.7,
-        type: "Self-contained",
-        label: "Popular",
-        short: "A polished, student-friendly hostel with a calm setting and easy access to UCC.",
-        description:
-          "Sunrise Court is designed for students who want comfort, security, and a tidy layout close to campus. The rooms are spacious, the compound is well maintained, and the hostel works well for students who want a quiet place to settle in during the semester.",
-        phone: "+233 24 000 0001",
-        whatsapp: "+233240000001",
-        facebook: "SunriseCourtHostel",
-        instagram: "sunrisecourt_hostel",
-        heroImage:
-          "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1600&q=80",
-        gallery: [
-          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
-        ],
-        amenities: ["Wi‑Fi", "Water available", "Security", "Furnished", "Parking"],
-        rooms: [
-          { title: "Self-contained room", price: "GH₵ 4,600" },
-          { title: "2-in-1 shared option", price: "GH₵ 3,200" },
-          { title: "Short-stay room", price: "GH₵ 1,100 / month" },
-        ],
-        reviewsList: [
-          { name: "Ama Mensah", rating: 5, text: "Very neat hostel and the walk to campus is manageable. The rooms look exactly like the photos." },
-          { name: "Kwesi Appiah", rating: 4, text: "Good security and calm environment. Booking was simple and the owner responded quickly." },
-        ],
-      },
-      {
-        id: "campus-view-lodge",
-        name: "Campus View Lodge",
-        area: "UCC Road",
-        location: "UCC Road, Cape Coast",
-        rating: 4.7,
-        reviews: 98,
-        price: 5200,
-        distance: 0.4,
-        type: "Private room",
-        label: "New",
-        short: "A modern lodge with private rooms and very close access to the university road.",
-        description:
-          "Campus View Lodge is a great fit for students who want a private-room setup and quick access to the UCC road corridor. It balances modern interiors with a convenient location, making it easy to get to class, transport, and nearby shops.",
-        phone: "+233 24 000 0002",
-        whatsapp: "+233240000002",
-        facebook: "CampusViewLodge",
-        instagram: "campusview_lodge",
-        heroImage:
-          "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1600&q=80",
-        gallery: [
-          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
-        ],
-        amenities: ["Wi‑Fi", "Security", "Furnished", "Water available"],
-        rooms: [
-          { title: "Private room", price: "GH₵ 5,200" },
-          { title: "Premium private room", price: "GH₵ 6,000" },
-          { title: "Monthly stay", price: "GH₵ 1,300 / month" },
-        ],
-        reviewsList: [
-          { name: "Yaa Owusu", rating: 5, text: "The room was clean and the location is super convenient for lectures and shopping." },
-          { name: "Nana Boateng", rating: 4, text: "Nice private room setup. The place feels secure and well managed." },
-        ],
-      },
-      {
-        id: "blue-horizon-hostel",
-        name: "Blue Horizon Hostel",
-        area: "Anomabo",
-        location: "Anomabo, Cape Coast",
-        rating: 4.6,
-        reviews: 86,
-        price: 3900,
-        distance: 1.3,
-        type: "Shared room",
-        label: "Value",
-        short: "A budget-conscious choice with shared rooms and practical amenities.",
-        description:
-          "Blue Horizon Hostel gives students an affordable option without feeling too bare-bones. The shared-room arrangement is suited to students who want to spend less while still getting the basics they need for the semester.",
-        phone: "+233 24 000 0003",
-        whatsapp: "+233240000003",
-        facebook: "BlueHorizonHostel",
-        instagram: "bluehorizon_hostel",
-        heroImage:
-          "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1600&q=80",
-        gallery: [
-          "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80",
-        ],
-        amenities: ["Wi‑Fi", "Water available", "Security", "Furnished"],
-        rooms: [
-          { title: "Shared room", price: "GH₵ 3,900" },
-          { title: "Double occupancy", price: "GH₵ 3,400" },
-          { title: "Monthly stay", price: "GH₵ 950 / month" },
-        ],
-        reviewsList: [
-          { name: "Josephine Badu", rating: 4, text: "Affordable and practical. Good for students who care more about value than luxury." },
-          { name: "Kofi Antwi", rating: 5, text: "The room was comfortable and the security at night was reassuring." },
-        ],
-      },
-      {
-        id: "harbor-ridge-suites",
-        name: "Harbor Ridge Suites",
-        area: "Ayensudo",
-        location: "Ayensudo, Cape Coast",
-        rating: 4.9,
-        reviews: 157,
-        price: 7100,
-        distance: 0.9,
-        type: "Studio",
-        label: "Premium",
-        short: "A higher-end studio-style hostel with a premium finish and strong ratings.",
-        description:
-          "Harbor Ridge Suites is built for students who want a more premium experience. It has studio rooms, modern furnishing, and a stronger sense of privacy than typical hostel options in the area.",
-        phone: "+233 24 000 0004",
-        whatsapp: "+233240000004",
-        facebook: "HarborRidgeSuites",
-        instagram: "harborridge_suites",
-        heroImage:
-          "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1600&q=80",
-        gallery: [
-          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
-        ],
-        amenities: ["Wi‑Fi", "Security", "Furnished", "Water available", "Studio kitchen"],
-        rooms: [
-          { title: "Studio room", price: "GH₵ 7,100" },
-          { title: "Executive studio", price: "GH₵ 7,900" },
-          { title: "Monthly stay", price: "GH₵ 1,700 / month" },
-        ],
-        reviewsList: [
-          { name: "Esi Frimpong", rating: 5, text: "Very polished and worth the price if you want something quiet and comfortable." },
-          { name: "Daniel Quaye", rating: 5, text: "Everything feels premium here. The place is neat and the service is excellent." },
-        ],
-      },
-      {
-        id: "palmside-lodge",
-        name: "Palmside Lodge",
-        area: "Bakaano",
-        location: "Bakaano, Cape Coast",
-        rating: 4.5,
-        reviews: 72,
-        price: 4300,
-        distance: 1.1,
-        type: "Private room",
-        label: "Quiet",
-        short: "A quieter hostel for students who prefer a calmer atmosphere.",
-        description:
-          "Palmside Lodge offers private rooms in a quieter part of town. It is a good choice for students who want fewer distractions and a more relaxed environment while still staying within reach of UCC.",
-        phone: "+233 24 000 0005",
-        whatsapp: "+233240000005",
-        facebook: "PalmsideLodge",
-        instagram: "palmside_lodge",
-        heroImage:
-          "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=80",
-        gallery: [
-          "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
-        ],
-        amenities: ["Security", "Water available", "Wi‑Fi"],
-        rooms: [
-          { title: "Private room", price: "GH₵ 4,300" },
-          { title: "Single room", price: "GH₵ 4,900" },
-          { title: "Monthly stay", price: "GH₵ 1,050 / month" },
-        ],
-        reviewsList: [
-          { name: "Mabel Aidoo", rating: 4, text: "Nice and quiet. Exactly what I wanted for studying." },
-          { name: "Ernest Kyei", rating: 5, text: "Great management and a peaceful compound." },
-        ],
-      },
-      {
-        id: "city-gate-hostel",
-        name: "City Gate Hostel",
-        area: "Kotokuraba",
-        location: "Kotokuraba, Cape Coast",
-        rating: 4.4,
-        reviews: 64,
-        price: 3550,
-        distance: 1.6,
-        type: "Shared room",
-        label: "Budget",
-        short: "A more affordable hostel with basic but useful amenities.",
-        description:
-          "City Gate Hostel is designed for students who want to keep costs low. It offers shared-room accommodation and the essentials needed for a semester stay without adding unnecessary extras.",
-        phone: "+233 24 000 0006",
-        whatsapp: "+233240000006",
-        facebook: "CityGateHostel",
-        instagram: "citygate_hostel",
-        heroImage:
-          "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1600&q=80",
-        gallery: [
-          "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-        ],
-        amenities: ["Water available", "Security"],
-        rooms: [
-          { title: "Shared room", price: "GH₵ 3,550" },
-          { title: "Double occupancy", price: "GH₵ 3,100" },
-          { title: "Monthly stay", price: "GH₵ 880 / month" },
-        ],
-        reviewsList: [
-          { name: "Akosua Nyarko", rating: 4, text: "Simple and affordable. It does the job for a student budget." },
-          { name: "Prince Ofori", rating: 4, text: "Good location for the price, and the place feels secure enough." },
-        ],
-      },
-      {
-        id: "meridian-court",
-        name: "Meridian Court",
-        area: "UCC Road",
-        location: "UCC Road, Cape Coast",
-        rating: 4.6,
-        reviews: 104,
-        price: 4800,
-        distance: 0.8,
-        type: "Self-contained",
-        label: "Top pick",
-        short: "A balanced option with a modern feel and a convenient location.",
-        description:
-          "Meridian Court offers a clean self-contained layout close to campus. It is a balanced choice for students who want comfort, Wi‑Fi, and a location that makes day-to-day life easy.",
-        phone: "+233 24 000 0007",
-        whatsapp: "+233240000007",
-        facebook: "MeridianCourt",
-        instagram: "meridian_court",
-        heroImage:
-          "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1600&q=80",
-        gallery: [
-          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
-        ],
-        amenities: ["Wi‑Fi", "Water available", "Security", "Furnished"],
-        rooms: [
-          { title: "Self-contained room", price: "GH₵ 4,800" },
-          { title: "Single deluxe", price: "GH₵ 5,400" },
-          { title: "Monthly stay", price: "GH₵ 1,200 / month" },
-        ],
-        reviewsList: [
-          { name: "Linda Asare", rating: 5, text: "Easy to recommend. The rooms are neat and the location is very practical." },
-          { name: "Foster Tetteh", rating: 4, text: "Good value for the price, especially because it is close to campus." },
-        ],
-      },
-      {
-        id: "bridge-house-hostel",
-        name: "Bridge House Hostel",
-        area: "Kotokuraba",
-        location: "Kotokuraba, Cape Coast",
-        rating: 4.3,
-        reviews: 58,
-        price: 2950,
-        distance: 1.8,
-        type: "Shared room",
-        label: "Affordable",
-        short: "An economical hostel for students who need the lowest price point.",
-        description:
-          "Bridge House Hostel is one of the more affordable choices on the platform. It is best suited to students who care most about getting a safe place to stay at a lower rate.",
-        phone: "+233 24 000 0008",
-        whatsapp: "+233240000008",
-        facebook: "BridgeHouseHostel",
-        instagram: "bridgehouse_hostel",
-        heroImage:
-          "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1600&q=80",
-        gallery: [
-          "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80",
-        ],
-        amenities: ["Water available", "Security"],
-        rooms: [
-          { title: "Shared room", price: "GH₵ 2,950" },
-          { title: "Budget twin", price: "GH₵ 2,650" },
-          { title: "Monthly stay", price: "GH₵ 760 / month" },
-        ],
-        reviewsList: [
-          { name: "Ibrahim Seidu", rating: 4, text: "Basic but solid for the cost. Good if you are trying to save money." },
-          { name: "Naana Koomson", rating: 4, text: "Cheap and functional. The owner was easy to contact." },
-        ],
-      },
-      {
-        id: "oak-residence",
-        name: "Oak Residence",
-        area: "Ayensudo",
-        location: "Ayensudo, Cape Coast",
-        rating: 4.8,
-        reviews: 139,
-        price: 6100,
-        distance: 0.6,
-        type: "Studio",
-        label: "Recommended",
-        short: "A polished studio residence with premium furnishing and strong reviews.",
-        description:
-          "Oak Residence is one of the standout premium options on the platform. It pairs stylish interiors with a compact, studio-style layout that students can settle into quickly.",
-        phone: "+233 24 000 0009",
-        whatsapp: "+233240000009",
-        facebook: "OakResidence",
-        instagram: "oak_residence",
-        heroImage:
-          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&q=80",
-        gallery: [
-          "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
-        ],
-        amenities: ["Wi‑Fi", "Security", "Furnished", "Water available", "Studio kitchen"],
-        rooms: [
-          { title: "Studio room", price: "GH₵ 6,100" },
-          { title: "Executive studio", price: "GH₵ 6,900" },
-          { title: "Monthly stay", price: "GH₵ 1,500 / month" },
-        ],
-        reviewsList: [
-          { name: "Martha Serwaa", rating: 5, text: "Beautiful interior and very comfortable for solo living." },
-          { name: "Richard Yeboah", rating: 4, text: "The best mix of style and convenience in this price range." },
-        ],
-      },
-      {
-        id: "seaview-hostel",
-        name: "Seaview Hostel",
-        area: "Anomabo",
-        location: "Anomabo, Cape Coast",
-        rating: 4.5,
-        reviews: 69,
-        price: 4450,
-        distance: 1.0,
-        type: "Private room",
-        label: "Comfort",
-        short: "Private rooms with a straightforward, comfortable feel.",
-        description:
-          "Seaview Hostel offers private rooms and practical amenities. It is a comfortable middle-ground option for students who want a calm place to stay without jumping into the premium tier.",
-        phone: "+233 24 000 0010",
-        whatsapp: "+233240000010",
-        facebook: "SeaviewHostel",
-        instagram: "seaview_hostel",
-        heroImage:
-          "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1600&q=80",
-        gallery: [
-          "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-        ],
-        amenities: ["Wi‑Fi", "Water available", "Security"],
-        rooms: [
-          { title: "Private room", price: "GH₵ 4,450" },
-          { title: "Twin private room", price: "GH₵ 4,050" },
-          { title: "Monthly stay", price: "GH₵ 1,080 / month" },
-        ],
-        reviewsList: [
-          { name: "Joan Agyeman", rating: 4, text: "Comfortable room and decent security. Good value overall." },
-          { name: "Michael Donkor", rating: 5, text: "The room felt spacious and peaceful. I would stay again." },
-        ],
-      },
-      {
-        id: "greenline-suites",
-        name: "Greenline Suites",
-        area: "UCC Road",
-        location: "UCC Road, Cape Coast",
-        rating: 4.7,
-        reviews: 111,
-        price: 5150,
-        distance: 0.5,
-        type: "Self-contained",
-        label: "Close to campus",
-        short: "A close-to-campus self-contained option with reliable features.",
-        description:
-          "Greenline Suites is positioned for students who want quick access to campus and a clean self-contained layout. It is a strong match for anyone who values convenience over extra space.",
-        phone: "+233 24 000 0011",
-        whatsapp: "+233240000011",
-        facebook: "GreenlineSuites",
-        instagram: "greenline_suites",
-        heroImage:
-          "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1600&q=80",
-        gallery: [
-          "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80",
-        ],
-        amenities: ["Wi‑Fi", "Water available", "Security", "Furnished"],
-        rooms: [
-          { title: "Self-contained room", price: "GH₵ 5,150" },
-          { title: "Deluxe room", price: "GH₵ 5,850" },
-          { title: "Monthly stay", price: "GH₵ 1,250 / month" },
-        ],
-        reviewsList: [
-          { name: "Patricia Ansah", rating: 5, text: "Very convenient for campus life. Fast to get in and out every day." },
-          { name: "Samuel Koomson", rating: 4, text: "Clean, simple, and dependable." },
-        ],
-      },
-      {
-        id: "harbour-nest-hostel",
-        name: "Harbour Nest Hostel",
-        area: "Bakaano",
-        location: "Bakaano, Cape Coast",
-        rating: 4.2,
-        reviews: 50,
-        price: 3400,
-        distance: 1.9,
-        type: "Shared room",
-        label: "Budget",
-        short: "A value-friendly hostel with the basics covered.",
-        description:
-          "Harbour Nest Hostel is for students who want a simple shared-room option at an approachable price. The experience is straightforward, practical, and affordable.",
-        phone: "+233 24 000 0012",
-        whatsapp: "+233240000012",
-        facebook: "HarbourNestHostel",
-        instagram: "harbour_nest_hostel",
-        heroImage:
-          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&q=80",
-        gallery: [
-          "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
-        ],
-        amenities: ["Water available", "Security"],
-        rooms: [
-          { title: "Shared room", price: "GH₵ 3,400" },
-          { title: "Twin room", price: "GH₵ 3,050" },
-          { title: "Monthly stay", price: "GH₵ 790 / month" },
-        ],
-        reviewsList: [
-          { name: "Nii Armah", rating: 4, text: "Decent budget option. No surprises, which is good." },
-          { name: "Diana Bortei", rating: 4, text: "Affordable and safe enough for a semester stay." },
-        ],
-      },
-      {
-        id: "crescent-house",
-        name: "Crescent House",
-        area: "Ayensudo",
-        location: "Ayensudo, Cape Coast",
-        rating: 4.6,
-        reviews: 88,
-        price: 5800,
-        distance: 0.8,
-        type: "Private room",
-        label: "Best for pairs",
-        short: "A private-room option that works well for two students sharing.",
-        description:
-          "Crescent House is especially useful for two students who want to stay together in a more private setup. It has a comfortable arrangement and the amenities most students look for during the semester.",
-        phone: "+233 24 000 0013",
-        whatsapp: "+233240000013",
-        facebook: "CrescentHouse",
-        instagram: "crescent_house",
-        heroImage:
-          "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1600&q=80",
-        gallery: [
-          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80",
-        ],
-        amenities: ["Wi‑Fi", "Security", "Furnished", "Water available"],
-        rooms: [
-          { title: "Private room", price: "GH₵ 5,800" },
-          { title: "Shared pair room", price: "GH₵ 4,900" },
-          { title: "Monthly stay", price: "GH₵ 1,400 / month" },
-        ],
-        reviewsList: [
-          { name: "Akua Serwaa", rating: 5, text: "Perfect if you want to stay with a roommate and still have your privacy." },
-          { name: "Tariq Ibrahim", rating: 4, text: "Good location and a nice room layout." },
-        ],
-      },
-    ];
-
-    const state = {
-      saved: JSON.parse(localStorage.getItem("staynest_saved_hostels") || "[]"),
-    };
-
-    const params = new URLSearchParams(window.location.search);
-    const hostelIdFromUrl = params.get("id") || params.get("hostel") || params.get("slug");
-    const hostel = HOSTELS.find((item) => item.id === hostelIdFromUrl) || null;
-
-    const formatMoney = (value) =>
-      new Intl.NumberFormat("en-GH", {
-        style: "currency",
-        currency: "GHS",
-        maximumFractionDigits: 0,
-      }).format(Number(value)).replace("GHS", "GH₵");
-
-    const isSaved = () => state.saved.includes(hostel.id);
-
-    const toggleSaved = () => {
-      const index = state.saved.indexOf(hostel.id);
-      if (index >= 0) state.saved.splice(index, 1);
-      else state.saved.push(hostel.id);
-      localStorage.setItem("staynest_saved_hostels", JSON.stringify(state.saved));
-      render();
-    };
-
-    const renderStars = (rating) => {
-      const full = Math.round(Number(rating));
-      return "★".repeat(full) + "☆".repeat(Math.max(0, 5 - full));
-    };
-
-    const render = () => {
-      const content = document.getElementById("detailsContent");
-      const crumbArea = document.getElementById("crumbArea");
-      if (!hostel) {
-      crumbArea.textContent = 'Missing hostel link';
-      document.title = 'StayNest | Hostel not found';
-      content.innerHTML = '<section class="details-card not-found" style="grid-column: 1 / -1;"><div style="font-size: 3rem;">🧭</div><h1>Hostel details could not be loaded</h1><p>The details page needs a unique hostel id in the URL, such as <code>details.html?id=blue-horizon-hostel</code>. Right now, the link is opening without that id, so the page cannot know which hostel to show.</p><a href="explore.html" class="btn btn-primary">Back to explore</a></section>';
-      return;
-    }
-
-    crumbArea.textContent = hostel.location;
-      document.title = `StayNest | ${hostel.name}`;
-
-      content.innerHTML = `
-        <section class="details-main">
-          <article class="details-card details-hero">
-            <img src="${hostel.heroImage}" alt="${hostel.name}" />
-            <div class="details-hero-overlay">
-              <div class="details-badges">
-                <span class="details-badge gold">${hostel.label}</span>
-                <span class="details-badge"><i class="fa-solid fa-location-dot"></i> ${hostel.area}</span>
-                <span class="details-badge"><i class="fa-solid fa-bed"></i> ${hostel.type}</span>
-              </div>
-              <h1 class="details-title">${hostel.name}</h1>
-              <p class="details-subtitle">${hostel.short}</p>
+          <div class="header-actions">
+            <div class="guest-actions" data-guest-actions>
+              <a href="login.html" class="text-link">Sign in</a>
+              <a href="register.html" class="btn btn-primary">Create account</a>
             </div>
-          </article>
 
-          <article class="details-card details-body">
-            <div class="details-topbar">
-              <div class="left">
-                <span class="details-rating"><i class="fa-solid fa-star"></i> ${hostel.rating.toFixed(1)} • ${hostel.reviews} reviews</span>
-                <span class="details-rating"><i class="fa-solid fa-walkie-talkie"></i> ${hostel.distance.toFixed(1)} km from UCC</span>
-              </div>
-              <div class="right">
-                <button class="details-fav-btn" type="button" id="favBtn" aria-label="Save hostel" aria-pressed="${isSaved()}">
-                  <i class="${isSaved() ? "fa-solid" : "fa-regular"} fa-heart"></i>
+            <div class="user-actions" data-user-actions hidden>
+              <button
+                class="profile-trigger"
+                type="button"
+                aria-label="Open profile menu"
+                aria-expanded="false"
+                aria-controls="profile-menu"
+                data-profile-trigger
+              >
+                <span class="profile-avatar" data-profile-avatar>U</span>
+                <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+              </button>
+
+              <div class="profile-dropdown" id="profile-menu" data-profile-dropdown hidden>
+                <div class="profile-dropdown-top">
+                  <strong data-user-name>User Name</strong>
+                  <span data-user-email>user@email.com</span>
+                </div>
+
+                <div class="profile-dropdown-links">
+                  <a href="profile.html"><i class="fa-regular fa-user"></i> My profile</a>
+                  <a href="bookings.html"><i class="fa-regular fa-calendar-check"></i> My bookings</a>
+                  <a href="saved.html"><i class="fa-regular fa-heart"></i> Saved hostels</a>
+                </div>
+
+                <button type="button" class="profile-logout" data-logout-btn>
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  Log out
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      </header>
 
-            <section class="details-section">
-              <h2>About this hostel</h2>
-              <p>${hostel.description}</p>
+      <main id="details-main">
+        <section class="hero">
+          <article class="card hero-media">
+            <img id="detailImage" src="" alt="" />
+            <div class="hero-overlay">
+              <div>
+                <div class="details-badges">
+                  <span class="details-badge" id="detailTag"><i class="fa-solid fa-bolt"></i> Featured</span>
+                  <span class="details-badge gold" id="detailArea"><i class="fa-solid fa-location-dot"></i> Ayensudo</span>
+                </div>
 
-              <div class="stats-row">
-                <div class="stat-box"><span class="label">Price</span><strong>${formatMoney(hostel.price)}</strong></div>
-                <div class="stat-box"><span class="label">Location</span><strong>${hostel.area}</strong></div>
-                <div class="stat-box"><span class="label">Distance</span><strong>${hostel.distance.toFixed(1)} km</strong></div>
-                <div class="stat-box"><span class="label">Rating</span><strong>${hostel.rating.toFixed(1)} / 5</strong></div>
+                <div class="hero-copy">
+                  <h1 class="details-title" id="detailName">Hostel name</h1>
+                  <p class="details-subtitle" id="detailLocation">Location</p>
+                </div>
               </div>
-            </section>
-
-            <section class="details-section">
-              <h2>Amenities</h2>
-              <div class="amenity-grid">
-                ${hostel.amenities.map((item) => `<span class="amenity-pill"><i class="fa-solid fa-circle-check"></i> ${item}</span>`).join("")}
-              </div>
-            </section>
-
-            <section class="details-section">
-              <h2>Room options</h2>
-              <div class="room-grid">
-                ${hostel.rooms.map((room) => `<div class="room-pill"><span>${room.title}</span><span>${room.price}</span></div>`).join("")}
-              </div>
-            </section>
-
-            <section class="details-section">
-              <h2>Gallery</h2>
-              <div class="gallery-grid">
-                ${hostel.gallery.map((src) => `<img src="${src}" alt="${hostel.name} gallery image" />`).join("")}
-              </div>
-            </section>
-
-            <section class="details-section">
-              <h2>Reviews</h2>
-              <div class="review-list">
-                ${hostel.reviewsList.map((review) => `
-                  <div class="review-card">
-                    <div class="review-top">
-                      <strong>${review.name}</strong>
-                      <span>${renderStars(review.rating)} ${review.rating.toFixed(0)}</span>
-                    </div>
-                    <p>${review.text}</p>
-                  </div>
-                `).join("")}
-              </div>
-            </section>
+            </div>
           </article>
-        </section>
 
-        <aside class="details-aside">
-          <article class="details-card aside-card price-card">
-            <span class="eyebrow">Semester price</span>
-            <div class="price-amount">${formatMoney(hostel.price)}</div>
-            <p class="mini-note">Per semester • ${hostel.type} • ${hostel.area}</p>
+          <aside class="card aside-card price-card">
+            <span class="eyebrow"><i class="fa-solid fa-calendar-days"></i> Yearly price</span>
+            <div class="price-amount" id="detailPrice">GH₵ 0</div>
+            <p class="muted">Pricing is displayed per year so it stays consistent across the site.</p>
 
             <div class="action-stack">
-              <a class="btn btn-primary btn-full" href="bookings.html">Book now</a>
-              <a class="btn btn-secondary btn-full" href="messages.html">Message owner</a>
+              <button class="btn btn-primary btn-full" type="button" id="bookNowTop">
+                <i class="fa-solid fa-calendar-check"></i>
+                Book now
+              </button>
+              <button class="btn btn-outline btn-full" type="button" id="saveHostelBtn">
+                <i class="fa-regular fa-heart"></i>
+                Save hostel
+              </button>
             </div>
-          </article>
 
-          <article class="details-card aside-card">
-            <h3>Contact</h3>
-            <div class="contact-box">
-              <div class="contact-row"><strong>Phone</strong><a href="tel:${hostel.phone}">${hostel.phone}</a></div>
-              <div class="contact-row"><strong>WhatsApp</strong><a href="https://wa.me/${hostel.whatsapp.replace(/\D/g, "")}" target="_blank" rel="noreferrer">Chat now</a></div>
-              <div class="contact-row"><strong>Facebook</strong><span>${hostel.facebook}</span></div>
-              <div class="contact-row"><strong>Instagram</strong><span>@${hostel.instagram}</span></div>
+            <div class="details-section" style="border-top-color: rgba(255,255,255,0.14);">
+              <h3 style="margin-bottom:10px;">Quick facts</h3>
+              <div class="contact-box" style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12);">
+                <div class="contact-row">
+                  <strong>Rating</strong>
+                  <span id="detailRating">4.8</span>
+                </div>
+                <div class="contact-row">
+                  <strong>Distance</strong>
+                  <span id="detailDistance">0.8 km</span>
+                </div>
+                <div class="contact-row">
+                  <strong>Room type</strong>
+                  <span id="detailRoomType">Self-contained</span>
+                </div>
+              </div>
             </div>
-          </article>
+          </aside>
+        </section>
 
-          <article class="details-card aside-card">
-            <h3>Quick facts</h3>
-            <div class="contact-box">
-              <div class="contact-row"><strong>Room type</strong><span>${hostel.type}</span></div>
-              <div class="contact-row"><strong>Distance</strong><span>${hostel.distance.toFixed(1)} km</span></div>
-              <div class="contact-row"><strong>Rating</strong><span>${hostel.rating.toFixed(1)} / 5</span></div>
-              <div class="contact-row"><strong>Reviews</strong><span>${hostel.reviews}</span></div>
+        <section class="content-layout">
+          <div class="details-main">
+            <article class="card details-body">
+              <div class="details-topbar">
+                <div class="left">
+                  <span class="details-rating"><i class="fa-solid fa-star"></i> <span id="detailStarRating">4.8</span></span>
+                </div>
+                <div class="right">
+                  <button class="details-fav-btn" type="button" id="favBtn" aria-label="Save hostel">
+                    <i class="fa-regular fa-heart"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="details-section">
+                <h2>About this hostel</h2>
+                <p id="detailDescription">
+                  A comfortable student hostel with a clean layout, reliable water access, and a calm environment.
+                </p>
+              </div>
+
+              <div class="details-section">
+                <h2>Facilities</h2>
+                <div class="amenity-grid" id="amenityGrid"></div>
+              </div>
+
+              <div class="details-section">
+                <h2>Room options</h2>
+                <div class="room-grid" id="roomGrid"></div>
+              </div>
+
+              <div class="details-section">
+                <h2>Gallery</h2>
+                <div class="gallery-grid" id="galleryGrid"></div>
+              </div>
+
+              <div class="details-section">
+                <h2>What students say</h2>
+                <div class="review-list" id="reviewList"></div>
+              </div>
+            </article>
+          </div>
+
+          <aside class="details-aside">
+            <article class="card aside-card">
+              <span class="eyebrow"><i class="fa-solid fa-map-location-dot"></i> Location</span>
+              <h3 style="margin:10px 0 8px;" id="detailAreaName">Ayensudo</h3>
+              <p id="detailMapText">Close to campus and easy to reach from nearby student routes.</p>
+
+              <div class="details-section">
+                <h3>Contact</h3>
+                <div class="contact-box">
+                  <div class="contact-row">
+                    <strong>Call</strong>
+                    <a href="#" id="contactPhoneLink">+233 000 000 000</a>
+                  </div>
+                  <div class="contact-row">
+                    <strong>Email</strong>
+                    <a href="#" id="contactEmailLink">info@staynest.com</a>
+                  </div>
+                  <div class="contact-row">
+                    <strong>View area</strong>
+                    <span id="detailAreaLabel">Ayensudo</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="card aside-card">
+              <span class="eyebrow"><i class="fa-solid fa-circle-info"></i> Booking notes</span>
+              <p style="margin-top:10px;">
+                You can book from here. When signed in, the booking saves to your account and can appear in your bookings page.
+              </p>
+              <div class="action-stack">
+                <button class="btn btn-primary btn-full" type="button" id="bookNowSide">
+                  <i class="fa-solid fa-calendar-check"></i>
+                  Book this hostel
+                </button>
+                <a class="btn btn-outline btn-full" href="explore.html">
+                  <i class="fa-solid fa-arrow-left"></i>
+                  Back to explore
+                </a>
+              </div>
+            </article>
+          </aside>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="booking-modal" id="bookingModal" aria-hidden="true">
+    <div class="booking-dialog" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
+      <div class="booking-visual">
+        <img id="bookingHostelImage" src="" alt="" />
+        <div class="booking-visual-overlay">
+          <div class="booking-visual-top">
+            <strong id="bookingHostelName">Hostel name</strong>
+            <span id="bookingHostelLocation">Location</span>
+          </div>
+          <div class="booking-visual-bottom">
+            <span id="bookingHostelPrice">GH₵ 0 per year</span>
+            <span id="bookingHostelMeta">Room type</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="booking-form-panel">
+        <div class="booking-head">
+          <div>
+            <h2 id="bookingTitle">Book hostel</h2>
+            <p>Fill in the details below to save your booking request.</p>
+          </div>
+          <button type="button" class="close-modal-btn" id="closeBookingModal" aria-label="Close booking modal">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form id="bookingForm">
+          <div class="booking-grid">
+            <div class="booking-field">
+              <label for="bookingFullName">Full name</label>
+              <input type="text" id="bookingFullName" required />
             </div>
-          </article>
-        </aside>
-      `;
+            <div class="booking-field">
+              <label for="bookingStudentId">Student ID</label>
+              <input type="text" id="bookingStudentId" required />
+            </div>
+            <div class="booking-field">
+              <label for="bookingPhone">Phone number</label>
+              <input type="tel" id="bookingPhone" required />
+            </div>
+            <div class="booking-field">
+              <label for="bookingMoveInDate">Move-in date</label>
+              <input type="date" id="bookingMoveInDate" required />
+            </div>
+            <div class="booking-field">
+              <label for="bookingRoomType">Room type</label>
+              <select id="bookingRoomType" required>
+                <option value="self-contained">Self-contained</option>
+                <option value="shared-room">Shared room</option>
+                <option value="private-room">Private room</option>
+                <option value="studio">Studio room</option>
+              </select>
+            </div>
+            <div class="booking-field">
+              <label for="bookingArea">Area</label>
+              <input type="text" id="bookingArea" readonly />
+            </div>
+          </div>
 
-      document.getElementById("favBtn")?.addEventListener("click", toggleSaved);
-    };
+          <div class="booking-field">
+            <label for="bookingNotes">Booking notes</label>
+            <textarea id="bookingNotes" placeholder="Optional notes about your booking..."></textarea>
+          </div>
 
-    // Simple header menu support for small screens
-    const menuToggle = document.querySelector(".menu-toggle");
-    const siteNav = document.querySelector(".site-nav");
-    const headerActions = document.querySelector(".header-actions");
+          <div class="booking-message" id="bookingMessage" aria-live="polite"></div>
 
-    if (menuToggle && siteNav) {
-      menuToggle.addEventListener("click", () => {
-        const isOpen = siteNav.classList.contains("open");
-        siteNav.classList.toggle("open", !isOpen);
-        headerActions?.classList.toggle("open", !isOpen);
-        menuToggle.setAttribute("aria-expanded", String(!isOpen));
+          <div class="action-stack" style="display:flex; flex-direction:row; flex-wrap:wrap; gap:12px; margin-top:14px;">
+            <button class="btn btn-primary" type="submit" id="confirmBookingBtn">
+              <i class="fa-solid fa-calendar-check"></i>
+              Confirm booking
+            </button>
+            <button class="btn btn-outline" type="button" id="cancelBookingBtn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" aria-live="polite" role="status"></div>
+
+  <script src="auth.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const hostels = [
+        {
+          id: "sunrise-court-hostel",
+          name: "Sunrise Court Hostel",
+          area: "Ayensudo",
+          location: "Ayensudo, Cape Coast",
+          image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+          tag: "Popular",
+          rating: "4.8",
+          distance: "0.7",
+          priceYear: 9200,
+          type: "self-contained",
+          roomLabel: "Self-contained",
+          tagClass: "",
+          amenities: ["Wi-Fi", "Water available", "Security", "Furnished"],
+          gallery: [
+            "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80"
+          ],
+          reviews: [
+            { name: "Ama", stars: "5.0", text: "Clean, calm, and close to campus. Booking was easy once my details were saved." },
+            { name: "Kofi", stars: "4.8", text: "The room layout and water access made it a strong choice for the year." }
+          ]
+        },
+        {
+          id: "campus-view-lodge",
+          name: "Campus View Lodge",
+          area: "UCC Road",
+          location: "UCC Road, Cape Coast",
+          image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+          tag: "New",
+          rating: "4.7",
+          distance: "0.4",
+          priceYear: 10400,
+          type: "private-room",
+          roomLabel: "Private room",
+          tagClass: "gold",
+          amenities: ["Wi-Fi", "Security", "Furnished", "Water available"],
+          gallery: [
+            "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80"
+          ],
+          reviews: [
+            { name: "Naa", stars: "4.9", text: "Very close to the road and the room was neat. Good for a student schedule." },
+            { name: "Daniel", stars: "4.6", text: "Private room felt comfortable and the yearly cost was clearly shown." }
+          ]
+        },
+        {
+          id: "blue-horizon-hostel",
+          name: "Blue Horizon Hostel",
+          area: "Anomabo",
+          location: "Anomabo, Cape Coast",
+          image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80",
+          tag: "Value",
+          rating: "4.6",
+          distance: "1.3",
+          priceYear: 7800,
+          type: "shared-room",
+          roomLabel: "Shared room",
+          tagClass: "",
+          amenities: ["Wi-Fi", "Water available", "Security", "Furnished"],
+          gallery: [
+            "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80"
+          ],
+          reviews: [
+            { name: "Esi", stars: "4.7", text: "Great value for the price and good for students who want to spend less." },
+            { name: "Mabel", stars: "4.5", text: "The shared room was organized and booking details were straightforward." }
+          ]
+        },
+        {
+          id: "harbor-ridge-suites",
+          name: "Harbor Ridge Suites",
+          area: "Ayensudo",
+          location: "Ayensudo, Cape Coast",
+          image: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1200&q=80",
+          tag: "Premium",
+          rating: "4.9",
+          distance: "0.9",
+          priceYear: 14200,
+          type: "studio",
+          roomLabel: "Studio",
+          tagClass: "",
+          amenities: ["Wi-Fi", "Security", "Furnished", "Water available"],
+          gallery: [
+            "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
+          ],
+          reviews: [
+            { name: "Kwame", stars: "5.0", text: "Feels premium and still student-friendly. The studio option is strong." },
+            { name: "Akosua", stars: "4.8", text: "The space was tidy and booking was easy to understand." }
+          ]
+        },
+        {
+          id: "palmside-lodge",
+          name: "Palmside Lodge",
+          area: "Bakaano",
+          location: "Bakaano, Cape Coast",
+          image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+          tag: "Quiet",
+          rating: "4.5",
+          distance: "1.1",
+          priceYear: 8600,
+          type: "private-room",
+          roomLabel: "Private room",
+          tagClass: "gold",
+          amenities: ["Wi-Fi", "Security", "Water available"],
+          gallery: [
+            "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80"
+          ],
+          reviews: [
+            { name: "Selina", stars: "4.6", text: "Quiet enough for study and the room felt comfortable." },
+            { name: "Kojo", stars: "4.4", text: "Simple and practical. Good booking page flow too." }
+          ]
+        },
+        {
+          id: "city-gate-hostel",
+          name: "City Gate Hostel",
+          area: "Kotokuraba",
+          location: "Kotokuraba, Cape Coast",
+          image: "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1200&q=80",
+          tag: "Budget",
+          rating: "4.4",
+          distance: "1.6",
+          priceYear: 7100,
+          type: "shared-room",
+          roomLabel: "Shared room",
+          tagClass: "gold",
+          amenities: ["Water available", "Security"],
+          gallery: [
+            "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80"
+          ],
+          reviews: [
+            { name: "Adjoa", stars: "4.4", text: "Affordable and clear, which made comparing it easier." },
+            { name: "Ibrahim", stars: "4.3", text: "A solid budget option for yearly planning." }
+          ]
+        },
+        {
+          id: "meridian-court",
+          name: "Meridian Court",
+          area: "UCC Road",
+          location: "UCC Road, Cape Coast",
+          image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80",
+          tag: "Top pick",
+          rating: "4.6",
+          distance: "0.8",
+          priceYear: 9600,
+          type: "self-contained",
+          roomLabel: "Self-contained",
+          tagClass: "",
+          amenities: ["Wi-Fi", "Water available", "Security", "Furnished"],
+          gallery: [
+            "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"
+          ],
+          reviews: [
+            { name: "Abena", stars: "4.7", text: "A good balance of price and comfort for a student year." },
+            { name: "Samuel", stars: "4.5", text: "The whole listing was easy to scan and trust." }
+          ]
+        }
+      ];
+
+      const fallbackHostel = hostels[0];
+      const params = new URLSearchParams(window.location.search);
+      const hostelId = params.get("id");
+      const hostel = hostels.find((item) => item.id === hostelId) || fallbackHostel;
+
+      const auth = window.HostelLinkAuth?.auth || (window.firebase?.auth ? window.firebase.auth() : null);
+      const db = window.HostelLinkAuth?.db || (window.firebase?.firestore ? window.firebase.firestore() : null);
+
+      const detailImage = document.getElementById("detailImage");
+      const detailName = document.getElementById("detailName");
+      const detailLocation = document.getElementById("detailLocation");
+      const detailTag = document.getElementById("detailTag");
+      const detailArea = document.getElementById("detailArea");
+      const detailPrice = document.getElementById("detailPrice");
+      const detailRating = document.getElementById("detailRating");
+      const detailStarRating = document.getElementById("detailStarRating");
+      const detailDistance = document.getElementById("detailDistance");
+      const detailRoomType = document.getElementById("detailRoomType");
+      const detailDescription = document.getElementById("detailDescription");
+      const detailAreaName = document.getElementById("detailAreaName");
+      const detailAreaLabel = document.getElementById("detailAreaLabel");
+      const detailMapText = document.getElementById("detailMapText");
+      const contactPhoneLink = document.getElementById("contactPhoneLink");
+      const contactEmailLink = document.getElementById("contactEmailLink");
+      const amenityGrid = document.getElementById("amenityGrid");
+      const roomGrid = document.getElementById("roomGrid");
+      const galleryGrid = document.getElementById("galleryGrid");
+      const reviewList = document.getElementById("reviewList");
+      const bookNowTop = document.getElementById("bookNowTop");
+      const bookNowSide = document.getElementById("bookNowSide");
+      const saveHostelBtn = document.getElementById("saveHostelBtn");
+      const favBtn = document.getElementById("favBtn");
+      const toast = document.getElementById("toast");
+
+      const bookingModal = document.getElementById("bookingModal");
+      const bookingForm = document.getElementById("bookingForm");
+      const closeBookingModalBtn = document.getElementById("closeBookingModal");
+      const cancelBookingBtn = document.getElementById("cancelBookingBtn");
+      const confirmBookingBtn = document.getElementById("confirmBookingBtn");
+      const bookingMessage = document.getElementById("bookingMessage");
+      const bookingTitle = document.getElementById("bookingTitle");
+      const bookingHostelName = document.getElementById("bookingHostelName");
+      const bookingHostelLocation = document.getElementById("bookingHostelLocation");
+      const bookingHostelPrice = document.getElementById("bookingHostelPrice");
+      const bookingHostelImage = document.getElementById("bookingHostelImage");
+      const bookingHostelMeta = document.getElementById("bookingHostelMeta");
+      const bookingFullName = document.getElementById("bookingFullName");
+      const bookingStudentId = document.getElementById("bookingStudentId");
+      const bookingPhone = document.getElementById("bookingPhone");
+      const bookingMoveInDate = document.getElementById("bookingMoveInDate");
+      const bookingRoomType = document.getElementById("bookingRoomType");
+      const bookingArea = document.getElementById("bookingArea");
+      const bookingNotes = document.getElementById("bookingNotes");
+
+      let activeBookingHostel = hostel;
+      const savedHostels = safeParse(localStorage.getItem("staynest_saved_hostels"), []);
+
+      function safeParse(jsonText, fallback) {
+        try {
+          const parsed = JSON.parse(jsonText);
+          return parsed && typeof parsed === "object" ? parsed : fallback;
+        } catch {
+          return fallback;
+        }
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function formatPrice(value) {
+        return new Intl.NumberFormat("en-GH", {
+          style: "currency",
+          currency: "GHS",
+          maximumFractionDigits: 0
+        }).format(Number(value)).replace("GHS", "GH₵");
+      }
+
+      function showToast(text) {
+        if (!toast) return;
+        toast.textContent = text;
+        toast.classList.add("show");
+        clearTimeout(window.__staynestToastTimer);
+        window.__staynestToastTimer = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 2400);
+      }
+
+      function showBookingMessage(text, type = "success") {
+        if (!bookingMessage) return;
+        bookingMessage.textContent = text;
+        bookingMessage.className = `booking-message show ${type}`;
+      }
+
+      function getProfile() {
+        return window.HostelLinkAuth?.getStoredProfile?.() || safeParse(localStorage.getItem("staynest_profile"), {});
+      }
+
+      function initials(value) {
+        if (!value) return "U";
+        const parts = String(value).trim().replace(/[@._-]+/g, " ").split(/\s+/).filter(Boolean);
+        if (!parts.length) return "U";
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+
+      function setAvatar(button, name, photoURL) {
+        const avatarSmall = document.querySelector("[data-profile-avatar]");
+        if (!avatarSmall) return;
+        avatarSmall.innerHTML = "";
+
+        if (photoURL) {
+          const img = document.createElement("img");
+          img.src = photoURL;
+          img.alt = "";
+          avatarSmall.appendChild(img);
+        } else {
+          avatarSmall.textContent = initials(name);
+        }
+      }
+
+      function loadSavedState() {
+        const isSaved = savedHostels.includes(hostel.name);
+        saveHostelsBtnState(isSaved);
+      }
+
+      function saveHostelsBtnState(isSaved) {
+        const icon = favBtn?.querySelector("i");
+        if (icon) {
+          icon.className = isSaved ? "fa-solid fa-heart" : "fa-regular fa-heart";
+        }
+        if (saveHostelBtn) {
+          saveHostelBtn.innerHTML = isSaved
+            ? '<i class="fa-solid fa-heart"></i> Saved'
+            : '<i class="fa-regular fa-heart"></i> Save hostel';
+        }
+      }
+
+      function renderHostel() {
+        if (!hostel) {
+          document.querySelector(".hero").innerHTML = `
+            <div class="card not-found">
+              <i class="fa-solid fa-circle-exclamation" style="font-size:3rem;color:var(--gold);"></i>
+              <h1>Hostel not found</h1>
+              <p>The hostel link may be broken or the hostel ID is missing. Go back to explore and choose another listing.</p>
+              <a class="btn btn-primary" href="explore.html">Back to explore</a>
+            </div>
+          `;
+          return;
+        }
+
+        document.title = `StayNest | ${hostel.name}`;
+
+        detailImage.src = hostel.image;
+        detailImage.alt = hostel.name;
+        detailName.textContent = hostel.name;
+        detailLocation.textContent = hostel.location;
+        detailTag.innerHTML = `<i class="fa-solid fa-bolt"></i> ${escapeHtml(hostel.tag || "Featured")}`;
+        detailArea.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${escapeHtml(hostel.area)}`;
+        detailPrice.textContent = formatPrice(hostel.priceYear);
+        detailRating.textContent = hostel.rating;
+        detailStarRating.textContent = hostel.rating;
+        detailDistance.textContent = `${hostel.distance} km`;
+        detailRoomType.textContent = hostel.roomLabel;
+        detailDescription.textContent =
+          `${hostel.name} is a student-friendly stay in ${hostel.area}. It offers a clear yearly price, a simple booking flow, and the kinds of facilities students usually look for.`;
+        detailAreaName.textContent = hostel.area;
+        detailAreaLabel.textContent = hostel.area;
+        detailMapText.textContent =
+          `Located in ${hostel.location}, this hostel is a practical choice for students who want something easy to compare and book.`;
+
+        contactPhoneLink.href = "tel:+233000000000";
+        contactPhoneLink.textContent = "+233 000 000 000";
+        contactEmailLink.href = "mailto:info@staynest.com";
+        contactEmailLink.textContent = "info@staynest.com";
+
+        amenityGrid.innerHTML = hostel.amenities
+          .map((item) => `<div class="amenity-pill"><i class="fa-solid fa-circle-check" style="color:var(--green);"></i> ${escapeHtml(item)}</div>`)
+          .join("");
+
+        roomGrid.innerHTML = `
+          <div class="room-pill"><span><i class="fa-solid fa-house"></i> ${escapeHtml(hostel.roomLabel)}</span><span>${formatPrice(hostel.priceYear)}</span></div>
+          <div class="room-pill"><span><i class="fa-solid fa-shield-heart"></i> Security included</span><span>Yearly</span></div>
+          <div class="room-pill"><span><i class="fa-solid fa-droplet"></i> Water access</span><span>Available</span></div>
+        `;
+
+        galleryGrid.innerHTML = hostel.gallery
+          .map((src) => `<img src="${escapeHtml(src)}" alt="${escapeHtml(hostel.name)} gallery image" />`)
+          .join("");
+
+        reviewList.innerHTML = hostel.reviews
+          .map(
+            (review) => `
+              <div class="review-card">
+                <div class="review-top">
+                  <strong>${escapeHtml(review.name)}</strong>
+                  <span><i class="fa-solid fa-star"></i> ${escapeHtml(review.stars)}</span>
+                </div>
+                <p>${escapeHtml(review.text)}</p>
+              </div>
+            `
+          )
+          .join("");
+
+        bookingHostelName.textContent = hostel.name;
+        bookingHostelLocation.textContent = hostel.location;
+        bookingHostelPrice.innerHTML = `${formatPrice(hostel.priceYear)} <span>per year</span>`;
+        bookingHostelImage.src = hostel.image;
+        bookingHostelImage.alt = hostel.name;
+        bookingHostelMeta.textContent = `${hostel.roomLabel} in ${hostel.area}`;
+        bookingArea.value = hostel.area;
+
+        loadSavedState();
+      }
+
+      function getBookingDefaults() {
+        const profile = getProfile();
+        const user = auth?.currentUser || null;
+        return {
+          fullName: profile.fullName || user?.displayName || "",
+          studentId: profile.studentId || "",
+          phone: profile.phone || "",
+          email: profile.email || user?.email || "",
+        };
+      }
+
+      function openBookingModal() {
+        if (!hostel || !bookingModal) return;
+        activeBookingHostel = hostel;
+
+        const defaults = getBookingDefaults();
+        bookingTitle.textContent = `Book ${hostel.name}`;
+        bookingFullName.value = defaults.fullName;
+        bookingStudentId.value = defaults.studentId;
+        bookingPhone.value = defaults.phone;
+        bookingMoveInDate.value = "";
+        bookingRoomType.value = hostel.type;
+        bookingArea.value = hostel.area;
+        bookingNotes.value = "";
+        bookingMessage.className = "booking-message";
+        bookingMessage.textContent = "";
+
+        bookingModal.classList.add("open");
+        bookingModal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        setTimeout(() => bookingFullName.focus(), 50);
+      }
+
+      function closeBookingModal() {
+        if (!bookingModal) return;
+        bookingModal.classList.remove("open");
+        bookingModal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+      }
+
+      function getBookingsArray() {
+        return safeParse(localStorage.getItem("staynest_bookings"), []);
+      }
+
+      function saveBookingsArray(bookings) {
+        try {
+          localStorage.setItem("staynest_bookings", JSON.stringify(bookings));
+        } catch {
+          // ignore
+        }
+      }
+
+      function updateProfileBookingCount() {
+        const profile = getProfile();
+        const updated = {
+          ...profile,
+          bookingCount: Number(profile.bookingCount || 0) + 1
+        };
+
+        try {
+          localStorage.setItem("staynest_profile", JSON.stringify(updated));
+        } catch {
+          // ignore
+        }
+
+        if (window.HostelLinkAuth?.saveStoredProfile) {
+          window.HostelLinkAuth.saveStoredProfile(updated);
+        }
+
+        const currentUser = auth?.currentUser;
+        if (db && currentUser) {
+          db.collection("users").doc(currentUser.uid).set(
+            {
+              bookingCount: updated.bookingCount,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            { merge: true }
+          ).catch((error) => console.warn("Could not update booking count:", error));
+        }
+      }
+
+      async function saveBooking(booking) {
+        const currentUser = auth?.currentUser;
+        if (!currentUser) {
+          window.location.href = `login.html?redirect=${encodeURIComponent(window.location.href)}`;
+          return;
+        }
+
+        if (db) {
+          try {
+            await db.collection("bookings").add(booking);
+          } catch (error) {
+            console.warn("Firestore booking save failed:", error);
+            const list = getBookingsArray();
+            list.push(booking);
+            saveBookingsArray(list);
+          }
+        } else {
+          const list = getBookingsArray();
+          list.push(booking);
+          saveBookingsArray(list);
+        }
+
+        updateProfileBookingCount();
+      }
+
+      function friendlyError(error) {
+        const code = error?.code || "";
+        if (code.includes("permission-denied")) return "You are not allowed to save this booking right now.";
+        if (code.includes("network-request-failed")) return "Network error. Please check your connection and try again.";
+        return error?.message || "Booking could not be saved.";
+      }
+
+      function toggleSave() {
+        const name = hostel.name;
+        const isSaved = savedHostels.includes(name);
+
+        if (isSaved) {
+          const index = savedHostels.indexOf(name);
+          savedHostels.splice(index, 1);
+          showToast(`Removed ${name} from saved`);
+        } else {
+          savedHostels.push(name);
+          showToast(`Saved ${name}`);
+        }
+
+        try {
+          localStorage.setItem("staynest_saved_hostels", JSON.stringify(savedHostels));
+        } catch {
+          // ignore
+        }
+
+        saveHostelsBtnState(!isSaved);
+      }
+
+      renderHostel();
+
+      bookNowTop.addEventListener("click", openBookingModal);
+      bookNowSide.addEventListener("click", openBookingModal);
+
+      saveHostelBtn.addEventListener("click", toggleSave);
+      favBtn.addEventListener("click", toggleSave);
+
+      bookingModal.addEventListener("click", (event) => {
+        if (event.target === bookingModal) closeBookingModal();
       });
-    }
 
-    // Update the page title even if no hostel ID is found.
-    render();
+      closeBookingModalBtn.addEventListener("click", closeBookingModal);
+      cancelBookingBtn.addEventListener("click", closeBookingModal);
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && bookingModal.classList.contains("open")) {
+          closeBookingModal();
+        }
+      });
+
+      bookingForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const user = auth?.currentUser;
+        if (!user) {
+          window.location.href = `login.html?redirect=${encodeURIComponent(window.location.href)}`;
+          return;
+        }
+
+        if (!bookingFullName.value.trim() || !bookingStudentId.value.trim() || !bookingPhone.value.trim() || !bookingMoveInDate.value) {
+          showBookingMessage("Please complete the required booking fields.", "error");
+          return;
+        }
+
+        const booking = {
+          uid: user.uid,
+          hostelId: activeBookingHostel.id,
+          hostelName: activeBookingHostel.name,
+          location: activeBookingHostel.location,
+          area: activeBookingHostel.area,
+          roomType: bookingRoomType.value,
+          roomLabel: activeBookingHostel.roomLabel,
+          fullName: bookingFullName.value.trim(),
+          studentId: bookingStudentId.value.trim(),
+          phone: bookingPhone.value.trim(),
+          moveInDate: bookingMoveInDate.value,
+          notes: bookingNotes.value.trim(),
+          pricePerYear: activeBookingHostel.priceYear,
+          status: "pending",
+          source: "details",
+          createdAt: new Date().toISOString()
+        };
+
+        try {
+          confirmBookingBtn.disabled = true;
+          confirmBookingBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+
+          await saveBooking(booking);
+          showBookingMessage("Booking saved successfully. Taking you to your bookings...", "success");
+          showToast("Booking saved");
+
+          setTimeout(() => {
+            window.location.href = "bookings.html";
+          }, 900);
+        } catch (error) {
+          showBookingMessage(friendlyError(error), "error");
+        } finally {
+          confirmBookingBtn.disabled = false;
+          confirmBookingBtn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Confirm booking';
+        }
+      });
+
+      if (auth) {
+        auth.onAuthStateChanged((user) => {
+          const profile = getProfile();
+          const displayName = profile.fullName || user?.displayName || user?.email?.split("@")?.[0] || "User";
+          const email = profile.email || user?.email || "";
+          setAvatar(null, displayName, profile.photoURL || user?.photoURL || "");
+
+          document.querySelectorAll("[data-user-name]").forEach((el) => (el.textContent = displayName));
+          document.querySelectorAll("[data-user-email]").forEach((el) => (el.textContent = email));
+        });
+      }
+
+      document.querySelectorAll("[data-logout-btn]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          try {
+            if (auth) await auth.signOut();
+          } finally {
+            localStorage.removeItem("staynest_profile");
+            window.location.href = "index.html";
+          }
+        });
+      });
+    });
   </script>
+  <script src="app.js"></script>
 </body>
 </html>
