@@ -1,11 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const cards = Array.from(document.querySelectorAll(".booking-card"));
-  const tabs = Array.from(document.querySelectorAll(".btab"));
+  "use strict";
+
+  const auth = window.HostelLinkAuth?.auth || (window.firebase?.auth ? window.firebase.auth() : null);
+  const db = window.HostelLinkAuth?.db || (window.firebase?.firestore ? window.firebase.firestore() : null);
+
+  const BOOKINGS_KEY = "staynest_bookings";
+
+  const grid = document.getElementById("bookingsGrid");
+  const emptyState = document.getElementById("bookingsEmptyState");
   const searchInput = document.getElementById("bookingSearch");
   const sortSelect = document.getElementById("bookingSort");
   const resetBtn = document.getElementById("resetBookingFilters");
-  const grid = document.getElementById("bookingsGrid");
-  const emptyState = document.getElementById("bookingsEmptyState");
+  const tabs = Array.from(document.querySelectorAll(".btab"));
 
   const activeCountEl = document.getElementById("activeCount");
   const pendingCountEl = document.getElementById("pendingCount");
@@ -20,62 +26,356 @@ document.addEventListener("DOMContentLoaded", () => {
     tab: "all",
     query: "",
     sort: "recent",
+    userId: null,
+    userEmail: "",
+    items: [],
   };
 
-  const originalOrder = new Map(cards.map((card, index) => [card, index]));
+  function safeParse(jsonText, fallback) {
+    try {
+      const parsed = JSON.parse(jsonText);
+      return parsed && typeof parsed === "object" ? parsed : fallback;
+    } catch {
+      return fallback;
+    }
+  }
 
-  const MONTHS = {
-    jan: 0,
-    january: 0,
-    feb: 1,
-    february: 1,
-    mar: 2,
-    march: 2,
-    apr: 3,
-    april: 3,
-    may: 4,
-    jun: 5,
-    june: 5,
-    jul: 6,
-    july: 6,
-    aug: 7,
-    august: 7,
-    sep: 8,
-    sept: 8,
-    september: 8,
-    oct: 9,
-    october: 9,
-    nov: 10,
-    november: 10,
-    dec: 11,
-    december: 11,
-  };
+  function getLocalBookings() {
+    return safeParse(localStorage.getItem(BOOKINGS_KEY), []);
+  }
 
-  const setHeaderScrolled = () => {
+  function formatMoney(value) {
+    const amount = Number(value || 0);
+    return new Intl.NumberFormat("en-GH", {
+      style: "currency",
+      currency: "GHS",
+      maximumFractionDigits: 0,
+    })
+      .format(amount)
+      .replace("GHS", "GH₵");
+  }
+
+  function formatDate(value) {
+    if (!value) return "Not set";
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  function normalizeTimestamp(value) {
+    if (!value) return 0;
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+      const parsed = Date.parse(value);
+      return Number.isNaN(parsed) ? 0 : parsed;
+    }
+    if (value && typeof value.toDate === "function") {
+      return value.toDate().getTime();
+    }
+    if (value && typeof value.seconds === "number") {
+      return value.seconds * 1000;
+    }
+    return 0;
+  }
+
+  function normalizeBooking(raw) {
+    const createdAt = raw.createdAt || raw.created_at || raw.timestamp || raw.dateCreated || "";
+    const moveInDate = raw.moveInDate || raw.move_in_date || raw.moveIn || raw.checkInDate || "";
+
+    const price =
+      raw.pricePerYear ??
+      raw.priceYear ??
+      raw.yearlyPrice ??
+      raw.price ??
+      raw.amount ??
+      raw.rent ??
+      0;
+
+    const statusRaw = String(raw.status || "pending").toLowerCase();
+    let status = "pending";
+
+    if (["active", "confirmed", "approved", "paid"].includes(statusRaw)) {
+      status = "active";
+    } else if (["previous", "completed", "finished", "archived"].includes(statusRaw)) {
+      status = "previous";
+    } else if (["cancelled", "canceled", "rejected"].includes(statusRaw)) {
+      status = "previous";
+    }
+
+    const hostelName = raw.hostelName || raw.name || "Unnamed hostel";
+    const location = raw.location || raw.hostelLocation || raw.area || "Unknown location";
+    const area = raw.area || raw.zone || raw.locationArea || "";
+    const roomType = raw.roomType || raw.roomLabel || raw.room || "Not specified";
+    const ref =
+      raw.reference ||
+      raw.bookingRef ||
+      raw.bookingId ||
+      raw.id ||
+      `STN-${String(normalizeTimestamp(createdAt) || Math.floor(Math.random() * 100000)).slice(-5)}`;
+
+    return {
+      id: raw.id || raw.bookingId || ref,
+      uid: raw.uid || raw.userId || raw.user || "",
+      hostelId: raw.hostelId || "",
+      hostelName,
+      location,
+      area,
+      roomType,
+      fullName: raw.fullName || raw.studentName || "",
+      studentId: raw.studentId || "",
+      phone: raw.phone || "",
+      moveInDate,
+      pricePerYear: Number(price) || 0,
+      status,
+      reference: ref,
+      source: raw.source || "",
+      notes: raw.notes || "",
+      createdAt,
+      createdAtTs: normalizeTimestamp(createdAt),
+      searchBlob: [
+        hostelName,
+        location,
+        area,
+        roomType,
+        raw.fullName || "",
+        raw.studentId || "",
+        raw.phone || "",
+        ref,
+        status,
+        price,
+      ]
+        .join(" ")
+        .toLowerCase(),
+    };
+  }
+
+  function getStatusLabel(status) {
+    if (status === "active") return "Confirmed";
+    if (status === "previous") return "Completed";
+    return "Pending";
+  }
+
+  function getStatusClass(status) {
+    if (status === "active") return "active";
+    if (status === "previous") return "previous";
+    return "pending";
+  }
+
+  function getStatusStepText(status) {
+    if (status === "active") return "Move-in approaching";
+    if (status === "previous") return "Stay completed";
+    return "Awaiting review";
+  }
+
+  function getFilteredItems() {
+    const query = state.query.trim().toLowerCase();
+
+    return state.items
+      .filter((item) => {
+        const tabMatch = state.tab === "all" || item.status === state.tab;
+        const queryMatch = !query || item.searchBlob.includes(query);
+        return tabMatch && queryMatch;
+      })
+      .sort((a, b) => {
+        switch (state.sort) {
+          case "movein": {
+            const aMoveIn = normalizeTimestamp(a.moveInDate);
+            const bMoveIn = normalizeTimestamp(b.moveInDate);
+            if (aMoveIn !== bMoveIn) return aMoveIn - bMoveIn;
+            return b.createdAtTs - a.createdAtTs;
+          }
+          case "paid-high":
+            if (a.pricePerYear !== b.pricePerYear) return b.pricePerYear - a.pricePerYear;
+            return b.createdAtTs - a.createdAtTs;
+          case "paid-low":
+            if (a.pricePerYear !== b.pricePerYear) return a.pricePerYear - b.pricePerYear;
+            return b.createdAtTs - a.createdAtTs;
+          case "recent":
+          default:
+            return b.createdAtTs - a.createdAtTs;
+        }
+      });
+  }
+
+  function updateCounts(items) {
+    const active = items.filter((item) => item.status === "active").length;
+    const pending = items.filter((item) => item.status === "pending").length;
+    const previous = items.filter((item) => item.status === "previous").length;
+
+    if (activeCountEl) activeCountEl.textContent = String(active);
+    if (pendingCountEl) pendingCountEl.textContent = String(pending);
+    if (previousCountEl) previousCountEl.textContent = String(previous);
+  }
+
+  function setEmptyStateVisible(visible, signedIn) {
+    if (!emptyState) return;
+
+    emptyState.hidden = !visible;
+
+    if (!visible) return;
+
+    const title = emptyState.querySelector("[data-empty-title]");
+    const text = emptyState.querySelector("[data-empty-text]");
+    const cta = emptyState.querySelector("[data-empty-cta]");
+
+    if (signedIn) {
+      if (title) title.textContent = "No bookings yet";
+      if (text) text.textContent = "Once you book a hostel from Explore or Details, it will appear here.";
+      if (cta) {
+        cta.href = "explore.html";
+        cta.textContent = "Browse hostels";
+      }
+    } else {
+      if (title) title.textContent = "Sign in to see bookings";
+      if (text) text.textContent = "Your bookings are tied to your account, so sign in first to view them here.";
+      if (cta) {
+        cta.href = "login.html?redirect=bookings.html";
+        cta.textContent = "Sign in";
+      }
+    }
+  }
+
+  function bookingCardTemplate(item) {
+    const statusLabel = getStatusLabel(item.status);
+    const statusClass = getStatusClass(item.status);
+
+    return `
+      <article class="booking-card" data-status="${statusClass}" data-search="${item.searchBlob.replace(/"/g, "&quot;")}">
+        <div class="booking-card-image-wrap">
+          <div class="booking-card-image-fallback">
+            <i class="fa-solid fa-building-user"></i>
+          </div>
+          <span class="booking-badge ${statusClass}">${statusLabel}</span>
+        </div>
+
+        <div class="booking-card-body">
+          <div class="booking-top">
+            <div>
+              <h3>${item.hostelName}</h3>
+              <p class="booking-location">
+                <i class="fa-solid fa-location-dot"></i>
+                ${item.location}${item.area ? ` • ${item.area}` : ""}
+              </p>
+            </div>
+            <div class="booking-price">
+              <strong>${formatMoney(item.pricePerYear)}</strong>
+              <span>Per year</span>
+            </div>
+          </div>
+
+          <div class="booking-ref-row">
+            <span>Reference: <strong>${item.reference}</strong></span>
+            <span><i class="fa-solid fa-bed"></i> ${item.roomType}</span>
+          </div>
+
+          <div class="booking-meta-grid">
+            <div class="booking-meta-item">
+              <span class="label">Move in</span>
+              <strong>${formatDate(item.moveInDate)}</strong>
+            </div>
+            <div class="booking-meta-item">
+              <span class="label">Status</span>
+              <strong>${statusLabel}</strong>
+            </div>
+            <div class="booking-meta-item">
+              <span class="label">Booked by</span>
+              <strong>${item.fullName || "Student"}</strong>
+            </div>
+          </div>
+
+          <div class="booking-timeline">
+            <div class="timeline-item done">
+              <span class="timeline-dot"></span>
+              <div>
+                <strong>Application submitted</strong>
+                <p>Saved on ${formatDate(item.createdAt)}</p>
+              </div>
+            </div>
+            <div class="timeline-item ${item.status === "active" || item.status === "previous" ? "done" : ""}">
+              <span class="timeline-dot"></span>
+              <div>
+                <strong>Booking reviewed</strong>
+                <p>${item.status === "pending" ? "Waiting for review" : "Reviewed"}</p>
+              </div>
+            </div>
+            <div class="timeline-item ${item.status === "active" || item.status === "previous" ? "done" : ""}">
+              <span class="timeline-dot"></span>
+              <div>
+                <strong>Payment confirmed</strong>
+                <p>${item.status === "pending" ? "Pending payment confirmation" : "Confirmed"}</p>
+              </div>
+            </div>
+            <div class="timeline-item ${item.status === "active" ? "" : "done"}">
+              <span class="timeline-dot"></span>
+              <div>
+                <strong>Move-in day</strong>
+                <p>${getStatusStepText(item.status)}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="booking-actions">
+            <a href="details.html?id=${encodeURIComponent(item.hostelId || item.id)}" class="btn btn-primary">View Details</a>
+            <a href="messages.html" class="btn btn-outline">Contact Hostel</a>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function render() {
+    if (!grid) return;
+
+    const items = getFilteredItems();
+    updateCounts(items.length ? items : state.items);
+
+    grid.innerHTML = "";
+
+    if (!items.length) {
+      setEmptyStateVisible(true, !!state.userId);
+      return;
+    }
+
+    setEmptyStateVisible(false, !!state.userId);
+    grid.innerHTML = items.map(bookingCardTemplate).join("");
+  }
+
+  function syncTabUI() {
+    tabs.forEach((tab) => {
+      const active = tab.dataset.tab === state.tab;
+      tab.classList.toggle("active", active);
+      tab.setAttribute("aria-selected", String(active));
+    });
+  }
+
+  function setHeaderScrolled() {
     if (!header) return;
     header.classList.toggle("is-scrolled", window.scrollY > 8);
-  };
+  }
 
-  setHeaderScrolled();
-  window.addEventListener("scroll", setHeaderScrolled, { passive: true });
-
-  const closeMobileMenu = () => {
+  function closeMobileMenu() {
     if (!siteNav || !menuToggle) return;
     siteNav.classList.remove("open");
     headerActions?.classList.remove("open");
     menuToggle.setAttribute("aria-expanded", "false");
     document.body.classList.remove("nav-open");
-  };
+  }
 
-  const openMobileMenu = () => {
+  function openMobileMenu() {
     if (!siteNav || !menuToggle) return;
     siteNav.classList.add("open");
     headerActions?.classList.add("open");
     menuToggle.setAttribute("aria-expanded", "true");
     document.body.classList.add("nav-open");
-  };
+  }
 
-  if (menuToggle && siteNav) {
+  function setupMobileNav() {
+    if (!menuToggle || !siteNav) return;
+
     menuToggle.addEventListener("click", () => {
       const isOpen = siteNav.classList.contains("open");
       if (isOpen) closeMobileMenu();
@@ -93,238 +393,134 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const formatMoney = (value) =>
-    new Intl.NumberFormat("en-GH", {
-      style: "currency",
-      currency: "GHS",
-      maximumFractionDigits: 0,
-    })
-      .format(Number(value))
-      .replace("GHS", "GH₵");
+  function applyFiltersAndRender() {
+    syncTabUI();
+    render();
+  }
 
-  const parseMoney = (text) => {
-    const match = String(text).replace(/,/g, "").match(/GH₵\s*([\d.]+)/i);
-    return match ? Number(match[1]) : 0;
-  };
+  async function loadBookingsForUser(user) {
+    state.userId = user?.uid || null;
+    state.userEmail = user?.email || "";
 
-  const parseDateText = (text) => {
-    if (!text) return null;
+    const localBookings = getLocalBookings().map(normalizeBooking);
 
-    const clean = String(text)
-      .replace(/Move in:?\s*/i, "")
-      .replace(/Stayed:?\s*/i, "")
-      .replace(/\s+/g, " ")
-      .trim();
+    if (!user) {
+      state.items = [];
+      applyFiltersAndRender();
+      return;
+    }
 
-    // Try native parsing first.
-    const native = Date.parse(clean);
-    if (!Number.isNaN(native)) return native;
+    let remoteBookings = [];
 
-    const match = clean.match(/([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/);
-    if (!match) return null;
+    if (db) {
+      try {
+        const snap = await db.collection("bookings").where("uid", "==", user.uid).get();
+        remoteBookings = snap.docs.map((doc) =>
+          normalizeBooking({
+            id: doc.id,
+            ...doc.data(),
+          })
+        );
+      } catch (error) {
+        console.warn("Could not load bookings from Firestore:", error);
+      }
+    }
 
-    const month = MONTHS[match[1].toLowerCase()];
-    if (month === undefined) return null;
+    const merged = [...remoteBookings, ...localBookings.filter((booking) => booking.uid === user.uid)];
 
-    const day = Number(match[2]);
-    const year = Number(match[3]);
-    return new Date(year, month, day).getTime();
-  };
+    const byId = new Map();
+    merged.forEach((booking) => {
+      const key = String(booking.id || booking.reference || `${booking.hostelId}-${booking.moveInDate}`);
+      const existing = byId.get(key);
+      if (!existing || booking.createdAtTs > existing.createdAtTs) {
+        byId.set(key, booking);
+      }
+    });
 
-  const cardText = (card) => card.textContent.toLowerCase();
+    state.items = Array.from(byId.values()).sort((a, b) => b.createdAtTs - a.createdAtTs);
+    applyFiltersAndRender();
+  }
 
-  const getCardStatus = (card) => card.dataset.status || "all";
-
-  const getMoveInTimestamp = (card) => {
-    const metaItems = Array.from(card.querySelectorAll(".booking-meta-item"));
-    const moveInBox = metaItems.find((item) =>
-      item.textContent.toLowerCase().includes("move in")
-    );
-    if (!moveInBox) return Number.POSITIVE_INFINITY;
-
-    const value = moveInBox.querySelector("strong")?.textContent || "";
-    const ts = parseDateText(value);
-    return ts ?? Number.POSITIVE_INFINITY;
-  };
-
-  const getPaidAmount = (card) => {
-    const priceText = card.querySelector(".booking-price strong")?.textContent || "";
-    return parseMoney(priceText);
-  };
-
-  const updateHeroStats = () => {
-    const active = cards.filter((card) => getCardStatus(card) === "active").length;
-    const pending = cards.filter((card) => getCardStatus(card) === "pending").length;
-    const previous = cards.filter((card) => getCardStatus(card) === "previous").length;
-
-    if (activeCountEl) activeCountEl.textContent = String(active);
-    if (pendingCountEl) pendingCountEl.textContent = String(pending);
-    if (previousCountEl) previousCountEl.textContent = String(previous);
-  };
-
-  const setActiveTabUI = () => {
+  function bindEvents() {
     tabs.forEach((tab) => {
-      const active = tab.dataset.tab === state.tab;
-      tab.classList.toggle("active", active);
-      tab.setAttribute("aria-selected", String(active));
-    });
-  };
-
-  const matchesFilters = (card) => {
-    const status = getCardStatus(card);
-    const query = state.query.trim().toLowerCase();
-
-    const tabMatch = state.tab === "all" || status === state.tab;
-
-    const searchBlob = [
-      card.dataset.search || "",
-      cardText(card),
-      card.querySelector("h3")?.textContent || "",
-    ]
-      .join(" ")
-      .toLowerCase();
-
-    const queryMatch = !query || searchBlob.includes(query);
-
-    return tabMatch && queryMatch;
-  };
-
-  const sortCompare = (a, b) => {
-    const aIndex = originalOrder.get(a) ?? 0;
-    const bIndex = originalOrder.get(b) ?? 0;
-
-    switch (state.sort) {
-      case "movein": {
-        const aMoveIn = getMoveInTimestamp(a);
-        const bMoveIn = getMoveInTimestamp(b);
-
-        if (aMoveIn !== bMoveIn) return aMoveIn - bMoveIn;
-        return aIndex - bIndex;
-      }
-
-      case "paid-high": {
-        const aPaid = getPaidAmount(a);
-        const bPaid = getPaidAmount(b);
-        if (aPaid !== bPaid) return bPaid - aPaid;
-        return aIndex - bIndex;
-      }
-
-      case "paid-low": {
-        const aPaid = getPaidAmount(a);
-        const bPaid = getPaidAmount(b);
-        if (aPaid !== bPaid) return aPaid - bPaid;
-        return aIndex - bIndex;
-      }
-
-      case "recent":
-      default:
-        return aIndex - bIndex;
-    }
-  };
-
-  const renderCards = () => {
-    const visibleCards = [];
-    const hiddenCards = [];
-
-    cards.forEach((card) => {
-      const visible = matchesFilters(card);
-      card.style.display = visible ? "" : "none";
-      card.dataset.visible = visible ? "true" : "false";
-      if (visible) visibleCards.push(card);
-      else hiddenCards.push(card);
-    });
-
-    visibleCards.sort(sortCompare);
-
-    if (grid) {
-      visibleCards.forEach((card) => grid.appendChild(card));
-      hiddenCards.forEach((card) => grid.appendChild(card));
-    }
-
-    if (emptyState) {
-      const shouldShowEmpty = visibleCards.length === 0;
-      emptyState.hidden = !shouldShowEmpty;
-    }
-
-    const activeVisible = visibleCards.filter((card) => getCardStatus(card) === "active").length;
-    const pendingVisible = visibleCards.filter((card) => getCardStatus(card) === "pending").length;
-    const previousVisible = visibleCards.filter((card) => getCardStatus(card) === "previous").length;
-
-    // These are useful when tabs/search narrow the view.
-    if (activeCountEl && state.tab !== "all") activeCountEl.textContent = String(activeVisible);
-    if (pendingCountEl && state.tab !== "all") pendingCountEl.textContent = String(pendingVisible);
-    if (previousCountEl && state.tab !== "all") previousCountEl.textContent = String(previousVisible);
-  };
-
-  const refresh = () => {
-    updateHeroStats();
-    setActiveTabUI();
-    renderCards();
-  };
-
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      state.tab = tab.dataset.tab || "all";
-      refresh();
-    });
-  });
-
-  searchInput?.addEventListener("input", () => {
-    state.query = searchInput.value;
-    renderCards();
-  });
-
-  sortSelect?.addEventListener("change", () => {
-    state.sort = sortSelect.value;
-    renderCards();
-  });
-
-  resetBtn?.addEventListener("click", () => {
-    state.tab = "all";
-    state.query = "";
-    state.sort = "recent";
-
-    if (searchInput) searchInput.value = "";
-    if (sortSelect) sortSelect.value = "recent";
-
-    refresh();
-  });
-
-  // Simple keyboard convenience.
-  searchInput?.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      searchInput.value = "";
-      state.query = "";
-      renderCards();
-    }
-  });
-
-  // Initial paint.
-  refresh();
-
-  // Animate cards in softly.
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("in-view");
-          observer.unobserve(entry.target);
-        }
+      tab.addEventListener("click", () => {
+        state.tab = tab.dataset.tab || "all";
+        applyFiltersAndRender();
       });
-    },
-    {
-      threshold: 0.14,
-      rootMargin: "0px 0px -40px 0px",
+    });
+
+    searchInput?.addEventListener("input", () => {
+      state.query = searchInput.value || "";
+      render();
+    });
+
+    sortSelect?.addEventListener("change", () => {
+      state.sort = sortSelect.value || "recent";
+      render();
+    });
+
+    resetBtn?.addEventListener("click", () => {
+      state.tab = "all";
+      state.query = "";
+      state.sort = "recent";
+
+      if (searchInput) searchInput.value = "";
+      if (sortSelect) sortSelect.value = "recent";
+
+      applyFiltersAndRender();
+    });
+
+    searchInput?.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        searchInput.value = "";
+        state.query = "";
+        render();
+      }
+    });
+
+    window.addEventListener("storage", () => {
+      if (state.userId) {
+        loadBookingsForUser({ uid: state.userId, email: state.userEmail });
+      }
+    });
+  }
+
+  function initEmptyFallback() {
+    if (!grid) return;
+
+    if (!emptyState) {
+      const fallback = document.createElement("section");
+      fallback.id = "bookingsEmptyState";
+      fallback.className = "empty-state";
+      fallback.hidden = true;
+      fallback.innerHTML = `
+        <div class="empty-state-card">
+          <div class="empty-state-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
+          <h3 data-empty-title>No bookings yet</h3>
+          <p data-empty-text>Once you book a hostel from Explore or Details, it will appear here.</p>
+          <a class="btn btn-primary" data-empty-cta href="explore.html">Browse hostels</a>
+        </div>
+      `;
+      grid.parentElement?.appendChild(fallback);
     }
-  );
+  }
 
-  cards.forEach((card) => {
-    card.classList.add("reveal-item");
-    observer.observe(card);
-  });
+  initEmptyFallback();
+  setupMobileNav();
+  bindEvents();
+  setHeaderScrolled();
+  window.addEventListener("scroll", setHeaderScrolled, { passive: true });
 
-  // Keep active counts in sync if another tab changes storage later.
-  window.addEventListener("storage", () => {
-    refresh();
-  });
+  if (auth) {
+    auth.onAuthStateChanged((user) => {
+      loadBookingsForUser(user);
+    });
+  } else {
+    state.items = getLocalBookings().map(normalizeBooking);
+    applyFiltersAndRender();
+  }
+
+  window.BookingsPage = {
+    reload: () => loadBookingsForUser(auth?.currentUser || null),
+  };
 });
