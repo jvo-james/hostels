@@ -46,31 +46,7 @@
 
   <main id="messages-main">
     <div class="container messages-shell">
-      <section class="messages-hero">
-        <div class="messages-hero-copy">
-          <span class="eyebrow"><i class="fa-solid fa-comments"></i> Accommodation communication hub</span>
-          <h1>Messages</h1>
-          <p>Talk directly with hostel managers, caretakers, or property representatives before booking. Ask about availability, room type, payments, or move-in updates.</p>
-        </div>
-
-        <div class="messages-hero-stats" aria-label="Message stats">
-          <div class="message-stat">
-            <strong>6</strong>
-            <span>Conversations</span>
-          </div>
-          <div class="message-stat">
-            <strong>3</strong>
-            <span>Unread</span>
-          </div>
-          <div class="message-stat">
-            <strong>15m</strong>
-            <span>Avg reply time</span>
-          </div>
-        </div>
-      </section>
-
       <section class="messages-layout" id="messagesLayout">
-        <!-- Sidebar -->
         <aside class="conversation-panel" aria-label="Conversations list">
           <div class="panel-card conversation-card">
             <div class="conversation-search">
@@ -169,7 +145,6 @@
           </div>
         </aside>
 
-        <!-- Chat Area -->
         <section class="chat-panel" aria-label="Chat area">
           <div class="panel-card chat-card">
             <div class="chat-header">
@@ -198,9 +173,26 @@
                 <a href="tel:+233240000001" class="icon-action" aria-label="Call hostel">
                   <i class="fa-solid fa-phone"></i>
                 </a>
-                <button class="icon-action" type="button" aria-label="More options">
-                  <i class="fa-solid fa-ellipsis-vertical"></i>
-                </button>
+
+                <div class="options-wrap">
+                  <button
+                    class="icon-action"
+                    type="button"
+                    id="moreOptionsBtn"
+                    aria-label="More options"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="chatOptionsMenu"
+                  >
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                  </button>
+
+                  <div class="chat-options-menu" id="chatOptionsMenu" hidden>
+                    <button type="button" class="chat-option-item" id="viewDetailsBtn">
+                      Details
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -251,7 +243,7 @@
                 </div>
               </div>
 
-              <div class="message-group incoming activity">
+              <div class="message-group activity">
                 <div class="activity-chip">
                   Booking request submitted
                   <span>2 days ago</span>
@@ -307,46 +299,6 @@
             </form>
           </div>
         </section>
-
-        <!-- Info Panel -->
-        <aside class="info-panel" aria-label="Conversation information">
-          <div class="panel-card info-card">
-            <span class="eyebrow"><i class="fa-solid fa-building"></i> Hostel details</span>
-            <div class="info-hostel">
-              <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=300&q=80" alt="Atlantic View Hostel" />
-              <div>
-                <h3>Atlantic View Hostel</h3>
-                <p>Amamoma, Cape Coast</p>
-              </div>
-            </div>
-
-            <div class="info-list">
-              <div class="info-row">
-                <span>Contact number</span>
-                <strong>+233 24 000 0001</strong>
-              </div>
-              <div class="info-row">
-                <span>Distance from UCC</span>
-                <strong>0.7 km</strong>
-              </div>
-              <div class="info-row">
-                <span>Availability</span>
-                <strong>September intake open</strong>
-              </div>
-            </div>
-
-            <div class="info-actions">
-              <a href="details.html?id=sunrise-court-hostel" class="btn btn-primary btn-full">View Hostel</a>
-              <a href="saved.html" class="btn btn-outline btn-full">Save Hostel</a>
-              <a href="bookings.html" class="btn btn-dark btn-full">Start Booking</a>
-            </div>
-          </div>
-
-          <div class="panel-card info-card">
-            <span class="eyebrow"><i class="fa-solid fa-lightbulb"></i> Quick suggestions</span>
-            <p class="info-copy">Ask about room sizes, payment deadlines, or photos of the bathroom and kitchen area before you decide.</p>
-          </div>
-        </aside>
       </section>
 
       <section class="messages-empty-state" id="emptyChatState" hidden>
@@ -372,6 +324,52 @@
       </section>
     </div>
   </main>
+
+  <div class="details-modal" id="hostelDetailsModal" hidden>
+    <div class="details-modal-backdrop" id="hostelDetailsBackdrop" tabindex="-1" aria-hidden="true"></div>
+
+    <div class="details-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="hostelDetailsTitle">
+      <button class="details-modal-close" type="button" id="hostelDetailsCloseBtn" aria-label="Close details modal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="details-modal-hero">
+        <img id="hostelDetailsImage" src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80" alt="Hostel image" />
+      </div>
+
+      <div class="details-modal-body">
+        <div class="details-modal-head">
+          <span class="eyebrow" id="hostelDetailsBadge">Hostel details</span>
+          <h2 id="hostelDetailsTitle">Atlantic View Hostel</h2>
+          <p id="hostelDetailsLocation">Amamoma, Cape Coast</p>
+        </div>
+
+        <div class="details-modal-grid">
+          <div class="details-modal-box">
+            <span>Contact</span>
+            <strong id="hostelDetailsPhone">+233 24 000 0001</strong>
+          </div>
+          <div class="details-modal-box">
+            <span>Distance</span>
+            <strong id="hostelDetailsDistance">0.7 km</strong>
+          </div>
+          <div class="details-modal-box">
+            <span>Status</span>
+            <strong id="hostelDetailsStatus">September intake open</strong>
+          </div>
+          <div class="details-modal-box">
+            <span>Room type</span>
+            <strong id="hostelDetailsRoomType">Double occupancy</strong>
+          </div>
+        </div>
+
+        <div class="details-modal-actions">
+          <a href="details.html?id=sunrise-court-hostel" class="btn btn-primary btn-full" id="hostelDetailsViewBtn">View Hostel</a>
+          <a href="bookings.html" class="btn btn-dark btn-full">Start Booking</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="messages.js"></script>
 </body>
