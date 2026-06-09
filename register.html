@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Create a StayNest account to save hostels, manage bookings, and continue exploring around UCC." />
+  <title>StayNest | Create account</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg: #f4f8f5;
+      --surface: rgba(255, 255, 255, 0.88);
+      --surface-strong: #ffffff;
+      --text: #10211a;
+      --muted: #64726c;
+      --line: rgba(16, 33, 26, 0.10);
+      --green: #1b4332;
+      --green-2: #2d6a4f;
+      --mint: #d8f3dc;
+      --gold: #c89b3c;
+      --danger: #c94b4b;
+      --shadow: 0 24px 60px rgba(16, 33, 26, 0.14);
+      --shadow-soft: 0 12px 34px rgba(16, 33, 26, 0.08);
+      --radius: 28px;
+      --radius-lg: 36px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(216, 243, 220, 0.7), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(247, 239, 217, 0.65), transparent 26%),
+        var(--bg);
+    }
+
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+
+    .container {
+      width: min(calc(100% - 32px), 1180px);
+      margin-inline: auto;
+    }
+
+    .page-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 0.95fr;
+    }
+
+    .auth-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 0;
+      order: 1;
+    }
+
+    .auth-card {
+      width: min(100%, 620px);
+      background: var(--surface);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      backdrop-filter: blur(16px);
+    }
+
+    .auth-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+
+    .auth-top h2 {
+      margin: 8px 0 0;
+      font-size: clamp(1.8rem, 1.25rem + 1vw, 2.45rem);
+      line-height: 1.1;
+      font-family: "Playfair Display", Georgia, serif;
+      letter-spacing: -0.03em;
+    }
+
+    .auth-top p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      width: fit-content;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--green), var(--green-2));
+      color: #fff;
+      box-shadow: 0 16px 30px rgba(27, 67, 50, 0.20);
+    }
+
+    .brand-text { font-size: 1.12rem; }
+
+    .mini-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(27, 67, 50, 0.08);
+      color: var(--green);
+      font-weight: 800;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 6px;
+      background: rgba(16, 33, 26, 0.04);
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      border-radius: 999px;
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 13px 16px;
+      border-radius: 999px;
+      font-weight: 800;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: #fff;
+      color: var(--green);
+      box-shadow: 0 8px 20px rgba(16, 33, 26, 0.08);
+    }
+
+    .tab-btn:hover { transform: translateY(-1px); }
+
+    .auth-form {
+      display: grid;
+      gap: 16px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field-group {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field-group label {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #23342d;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(16, 33, 26, 0.45);
+      pointer-events: none;
+    }
+
+    .auth-input {
+      width: 100%;
+      border: 1.5px solid rgba(16, 33, 26, 0.12);
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--text);
+      border-radius: 18px;
+      padding: 15px 16px 15px 48px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+    }
+
+    .auth-input:focus {
+      border-color: rgba(27, 67, 50, 0.45);
+      box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .password-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle-btn {
+      border: 1.5px solid rgba(16, 33, 26, 0.12);
+      background: #fff;
+      color: var(--muted);
+      width: 48px;
+      height: 54px;
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .helper-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: -2px;
+    }
+
+    .terms {
+      display: inline-flex;
+      gap: 10px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .terms input {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: var(--green);
+      flex: none;
+    }
+
+    .submit-btn {
+      border: 0;
+      border-radius: 18px;
+      padding: 15px 18px;
+      background: linear-gradient(135deg, var(--green), var(--green-2));
+      color: #fff;
+      font-weight: 900;
+      box-shadow: 0 18px 36px rgba(27, 67, 50, 0.20);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 22px 40px rgba(27, 67, 50, 0.24);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.75;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .divider {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 2px 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      height: 1px;
+      background: rgba(16, 33, 26, 0.12);
+      flex: 1;
+    }
+
+    .divider span {
+      padding: 0 14px;
+    }
+
+    .social-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 1.5px solid rgba(16, 33, 26, 0.10);
+      border-radius: 18px;
+      padding: 14px 16px;
+      background: #fff;
+      font-weight: 800;
+      color: var(--text);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .social-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-soft);
+      border-color: rgba(27, 67, 50, 0.18);
+    }
+
+    .social-btn i { color: var(--green-2); }
+
+    .form-note {
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .form-note a {
+      color: var(--green-2);
+      font-weight: 800;
+    }
+
+    .message {
+      margin-top: 14px;
+      padding: 13px 14px;
+      border-radius: 16px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      display: none;
+    }
+
+    .message.show { display: block; }
+    .message.error {
+      background: rgba(201, 75, 75, 0.10);
+      color: #9c2f2f;
+      border: 1px solid rgba(201, 75, 75, 0.16);
+    }
+    .message.success {
+      background: rgba(27, 67, 50, 0.10);
+      color: var(--green);
+      border: 1px solid rgba(27, 67, 50, 0.14);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(20px);
+      padding: 14px 18px;
+      border-radius: 999px;
+      background: rgba(16, 33, 26, 0.94);
+      color: #fff;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 50;
+      max-width: calc(100% - 24px);
+      text-align: center;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .auth-footer {
+      margin-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .auth-footer a {
+      font-weight: 700;
+      color: var(--green-2);
+    }
+
+    .visual-panel {
+      position: relative;
+      padding: 28px;
+      overflow: hidden;
+      background:
+        linear-gradient(140deg, rgba(16, 33, 26, 0.88), rgba(27, 67, 50, 0.56)),
+        url("https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80") center/cover no-repeat;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      isolation: isolate;
+      order: 2;
+    }
+
+    .visual-panel::after {
+      content: "";
+      position: absolute;
+      inset: auto -8% -18% -8%;
+      height: 42%;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.12), transparent 68%);
+      z-index: -1;
+    }
+
+    .hero-copy {
+      max-width: 520px;
+      padding-bottom: 24px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      font-size: 0.77rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .hero-copy h1 {
+      margin: 0;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(2.4rem, 1.7rem + 2.8vw, 4.8rem);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+      max-width: 10ch;
+    }
+
+    .hero-copy p {
+      margin: 18px 0 0;
+      max-width: 48ch;
+      color: rgba(255, 255, 255, 0.84);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .feature-list {
+      margin: 30px 0 0;
+      display: grid;
+      gap: 12px;
+      max-width: 420px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(12px);
+    }
+
+    .feature-item i {
+      color: #d8f3dc;
+      width: 24px;
+      text-align: center;
+    }
+
+    .feature-item span {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .stats-card {
+      margin-top: 24px;
+      width: fit-content;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      padding: 14px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(12px);
+    }
+
+    .stats-card div {
+      min-width: 110px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.10);
+      text-align: center;
+    }
+
+    .stats-card strong {
+      display: block;
+      font-size: 1.1rem;
+      color: #fff;
+    }
+
+    .stats-card span {
+      display: block;
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.78);
+      margin-top: 4px;
+    }
+
+    @media (max-width: 1100px) {
+      .page-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .auth-panel {
+        order: 2;
+        padding: 22px 0 34px;
+      }
+
+      .visual-panel {
+        order: 1;
+        min-height: 420px;
+      }
+
+      .auth-card {
+        width: min(100%, 760px);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .visual-panel {
+        padding: 22px;
+        min-height: 380px;
+      }
+
+      .auth-card {
+        padding: 22px;
+        border-radius: 24px;
+      }
+
+      .auth-top {
+        flex-direction: column;
+        align-items: start;
+      }
+
+      .field-row,
+      .social-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .helper-row {
+        flex-direction: column;
+        align-items: start;
+      }
+
+      .stats-card {
+        width: 100%;
+        grid-template-columns: 1fr;
+      }
+
+      .stats-card div {
+        min-width: 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        width: min(calc(100% - 20px), 1180px);
+      }
+
+      .visual-panel {
+        min-height: 340px;
+      }
+
+      .hero-copy p {
+        font-size: 0.96rem;
+      }
+
+      .auth-input {
+        padding-left: 44px;
+      }
+
+      .submit-btn,
+      .social-btn {
+        border-radius: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-shell">
+    <section class="auth-panel">
+      <div class="auth-card">
+        <div class="auth-top">
+          <div>
+            <span class="mini-badge"><i class="fa-solid fa-user-plus"></i> Create account</span>
+            <h2>Join StayNest</h2>
+            <p>Create your profile and begin saving the hostels you like.</p>
+          </div>
+          <a href="login.html" class="mini-badge" style="background: rgba(200,155,60,0.12); color: #8a6a19;">
+            <i class="fa-solid fa-right-to-bracket"></i> Sign in
+          </a>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Registration tabs">
+          <button class="tab-btn active" type="button" data-tab="student" aria-selected="true">Student</button>
+          <button class="tab-btn" type="button" data-tab="host" aria-selected="false">Host</button>
+        </div>
+
+        <form class="auth-form" id="registerForm" novalidate>
+          <div class="field-row">
+            <div class="field-group">
+              <label for="firstName">First name</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-user input-icon"></i>
+                <input class="auth-input" id="firstName" name="firstName" type="text" placeholder="Ama" autocomplete="given-name" required />
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="lastName">Last name</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-user input-icon"></i>
+                <input class="auth-input" id="lastName" name="lastName" type="text" placeholder="Mensah" autocomplete="family-name" required />
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="email">Email address</label>
+            <div class="input-wrap">
+              <i class="fa-solid fa-envelope input-icon"></i>
+              <input class="auth-input" id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field-group">
+              <label for="phone">Phone number</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-phone input-icon"></i>
+                <input class="auth-input" id="phone" name="phone" type="tel" placeholder="024 000 0000" autocomplete="tel" required />
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="role">I am registering as</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-briefcase input-icon"></i>
+                <select class="auth-input" id="role" name="role" required style="appearance:none; padding-right: 16px;">
+                  <option value="student">Student</option>
+                  <option value="host">Host</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="password">Password</label>
+            <div class="password-row">
+              <div class="input-wrap" style="flex:1;">
+                <i class="fa-solid fa-lock input-icon"></i>
+                <input class="auth-input" id="password" name="password" type="password" placeholder="Create a password" autocomplete="new-password" required />
+              </div>
+              <button class="toggle-btn" type="button" id="togglePassword" aria-label="Show password">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="confirmPassword">Confirm password</label>
+            <div class="input-wrap">
+              <i class="fa-solid fa-shield-halved input-icon"></i>
+              <input class="auth-input" id="confirmPassword" name="confirmPassword" type="password" placeholder="Repeat your password" autocomplete="new-password" required />
+            </div>
+          </div>
+
+          <label class="terms">
+            <input type="checkbox" id="terms" />
+            <span>I agree to the site terms and understand my account will be used to manage hostels, bookings, and saved places.</span>
+          </label>
+
+          <button class="submit-btn" id="submitBtn" type="submit">Create account</button>
+
+          <div class="message" id="formMessage" aria-live="polite"></div>
+
+          <div class="divider"><span>or continue with</span></div>
+
+          <div class="social-grid">
+            <button class="social-btn" type="button" id="googleBtn"><i class="fa-brands fa-google"></i> Google</button>
+            <button class="social-btn" type="button" id="appleBtn"><i class="fa-brands fa-apple"></i> Apple</button>
+          </div>
+        </form>
+
+        <p class="form-note">
+          Already have an account? <a href="login.html">Sign in here</a> and continue browsing your saved hostels.
+        </p>
+
+        <div class="auth-footer">
+          <span>Easy registration for a smoother booking experience.</span>
+          <a href="index.html">Return home</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="visual-panel">
+      <a href="index.html" class="brand" aria-label="StayNest home">
+        <span class="brand-mark"><i class="fa-solid fa-house-chimney"></i></span>
+        <span class="brand-text">StayNest</span>
+      </a>
+
+      <div class="hero-copy">
+        <span class="eyebrow"><i class="fa-solid fa-compass"></i> Discover stays near campus</span>
+        <h1>Make your shortlist, then make your move.</h1>
+        <p>Set up a profile to keep track of hostels that stand out, compare prices, and return to your favorites whenever you need them.</p>
+
+        <div class="feature-list" aria-label="Benefits">
+          <div class="feature-item">
+            <i class="fa-solid fa-heart"></i>
+            <span>Save and revisit hostels anytime</span>
+          </div>
+          <div class="feature-item">
+            <i class="fa-solid fa-location-dot"></i>
+            <span>Check stays close to UCC and nearby roads</span>
+          </div>
+          <div class="feature-item">
+            <i class="fa-solid fa-comments"></i>
+            <span>Keep messages and requests in one place</span>
+          </div>
+        </div>
+
+        <div class="stats-card" aria-label="Highlights">
+          <div>
+            <strong>Fast</strong>
+            <span>simple account setup</span>
+          </div>
+          <div>
+            <strong>Clear</strong>
+            <span>organized listing flow</span>
+          </div>
+          <div>
+            <strong>Mobile-ready</strong>
+            <span>works on every screen</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("registerForm");
+      const firstName = document.getElementById("firstName");
+      const lastName = document.getElementById("lastName");
+      const email = document.getElementById("email");
+      const phone = document.getElementById("phone");
+      const role = document.getElementById("role");
+      const password = document.getElementById("password");
+      const confirmPassword = document.getElementById("confirmPassword");
+      const terms = document.getElementById("terms");
+      const togglePassword = document.getElementById("togglePassword");
+      const formMessage = document.getElementById("formMessage");
+      const submitBtn = document.getElementById("submitBtn");
+      const toast = document.getElementById("toast");
+      const tabButtons = document.querySelectorAll(".tab-btn");
+      const googleBtn = document.getElementById("googleBtn");
+      const appleBtn = document.getElementById("appleBtn");
+
+      const showMessage = (text, type = "success") => {
+        formMessage.textContent = text;
+        formMessage.className = `message show ${type}`;
+      };
+
+      const showToast = (text) => {
+        toast.textContent = text;
+        toast.classList.add("show");
+        clearTimeout(window.__staynestToast);
+        window.__staynestToast = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 2200);
+      };
+
+      const setActiveTab = (tab) => {
+        tabButtons.forEach((btn) => {
+          const active = btn.dataset.tab === tab;
+          btn.classList.toggle("active", active);
+          btn.setAttribute("aria-selected", String(active));
+        });
+
+        role.value = tab === "host" ? "host" : "student";
+        showMessage(
+          tab === "host"
+            ? "Host accounts are best for listing and managing properties."
+            : "Student accounts are best for browsing, saving, and booking stays.",
+          "success"
+        );
+      };
+
+      tabButtons.forEach((button) => {
+        button.addEventListener("click", () => setActiveTab(button.dataset.tab));
+      });
+
+      togglePassword.addEventListener("click", () => {
+        const isHidden = password.type === "password";
+        password.type = isHidden ? "text" : "password";
+        confirmPassword.type = isHidden ? "text" : "password";
+        togglePassword.innerHTML = isHidden
+          ? '<i class="fa-solid fa-eye-slash"></i>'
+          : '<i class="fa-solid fa-eye"></i>';
+        togglePassword.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+      });
+
+      googleBtn.addEventListener("click", () => showToast("Google sign-up is being prepared."));
+      appleBtn.addEventListener("click", () => showToast("Apple sign-up is being prepared."));
+
+      const savedEmail = localStorage.getItem("staynest_email");
+      const savedUser = JSON.parse(localStorage.getItem("staynest_user") || "null");
+      if (savedEmail && !email.value) email.value = savedEmail;
+      if (savedUser?.email && !email.value) email.value = savedUser.email;
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const first = firstName.value.trim();
+        const last = lastName.value.trim();
+        const emailValue = email.value.trim();
+        const phoneValue = phone.value.trim();
+        const passwordValue = password.value.trim();
+        const confirmValue = confirmPassword.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^[0-9+()\-\s]{7,}$/;
+
+        if (!first || !last) {
+          showMessage("Please enter your first and last name.", "error");
+          (first || last ? lastName : firstName).focus();
+          return;
+        }
+
+        if (!emailValue || !emailRegex.test(emailValue)) {
+          showMessage("Please enter a valid email address.", "error");
+          email.focus();
+          return;
+        }
+
+        if (!phoneValue || !phoneRegex.test(phoneValue)) {
+          showMessage("Please enter a valid phone number.", "error");
+          phone.focus();
+          return;
+        }
+
+        if (passwordValue.length < 6) {
+          showMessage("Your password should be at least 6 characters long.", "error");
+          password.focus();
+          return;
+        }
+
+        if (passwordValue !== confirmValue) {
+          showMessage("The passwords do not match.", "error");
+          confirmPassword.focus();
+          return;
+        }
+
+        if (!terms.checked) {
+          showMessage("Please agree to the site terms to continue.", "error");
+          terms.focus();
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating account...';
+
+        setTimeout(() => {
+          const user = {
+            firstName: first,
+            lastName: last,
+            name: `${first} ${last}`,
+            email: emailValue,
+            phone: phoneValue,
+            role: role.value,
+            createdAt: new Date().toISOString(),
+          };
+
+          localStorage.setItem("staynest_user", JSON.stringify(user));
+          localStorage.setItem("staynest_email", emailValue);
+
+          showMessage("Your account is ready. Welcome to StayNest.", "success");
+          showToast("Account created successfully");
+
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Continue to home";
+
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 1100);
+        }, 1000);
+      });
+
+      setActiveTab("student");
+    });
+  </script>
+</body>
+</html>
