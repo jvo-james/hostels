@@ -881,74 +881,77 @@ button {
   }
 }
 
+.header-inner {
+  position: relative;
+}
+
 @media (max-width: 900px) {
-  .header-actions,
-  .site-nav {
-    display: none;
+  .header-inner {
+    flex-wrap: wrap;
+    align-items: center;
   }
 
   .menu-toggle {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    margin-left: auto;
+    z-index: 1002;
   }
 
-  .hero-section {
-    padding-top: 56px;
-  }
-
-  .section {
-    padding: 68px 0;
-  }
-
-  .section-heading-row {
-    align-items: start;
-    flex-direction: column;
-  }
-
-  .hero-copy h1 {
-    max-width: 12ch;
-  }
-
-  .hero-search {
-    grid-template-columns: 24px 1fr;
-  }
-
-  .hero-search .btn {
-    grid-column: 1 / -1;
+  .site-nav,
+  .header-actions {
+    display: none;
     width: 100%;
   }
 
-  .hero-mini-stats {
-    grid-template-columns: 1fr;
+  .site-nav.open,
+  .header-actions.open {
+    display: flex;
   }
 
-  .hero-visual {
-    min-height: 420px;
+  .site-nav.open {
+    order: 3;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(16, 33, 26, 0.10);
+    box-shadow: var(--shadow-md);
   }
 
-  .hero-card-main img {
-    height: 420px;
+  .site-nav.open a {
+    padding: 14px 12px;
+    border-radius: 14px;
   }
 
-  .feature-grid,
-  .testimonial-grid,
-  .district-grid,
-  .hostel-grid {
-    grid-template-columns: 1fr;
+  .site-nav.open a::after {
+    display: none;
   }
 
-  .district-card,
-  .district-card-large {
-    min-height: 230px;
+  .site-nav.open a:hover,
+  .site-nav.open a.active {
+    background: rgba(27, 67, 50, 0.06);
   }
 
-  .spotlight-copy,
-  .cta-panel {
-    padding: 24px;
+  .header-actions.open {
+    order: 4;
+    margin-top: 10px;
+    padding: 10px;
+    flex-direction: column;
+    align-items: stretch;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(16, 33, 26, 0.10);
+    box-shadow: var(--shadow-md);
+  }
+
+  .header-actions.open .btn,
+  .header-actions.open .text-link {
+    width: 100%;
+    justify-content: center;
   }
 }
-
 @media (max-width: 640px) {
   :root {
     --header-h: 74px;
@@ -1017,6 +1020,25 @@ button {
     height: 360px;
   }
 
+.hero-mini-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.hero-mini-stats > div {
+  padding: 10px 8px;
+  text-align: center;
+}
+
+.hero-mini-stats strong {
+  font-size: 0.92rem;
+}
+
+.hero-mini-stats span {
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
   .feature-card,
   .testimonial-card,
   .hostel-body,
@@ -1024,6 +1046,80 @@ button {
   .cta-panel {
     border-radius: 22px;
   }
+
+.feature-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.feature-card {
+  padding: 16px 12px;
+  text-align: center;
+}
+
+.feature-card p {
+  display: none;
+}
+
+.feature-icon {
+  margin: 0 auto 10px;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+}
+
+.feature-card h3 {
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.district-grid,
+.hostel-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.district-card-large {
+  grid-column: 1 / -1;
+  min-height: 210px;
+}
+
+.district-card {
+  min-height: 180px;
+}
+
+.hostel-card {
+  border-radius: 20px;
+}
+
+.hostel-body {
+  padding: 14px;
+}
+
+.hostel-top h3 {
+  font-size: 0.92rem;
+}
+
+.hostel-price {
+  font-size: 1rem;
+}
+
+.testimonial-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.testimonial-card:nth-child(1) {
+  grid-column: 1 / -1;
+}
+
+.testimonial-card {
+  padding: 18px;
+}
+
+.testimonial-card p {
+  font-size: 0.92rem;
+}
 
   .section {
     padding: 56px 0;
@@ -1041,6 +1137,23 @@ button {
   .footer-grid {
     gap: 16px;
   }
+.footer-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 12px;
+}
+
+.footer-grid > div:first-child {
+  grid-column: 1 / -1;
+}
+
+.site-footer h3 {
+  font-size: 0.9rem;
+}
+
+.site-footer a:not(.brand) {
+  font-size: 0.84rem;
+  margin-bottom: 8px;
+}
 }
 
 @media (max-width: 420px) {
@@ -1056,5 +1169,19 @@ button {
 
   .hostel-price {
     font-size: 1.02rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-section {
+    padding: 42px 0 52px;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(2.2rem, 1.3rem + 7vw, 3.35rem);
+  }
+
+  .hero-card-main img {
+    height: 360px;
   }
 }
