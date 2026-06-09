@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Track your hostel reservations, pending requests, confirmed stays, and move-in dates on StayNest." />
+  <title>StayNest | My Bookings</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="bookings.css" />
+</head>
+<body>
+  <a class="skip-link" href="#bookings-main">Skip to content</a>
+
+  <header class="site-header is-scrolled">
+    <div class="container header-inner">
+      <a href="index.html" class="brand" aria-label="StayNest home">
+        <span class="brand-mark"><i class="fa-solid fa-house-chimney"></i></span>
+        <span class="brand-text">StayNest</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="explore.html">Explore</a>
+        <a href="saved.html">Saved</a>
+        <a href="bookings.html" class="active">Bookings</a>
+        <a href="messages.html">Messages</a>
+        <a href="profile.html">Profile</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="login.html" class="text-link">Sign in</a>
+        <a href="register.html" class="btn btn-primary">Create account</a>
+      </div>
+
+      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <main id="bookings-main">
+    <div class="container bookings-shell">
+      <section class="bookings-hero">
+        <div class="bookings-hero-grid">
+          <div class="bookings-copy">
+            <span class="eyebrow"><i class="fa-solid fa-calendar-check"></i> Accommodation dashboard</span>
+            <h1>My Bookings</h1>
+            <p>Track your accommodation requests and confirmed stays in one clean place, with move-in reminders, booking progress, and payment context.</p>
+
+            <div class="booking-stats-row" aria-label="Booking summary">
+              <div class="booking-stat">
+                <strong id="activeCount">2</strong>
+                <span>Active Bookings</span>
+              </div>
+              <div class="booking-stat">
+                <strong id="pendingCount">1</strong>
+                <span>Pending Requests</span>
+              </div>
+              <div class="booking-stat">
+                <strong id="previousCount">3</strong>
+                <span>Previous Bookings</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bookings-hero-card">
+            <div class="bookings-hero-card-top">
+              <span>Current status</span>
+              <strong>2 Active • 1 Pending • 3 Previous</strong>
+            </div>
+            <div class="bookings-mini-panel">
+              <div class="mini-line">
+                <span class="dot done"></span>
+                <span>Application submitted</span>
+              </div>
+              <div class="mini-line">
+                <span class="dot done"></span>
+                <span>Booking reviewed</span>
+              </div>
+              <div class="mini-line">
+                <span class="dot done"></span>
+                <span>Payment confirmed</span>
+              </div>
+              <div class="mini-line">
+                <span class="dot"></span>
+                <span>Move-in day</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bookings-toolbar" aria-label="Booking tabs">
+        <div class="booking-tabs" id="bookingTabs" role="tablist" aria-label="Filter bookings by status">
+          <button class="btab active" type="button" data-tab="all" aria-selected="true" role="tab">All</button>
+          <button class="btab" type="button" data-tab="active" aria-selected="false" role="tab">Active</button>
+          <button class="btab" type="button" data-tab="pending" aria-selected="false" role="tab">Pending</button>
+          <button class="btab" type="button" data-tab="previous" aria-selected="false" role="tab">Previous</button>
+        </div>
+
+        <div class="booking-toolbar-actions">
+          <label class="booking-search" for="bookingSearch">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="bookingSearch" placeholder="Search hostel, reference, or location" />
+          </label>
+
+          <select id="bookingSort" class="sort-select" aria-label="Sort bookings">
+            <option value="recent">Recently Updated</option>
+            <option value="movein">Upcoming Move-In</option>
+            <option value="paid-high">Highest Paid</option>
+            <option value="paid-low">Lowest Paid</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="bookings-layout">
+        <div class="bookings-main-column">
+          <section class="section-card bookings-section">
+            <div class="section-head">
+              <div>
+                <h2>Your bookings</h2>
+                <p>Confirmed stays, pending applications, and completed reservations all appear here.</p>
+              </div>
+              <div class="section-head-right">
+                <button class="btn btn-secondary" id="resetBookingFilters" type="button">Reset filters</button>
+              </div>
+            </div>
+
+            <div id="bookingsGrid" class="bookings-grid" aria-live="polite">
+              <!-- Active Booking -->
+              <article class="booking-card" data-status="active" data-search="atlantic view hostel amamoma cape coast stn-28491 double occupancy sept 2 2026 gh₵ 5200">
+                <div class="booking-card-image-wrap">
+                  <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1400&q=80" alt="Atlantic View Hostel" />
+                  <span class="booking-badge active">Confirmed</span>
+                </div>
+
+                <div class="booking-card-body">
+                  <div class="booking-top">
+                    <div>
+                      <h3>Atlantic View Hostel</h3>
+                      <p class="booking-location"><i class="fa-solid fa-location-dot"></i> Amamoma, Cape Coast</p>
+                    </div>
+                    <div class="booking-price">
+                      <strong>GH₵ 5,200</strong>
+                      <span>Paid</span>
+                    </div>
+                  </div>
+
+                  <div class="booking-ref-row">
+                    <span>Reference: <strong>STN-28491</strong></span>
+                    <span><i class="fa-solid fa-bed"></i> Double Occupancy</span>
+                  </div>
+
+                  <div class="booking-meta-grid">
+                    <div class="booking-meta-item">
+                      <span class="label">Move in</span>
+                      <strong>Sept 2, 2026</strong>
+                    </div>
+                    <div class="booking-meta-item">
+                      <span class="label">Status</span>
+                      <strong>Confirmed</strong>
+                    </div>
+                  </div>
+
+                  <div class="booking-timeline">
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Application Submitted</strong>
+                        <p>Sent on Aug 4, 2026</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Booking Reviewed</strong>
+                        <p>Approved by the hostel owner</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Payment Confirmed</strong>
+                        <p>Receipt verified successfully</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Move-In Day</strong>
+                        <p>Coming up soon</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="booking-actions">
+                    <a href="details.html?id=sunrise-court-hostel" class="btn btn-primary">View Details</a>
+                    <a href="messages.html" class="btn btn-outline">Contact Hostel</a>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Active Booking -->
+              <article class="booking-card" data-status="active" data-search="meridian court ucc road cape coast stn-40177 private room sept 10 2026 gh₵ 4800">
+                <div class="booking-card-image-wrap">
+                  <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1400&q=80" alt="Meridian Court" />
+                  <span class="booking-badge active">Confirmed</span>
+                </div>
+
+                <div class="booking-card-body">
+                  <div class="booking-top">
+                    <div>
+                      <h3>Meridian Court</h3>
+                      <p class="booking-location"><i class="fa-solid fa-location-dot"></i> UCC Road, Cape Coast</p>
+                    </div>
+                    <div class="booking-price">
+                      <strong>GH₵ 4,800</strong>
+                      <span>Paid</span>
+                    </div>
+                  </div>
+
+                  <div class="booking-ref-row">
+                    <span>Reference: <strong>STN-40177</strong></span>
+                    <span><i class="fa-solid fa-key"></i> Private Room</span>
+                  </div>
+
+                  <div class="booking-meta-grid">
+                    <div class="booking-meta-item">
+                      <span class="label">Move in</span>
+                      <strong>Sept 10, 2026</strong>
+                    </div>
+                    <div class="booking-meta-item">
+                      <span class="label">Status</span>
+                      <strong>Confirmed</strong>
+                    </div>
+                  </div>
+
+                  <div class="booking-timeline">
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Application Submitted</strong>
+                        <p>Sent on Aug 8, 2026</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Booking Reviewed</strong>
+                        <p>Approved by the hostel owner</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Payment Confirmed</strong>
+                        <p>Receipt verified successfully</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Move-In Day</strong>
+                        <p>Coming up soon</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="booking-actions">
+                    <a href="details.html?id=meridian-court" class="btn btn-primary">View Details</a>
+                    <a href="messages.html" class="btn btn-outline">Contact Hostel</a>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Pending Booking -->
+              <article class="booking-card" data-status="pending" data-search="harbor ridge suites ayensudo cape coast stn-51022 studio application under review gh₵ 7100">
+                <div class="booking-card-image-wrap">
+                  <img src="https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1400&q=80" alt="Harbor Ridge Suites" />
+                  <span class="booking-badge pending">Application Under Review</span>
+                </div>
+
+                <div class="booking-card-body">
+                  <div class="booking-top">
+                    <div>
+                      <h3>Harbor Ridge Suites</h3>
+                      <p class="booking-location"><i class="fa-solid fa-location-dot"></i> Ayensudo, Cape Coast</p>
+                    </div>
+                    <div class="booking-price">
+                      <strong>GH₵ 7,100</strong>
+                      <span>Pending payment</span>
+                    </div>
+                  </div>
+
+                  <div class="booking-ref-row">
+                    <span>Reference: <strong>STN-51022</strong></span>
+                    <span><i class="fa-solid fa-house"></i> Studio</span>
+                  </div>
+
+                  <div class="booking-meta-grid">
+                    <div class="booking-meta-item">
+                      <span class="label">Submitted</span>
+                      <strong>Aug 11, 2026</strong>
+                    </div>
+                    <div class="booking-meta-item">
+                      <span class="label">Expected response</span>
+                      <strong>Aug 15, 2026</strong>
+                    </div>
+                  </div>
+
+                  <div class="booking-timeline">
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Application Submitted</strong>
+                        <p>Waiting on hostel review</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item current">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Booking Reviewed</strong>
+                        <p>In progress</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Payment Confirmed</strong>
+                        <p>Will unlock after approval</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Move-In Day</strong>
+                        <p>Awaiting booking confirmation</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="booking-actions">
+                    <a href="details.html?id=harbor-ridge-suites" class="btn btn-primary">View Application</a>
+                    <button class="btn btn-outline" type="button">Cancel Request</button>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Previous Booking -->
+              <article class="booking-card" data-status="previous" data-search="blue horizon hostel anomabo cape coast stn-19921 shared room completed gh₵ 3900">
+                <div class="booking-card-image-wrap">
+                  <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1400&q=80" alt="Blue Horizon Hostel" />
+                  <span class="booking-badge expired">Completed</span>
+                </div>
+
+                <div class="booking-card-body">
+                  <div class="booking-top">
+                    <div>
+                      <h3>Blue Horizon Hostel</h3>
+                      <p class="booking-location"><i class="fa-solid fa-location-dot"></i> Anomabo, Cape Coast</p>
+                    </div>
+                    <div class="booking-price">
+                      <strong>GH₵ 3,900</strong>
+                      <span>Completed</span>
+                    </div>
+                  </div>
+
+                  <div class="booking-ref-row">
+                    <span>Reference: <strong>STN-19921</strong></span>
+                    <span><i class="fa-solid fa-people-roof"></i> Shared Room</span>
+                  </div>
+
+                  <div class="booking-meta-grid">
+                    <div class="booking-meta-item">
+                      <span class="label">Stayed</span>
+                      <strong>Jan – Jun 2026</strong>
+                    </div>
+                    <div class="booking-meta-item">
+                      <span class="label">Status</span>
+                      <strong>Completed</strong>
+                    </div>
+                  </div>
+
+                  <div class="booking-timeline">
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Application Submitted</strong>
+                        <p>Completed</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Booking Reviewed</strong>
+                        <p>Completed</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Payment Confirmed</strong>
+                        <p>Completed</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Move-In Day</strong>
+                        <p>Completed</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="booking-actions">
+                    <a href="details.html?id=blue-horizon-hostel" class="btn btn-primary">View Stay Details</a>
+                    <a href="explore.html" class="btn btn-outline">Book Again</a>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Previous Booking -->
+              <article class="booking-card" data-status="previous" data-search="city gate hostel kotokuraba cape coast stn-11520 shared room completed gh₵ 3550">
+                <div class="booking-card-image-wrap">
+                  <img src="https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1400&q=80" alt="City Gate Hostel" />
+                  <span class="booking-badge expired">Completed</span>
+                </div>
+
+                <div class="booking-card-body">
+                  <div class="booking-top">
+                    <div>
+                      <h3>City Gate Hostel</h3>
+                      <p class="booking-location"><i class="fa-solid fa-location-dot"></i> Kotokuraba, Cape Coast</p>
+                    </div>
+                    <div class="booking-price">
+                      <strong>GH₵ 3,550</strong>
+                      <span>Completed</span>
+                    </div>
+                  </div>
+
+                  <div class="booking-ref-row">
+                    <span>Reference: <strong>STN-11520</strong></span>
+                    <span><i class="fa-solid fa-people-roof"></i> Shared Room</span>
+                  </div>
+
+                  <div class="booking-meta-grid">
+                    <div class="booking-meta-item">
+                      <span class="label">Stayed</span>
+                      <strong>Aug – Nov 2025</strong>
+                    </div>
+                    <div class="booking-meta-item">
+                      <span class="label">Status</span>
+                      <strong>Completed</strong>
+                    </div>
+                  </div>
+
+                  <div class="booking-timeline">
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Application Submitted</strong>
+                        <p>Completed</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Booking Reviewed</strong>
+                        <p>Completed</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Payment Confirmed</strong>
+                        <p>Completed</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Move-In Day</strong>
+                        <p>Completed</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="booking-actions">
+                    <a href="details.html?id=city-gate-hostel" class="btn btn-primary">View Stay Details</a>
+                    <a href="explore.html" class="btn btn-outline">Book Again</a>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Previous Booking -->
+              <article class="booking-card" data-status="previous" data-search="oak residence ayensudo cape coast stn-88441 studio completed gh₵ 6100">
+                <div class="booking-card-image-wrap">
+                  <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80" alt="Oak Residence" />
+                  <span class="booking-badge expired">Completed</span>
+                </div>
+
+                <div class="booking-card-body">
+                  <div class="booking-top">
+                    <div>
+                      <h3>Oak Residence</h3>
+                      <p class="booking-location"><i class="fa-solid fa-location-dot"></i> Ayensudo, Cape Coast</p>
+                    </div>
+                    <div class="booking-price">
+                      <strong>GH₵ 6,100</strong>
+                      <span>Completed</span>
+                    </div>
+                  </div>
+
+                  <div class="booking-ref-row">
+                    <span>Reference: <strong>STN-88441</strong></span>
+                    <span><i class="fa-solid fa-house"></i> Studio</span>
+                  </div>
+
+                  <div class="booking-meta-grid">
+                    <div class="booking-meta-item">
+                      <span class="label">Stayed</span>
+                      <strong>Jan – Mar 2026</strong>
+                    </div>
+                    <div class="booking-meta-item">
+                      <span class="label">Status</span>
+                      <strong>Completed</strong>
+                    </div>
+                  </div>
+
+                  <div class="booking-timeline">
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Application Submitted</strong>
+                        <p>Completed</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Booking Reviewed</strong>
+                        <p>Completed</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Payment Confirmed</strong>
+                        <p>Completed</p>
+                      </div>
+                    </div>
+                    <div class="timeline-item done">
+                      <span class="timeline-dot"></span>
+                      <div>
+                        <strong>Move-In Day</strong>
+                        <p>Completed</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="booking-actions">
+                    <a href="details.html?id=oak-residence" class="btn btn-primary">View Stay Details</a>
+                    <a href="explore.html" class="btn btn-outline">Book Again</a>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <div id="bookingsEmptyState" class="bookings-empty" hidden>
+              <svg viewBox="0 0 360 260" role="img" aria-label="Empty bookings illustration">
+                <defs>
+                  <linearGradient id="bookingEmptyGrad" x1="0%" x2="100%" y1="0%" y2="100%">
+                    <stop offset="0%" stop-color="#d8f3dc"></stop>
+                    <stop offset="100%" stop-color="#ffffff"></stop>
+                  </linearGradient>
+                </defs>
+                <rect x="58" y="58" width="244" height="150" rx="26" fill="url(#bookingEmptyGrad)" stroke="#dbe7e1" stroke-width="3"></rect>
+                <rect x="88" y="90" width="96" height="16" rx="8" fill="#1b4332" opacity="0.86"></rect>
+                <rect x="88" y="122" width="176" height="12" rx="6" fill="#5b6f67" opacity="0.35"></rect>
+                <rect x="88" y="146" width="154" height="12" rx="6" fill="#5b6f67" opacity="0.25"></rect>
+                <circle cx="256" cy="128" r="26" fill="#d8f3dc" stroke="#c7e5ce"></circle>
+                <path d="M246 128l8 8 16-18" stroke="#1b4332" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M84 214c34 12 66 18 102 18 42 0 69-10 95-10 28 0 51 6 69 16" stroke="#d8f3dc" stroke-width="18" stroke-linecap="round"></path>
+              </svg>
+              <h2>No bookings yet</h2>
+              <p>Start exploring available hostels and reserve a place that fits your needs.</p>
+              <a href="explore.html" class="btn btn-primary">Explore Hostels</a>
+            </div>
+          </section>
+        </div>
+
+        <aside class="bookings-aside">
+          <section class="section-card reminder-card">
+            <span class="eyebrow"><i class="fa-solid fa-bell"></i> Move-In Reminder</span>
+            <h2>Atlantic View Hostel</h2>
+            <p>Move in within <strong>14 days</strong>.</p>
+
+            <div class="reminder-list">
+              <h3>Documents required</h3>
+              <ul>
+                <li>Student ID</li>
+                <li>Admission Letter</li>
+                <li>Payment Receipt</li>
+              </ul>
+            </div>
+
+            <a href="#" class="btn btn-primary btn-full">View Checklist</a>
+          </section>
+
+          <section class="section-card payment-card">
+            <span class="eyebrow"><i class="fa-solid fa-wallet"></i> Payment Summary</span>
+            <div class="payment-row">
+              <span>Total Bookings</span>
+              <strong>GH₵ 12,600</strong>
+            </div>
+            <div class="payment-row">
+              <span>Paid</span>
+              <strong>GH₵ 10,200</strong>
+            </div>
+            <div class="payment-row">
+              <span>Outstanding</span>
+              <strong>GH₵ 2,400</strong>
+            </div>
+          </section>
+
+          <section class="section-card support-card">
+            <span class="eyebrow"><i class="fa-solid fa-circle-question"></i> Need help?</span>
+            <h2>Need help with your booking?</h2>
+            <p>Use the support options below if you need help with timing, payment, or hostel communication.</p>
+
+            <div class="support-actions">
+              <a href="messages.html" class="btn btn-primary btn-full">Message Hostel</a>
+              <a href="mailto:support@staynest.com" class="btn btn-outline btn-full">Contact Support</a>
+            </div>
+          </section>
+        </aside>
+      </section>
+    </div>
+  </main>
+
+  <script src="bookings.js"></script>
+</body>
+</html>
