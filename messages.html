@@ -14,15 +14,21 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="messages.css" />
 </head>
-<body>
+<body data-page="messages" data-auth-required="true">
   <a class="skip-link" href="#messages-main">Skip to content</a>
 
   <header class="site-header is-scrolled">
     <div class="container header-inner">
       <a href="index.html" class="brand" aria-label="StayNest home">
-        <span class="brand-mark"><i class="fa-solid fa-house-chimney"></i></span>
+        <span class="brand-mark">
+          <i class="fa-solid fa-house-chimney"></i>
+        </span>
         <span class="brand-text">StayNest</span>
       </a>
+
+      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+      </button>
 
       <nav class="site-nav" aria-label="Primary navigation">
         <a href="index.html">Home</a>
@@ -30,23 +36,56 @@
         <a href="saved.html">Saved</a>
         <a href="bookings.html">Bookings</a>
         <a href="messages.html" class="active">Messages</a>
-        <a href="profile.html">Profile</a>
       </nav>
 
       <div class="header-actions">
-        <a href="login.html" class="text-link">Sign in</a>
-        <a href="register.html" class="btn btn-primary">Create account</a>
-      </div>
+        <div data-guest-actions>
+          <a href="login.html" class="text-link">Sign in</a>
+          <a href="register.html" class="btn btn-primary">Create account</a>
+        </div>
 
-      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
-        <i class="fa-solid fa-bars"></i>
-      </button>
+        <div class="user-actions" data-user-actions hidden>
+          <div class="profile-menu">
+            <button
+              class="profile-trigger"
+              type="button"
+              data-profile-trigger
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-label="Open profile menu"
+            >
+              <span class="profile-avatar" data-profile-avatar>U</span>
+            </button>
+
+            <div class="profile-dropdown" data-profile-dropdown hidden>
+              <div class="profile-dropdown-head">
+                <span class="profile-avatar large" data-profile-avatar-large>U</span>
+                <div class="profile-dropdown-copy">
+                  <strong data-user-name>User</strong>
+                  <span data-user-email></span>
+                </div>
+              </div>
+
+              <div class="profile-dropdown-body">
+                <a href="profile.html">Profile</a>
+                <a href="bookings.html">Bookings</a>
+                <a href="saved.html">Saved hostels</a>
+              </div>
+
+              <button class="logout-btn" type="button" data-logout-btn>
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Log out
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 
   <main id="messages-main">
     <div class="container messages-shell">
-      <section class="messages-layout" id="messagesLayout">
+      <section class="messages-layout" id="messagesLayout" aria-label="Messages workspace">
         <aside class="conversation-panel" aria-label="Conversations list">
           <div class="panel-card conversation-card">
             <div class="conversation-search">
@@ -259,7 +298,7 @@
 
               <div class="message-group incoming">
                 <div class="message-bubble">
-                  <p>Pricing is GH₵ 5,200 for the semester. Water and security are included.</p>
+                  <p>Pricing is GH₵ 5,200 per year. Water and security are included.</p>
                   <span class="message-meta">09:22 • Seen</span>
                 </div>
               </div>
@@ -371,6 +410,10 @@
     </div>
   </div>
 
-  <script src="messages.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js" defer></script>
+  <script src="auth.js" defer></script>
+  <script src="messages.js" defer></script>
 </body>
 </html>
