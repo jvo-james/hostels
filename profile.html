@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta
     name="description"
-    content="Manage your Hostel Link Ghana profile, booking details, and saved account information."
+    content="Manage your StayNest profile, booking details, and saved account information."
   />
-  <title>Hostel Link Ghana | Profile</title>
+  <title>StayNest | Profile</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,10 +17,9 @@
   >
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <style>
     :root {
@@ -187,6 +186,28 @@
       align-items: center;
       gap: 12px;
       position: relative;
+    }
+
+    .guest-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .guest-link {
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 800;
+      border: 1px solid rgba(16, 33, 26, 0.08);
+      background: #fff;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .guest-link.primary {
+      background: linear-gradient(135deg, var(--green), var(--green-2));
+      color: #fff;
+      border-color: transparent;
     }
 
     .profile-trigger {
@@ -540,6 +561,12 @@
       transform: translateY(-1px);
     }
 
+    .input:disabled {
+      background: rgba(244, 248, 245, 0.75);
+      color: rgba(16, 33, 26, 0.7);
+      cursor: not-allowed;
+    }
+
     .notes-box {
       margin-top: 16px;
       background: linear-gradient(135deg, rgba(27, 67, 50, 0.05), rgba(216, 243, 220, 0.55));
@@ -781,7 +808,7 @@
   </style>
 </head>
 
-<body data-page="profile">
+<body data-page="profile" data-auth-required="true">
   <a class="skip-link" href="#profile-content">Skip to content</a>
 
   <div class="page-wrap">
@@ -792,11 +819,11 @@
     <div class="container">
       <header class="site-header">
         <div class="header-bar">
-          <a href="index.html" class="brand-row" aria-label="Hostel Link Ghana home">
+          <a href="index.html" class="brand-row" aria-label="StayNest home">
             <span class="brand-mark" aria-hidden="true">
-              <img src="assets/logo.svg" alt="" />
+              <img src="assets/logo.svg" alt="" onerror="this.style.display='none'; this.parentElement.textContent='S';">
             </span>
-            <span class="brand-text">Hostel Link Ghana</span>
+            <span class="brand-text">StayNest</span>
           </a>
 
           <nav class="nav-links" aria-label="Primary navigation">
@@ -809,39 +836,46 @@
           </nav>
 
           <div class="header-actions">
-            <button
-              class="profile-trigger"
-              type="button"
-              aria-label="Open profile menu"
-              aria-expanded="false"
-              aria-controls="profile-menu"
-              data-profile-trigger
-            >
-              <span class="profile-avatar" data-profile-avatar>U</span>
-              <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-            </button>
+            <div class="guest-actions" data-guest-actions>
+              <a class="guest-link" href="login.html">Sign in</a>
+              <a class="guest-link primary" href="register.html">Create account</a>
+            </div>
 
-            <div class="profile-dropdown" id="profile-menu" data-profile-dropdown hidden>
-              <div class="profile-dropdown-top">
-                <strong data-user-name>User Name</strong>
-                <span data-user-email>user@email.com</span>
-              </div>
-
-              <div class="profile-dropdown-links">
-                <a href="bookings.html">
-                  <i class="fa-regular fa-calendar-check"></i>
-                  My bookings
-                </a>
-                <a href="saved.html">
-                  <i class="fa-regular fa-heart"></i>
-                  Saved hostels
-                </a>
-              </div>
-
-              <button type="button" class="profile-logout" data-logout-btn>
-                <i class="fa-solid fa-right-from-bracket"></i>
-                Log out
+            <div class="user-actions" data-user-actions hidden>
+              <button
+                class="profile-trigger"
+                type="button"
+                aria-label="Open profile menu"
+                aria-expanded="false"
+                aria-controls="profile-menu"
+                data-profile-trigger
+              >
+                <span class="profile-avatar" data-profile-avatar>U</span>
+                <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
               </button>
+
+              <div class="profile-dropdown" id="profile-menu" data-profile-dropdown hidden>
+                <div class="profile-dropdown-top">
+                  <strong data-user-name>User Name</strong>
+                  <span data-user-email>user@email.com</span>
+                </div>
+
+                <div class="profile-dropdown-links">
+                  <a href="bookings.html">
+                    <i class="fa-regular fa-calendar-check"></i>
+                    My bookings
+                  </a>
+                  <a href="saved.html">
+                    <i class="fa-regular fa-heart"></i>
+                    Saved hostels
+                  </a>
+                </div>
+
+                <button type="button" class="profile-logout" data-logout-btn>
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  Log out
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -859,8 +893,12 @@
             </div>
 
             <div class="hero-actions">
-              <a href="explore.html" class="btn btn-ghost"><i class="fa-solid fa-magnifying-glass"></i> Browse hostels</a>
-              <button type="button" class="btn btn-primary" data-logout-btn><i class="fa-solid fa-right-from-bracket"></i> Log out</button>
+              <a href="explore.html" class="btn btn-ghost">
+                <i class="fa-solid fa-magnifying-glass"></i> Browse hostels
+              </a>
+              <button type="button" class="btn btn-primary" data-logout-btn>
+                <i class="fa-solid fa-right-from-bracket"></i> Log out
+              </button>
             </div>
           </div>
 
@@ -870,7 +908,9 @@
             <div class="summary-meta">
               <h2 data-profile-name>User Name</h2>
               <p data-profile-email>user@email.com</p>
-              <div class="status-pill"><i class="fa-solid fa-circle-check"></i> Signed in</div>
+              <div class="status-pill">
+                <i class="fa-solid fa-circle-check"></i> Signed in
+              </div>
             </div>
           </div>
 
@@ -903,7 +943,7 @@
                     <label for="fullName">Full name</label>
                     <div class="input-wrap">
                       <i class="fa-solid fa-id-card input-icon"></i>
-                      <input class="input" id="fullName" type="text" placeholder="Your full name" />
+                      <input class="input" id="fullName" type="text" placeholder="Your full name" data-profile-field="fullName">
                     </div>
                   </div>
 
@@ -911,7 +951,7 @@
                     <label for="email">Email address</label>
                     <div class="input-wrap">
                       <i class="fa-solid fa-envelope input-icon"></i>
-                      <input class="input" id="email" type="email" placeholder="you@example.com" disabled />
+                      <input class="input" id="email" type="email" placeholder="you@example.com" disabled data-profile-field="email">
                     </div>
                   </div>
                 </div>
@@ -921,7 +961,7 @@
                     <label for="phone">Phone number</label>
                     <div class="input-wrap">
                       <i class="fa-solid fa-phone input-icon"></i>
-                      <input class="input" id="phone" type="tel" placeholder="0xx xxx xxxx" />
+                      <input class="input" id="phone" type="tel" placeholder="0xx xxx xxxx" data-profile-field="phone">
                     </div>
                   </div>
 
@@ -929,7 +969,7 @@
                     <label for="studentId">Student ID</label>
                     <div class="input-wrap">
                       <i class="fa-solid fa-hashtag input-icon"></i>
-                      <input class="input" id="studentId" type="text" placeholder="Student ID" />
+                      <input class="input" id="studentId" type="text" placeholder="Student ID" data-profile-field="studentId">
                     </div>
                   </div>
                 </div>
@@ -939,7 +979,7 @@
                     <label for="institution">Institution</label>
                     <div class="input-wrap">
                       <i class="fa-solid fa-building-columns input-icon"></i>
-                      <input class="input" id="institution" type="text" placeholder="Your school or institution" />
+                      <input class="input" id="institution" type="text" placeholder="Your school or institution" data-profile-field="institution">
                     </div>
                   </div>
 
@@ -947,7 +987,7 @@
                     <label for="department">Department</label>
                     <div class="input-wrap">
                       <i class="fa-solid fa-book-open input-icon"></i>
-                      <input class="input" id="department" type="text" placeholder="Your department" />
+                      <input class="input" id="department" type="text" placeholder="Your department" data-profile-field="department">
                     </div>
                   </div>
                 </div>
@@ -957,13 +997,14 @@
                     <label for="year">Level / Year</label>
                     <div class="input-wrap">
                       <i class="fa-solid fa-graduation-cap input-icon"></i>
-                      <select class="select" id="year">
+                      <select class="select" id="year" data-profile-field="year">
                         <option value="">Select your level</option>
-                        <option value="Level 100">Level 100</option>
-                        <option value="Level 200">Level 200</option>
-                        <option value="Level 300">Level 300</option>
-                        <option value="Level 400">Level 400</option>
-                        <option value="Other">Other</option>
+                        <option value="100">Level 100</option>
+                        <option value="200">Level 200</option>
+                        <option value="300">Level 300</option>
+                        <option value="400">Level 400</option>
+                        <option value="500">Level 500</option>
+                        <option value="postgraduate">Postgraduate</option>
                       </select>
                     </div>
                   </div>
@@ -972,7 +1013,7 @@
                     <label for="photoURL">Profile photo link</label>
                     <div class="input-wrap">
                       <i class="fa-solid fa-image input-icon"></i>
-                      <input class="input" id="photoURL" type="url" placeholder="Optional image URL" />
+                      <input class="input" id="photoURL" type="url" placeholder="Optional image URL" data-profile-field="photoURL">
                     </div>
                   </div>
                 </div>
@@ -986,7 +1027,7 @@
                   <button type="submit" class="btn btn-primary" id="saveBtn">
                     <i class="fa-solid fa-floppy-disk"></i> Save profile
                   </button>
-                  <span class="hint">Changes are saved to your account profile and can also sync to Firebase if enabled.</span>
+                  <span class="hint">Changes are saved to your account profile and synced to Firebase when available.</span>
                 </div>
 
                 <div class="message" id="formMessage" aria-live="polite"></div>
@@ -1011,7 +1052,7 @@
                 </div>
               </div>
               <p>
-                Signed-in users can view and update this page. Signed-out visitors are redirected automatically.
+                Signed in users can view and update this page. Signed out visitors are redirected automatically.
               </p>
             </section>
 
@@ -1038,7 +1079,7 @@
                     <strong>Saved hostels</strong>
                     <span>Shortlist the rooms and locations you like most.</span>
                   </div>
-                  <em>0</em>
+                  <em data-stat-saved>0</em>
                 </div>
 
                 <div class="activity-item">
@@ -1046,7 +1087,7 @@
                     <strong>Booking requests</strong>
                     <span>Submit a room request once the booking page is connected.</span>
                   </div>
-                  <em>0</em>
+                  <em data-stat-bookings>0</em>
                 </div>
               </div>
             </section>
@@ -1080,7 +1121,7 @@
         </div>
 
         <div class="footer-row">
-          <span>Hostel Link Ghana profile dashboard</span>
+          <span>StayNest profile dashboard</span>
           <a href="index.html">Back to home</a>
         </div>
       </main>
@@ -1092,18 +1133,8 @@
   <script src="auth.js" defer></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
-    authDomain: "vitra-ai-712ea.firebaseapp.com",
-    projectId: "vitra-ai-712ea",
-    storageBucket: "vitra-ai-712ea.appspot.com",
-    messagingSenderId: "306868103753",
-    appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-
+      const auth = window.HostelLinkAuth?.auth || (window.firebase ? firebase.auth() : null);
+      const db = window.HostelLinkAuth?.db || (window.firebase && firebase.firestore ? firebase.firestore() : null);
 
       const form = document.getElementById("profileForm");
       const fullName = document.getElementById("fullName");
@@ -1125,11 +1156,9 @@ const firebaseConfig = {
       const avatarLarge = document.querySelector("[data-profile-avatar-large]");
       const userNameEls = document.querySelectorAll("[data-user-name]");
       const userEmailEls = document.querySelectorAll("[data-user-email]");
-      const statSaved = document.querySelector("[data-stat-saved]");
-      const statBookings = document.querySelector("[data-stat-bookings]");
-      const statMessages = document.querySelector("[data-stat-messages]");
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const statSaved = document.querySelectorAll("[data-stat-saved]");
+      const statBookings = document.querySelectorAll("[data-stat-bookings]");
+      const statMessages = document.querySelectorAll("[data-stat-messages]");
 
       function showMessage(text, type = "success") {
         formMessage.textContent = text;
@@ -1139,8 +1168,8 @@ const firebaseConfig = {
       function showToast(text) {
         toast.textContent = text;
         toast.classList.add("show");
-        clearTimeout(window.__hostelLinkToast);
-        window.__hostelLinkToast = setTimeout(() => {
+        clearTimeout(window.__staynestToastTimer);
+        window.__staynestToastTimer = setTimeout(() => {
           toast.classList.remove("show");
         }, 2200);
       }
@@ -1172,10 +1201,8 @@ const firebaseConfig = {
 
       function setAvatar(imageUrl, fallbackText) {
         const txt = fallbackText || "U";
-        const avatars = [avatarSmall, avatarLarge];
-        avatars.forEach((avatar) => {
+        [avatarSmall, avatarLarge].forEach((avatar) => {
           if (!avatar) return;
-
           avatar.innerHTML = "";
 
           if (imageUrl) {
@@ -1190,7 +1217,12 @@ const firebaseConfig = {
       }
 
       function populate(profile, user) {
-        const name = profile.fullName || user?.displayName || user?.email?.split("@")?.[0] || "User";
+        const name =
+          profile.fullName ||
+          user?.displayName ||
+          user?.email?.split("@")?.[0] ||
+          "User";
+
         const mail = user?.email || profile.email || "";
 
         fullName.value = profile.fullName || "";
@@ -1206,19 +1238,35 @@ const firebaseConfig = {
         profileName.textContent = name;
         profileEmail.textContent = mail;
 
-        userNameEls.forEach((el) => (el.textContent = name));
-        userEmailEls.forEach((el) => (el.textContent = mail));
+        userNameEls.forEach((el) => {
+          el.textContent = name;
+        });
+
+        userEmailEls.forEach((el) => {
+          el.textContent = mail;
+        });
 
         setAvatar(profile.photoURL || user?.photoURL || "", initials(name));
-        statSaved.textContent = String(profile.savedCount ?? 0);
-        statBookings.textContent = String(profile.bookingCount ?? 0);
-        statMessages.textContent = String(profile.messageCount ?? 0);
+
+        statSaved.forEach((el) => {
+          el.textContent = String(profile.savedCount ?? 0);
+        });
+
+        statBookings.forEach((el) => {
+          el.textContent = String(profile.bookingCount ?? 0);
+        });
+
+        statMessages.forEach((el) => {
+          el.textContent = String(profile.messageCount ?? 0);
+        });
       }
 
       function mergeProfileFromInputs(user) {
         const existing = getStoredProfile();
+
         return {
           ...existing,
+          uid: user?.uid || existing.uid || "",
           fullName: fullName.value.trim(),
           email: email.value.trim() || user?.email || "",
           phone: phone.value.trim(),
@@ -1228,10 +1276,9 @@ const firebaseConfig = {
           year: year.value,
           photoURL: photoURL.value.trim(),
           bio: bio.value.trim(),
-          uid: user?.uid || existing.uid || "",
           savedCount: existing.savedCount ?? 0,
           bookingCount: existing.bookingCount ?? 0,
-          messageCount: existing.messageCount ?? 0,
+          messageCount: existing.messageCount ?? 0
         };
       }
 
@@ -1246,9 +1293,14 @@ const firebaseConfig = {
           const stored = getStoredProfile();
           const merged = {
             ...stored,
+            uid: user.uid,
             email: user.email || stored.email || "",
-            fullName: stored.fullName || user.displayName || user.email?.split("@")?.[0] || "User",
-            photoURL: stored.photoURL || user.photoURL || "",
+            fullName:
+              stored.fullName ||
+              user.displayName ||
+              user.email?.split("@")?.[0] ||
+              "User",
+            photoURL: stored.photoURL || user.photoURL || ""
           };
 
           saveStoredProfile(merged);
@@ -1282,7 +1334,7 @@ const firebaseConfig = {
           return;
         }
 
-        if (email.value && !emailRegex.test(email.value.trim())) {
+        if (email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
           showMessage("Enter a valid email address.", "error");
           email.focus();
           return;
@@ -1299,7 +1351,7 @@ const firebaseConfig = {
           if (currentUser.updateProfile) {
             await currentUser.updateProfile({
               displayName: updated.fullName || "",
-              photoURL: updated.photoURL || "",
+              photoURL: updated.photoURL || ""
             });
           }
 
@@ -1308,7 +1360,7 @@ const firebaseConfig = {
               await db.collection("users").doc(currentUser.uid).set(
                 {
                   ...updated,
-                  updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 },
                 { merge: true }
               );
