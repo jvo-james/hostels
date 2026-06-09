@@ -832,7 +832,7 @@
             <a href="saved.html">Saved</a>
             <a href="bookings.html">Bookings</a>
             <a href="messages.html">Messages</a>
-            <a href="profile.html" class="active">Profile</a>
+            <a href="profile.html" class="active" data-user-only hidden>Profile</a>
           </nav>
 
           <div class="header-actions">
@@ -1135,6 +1135,29 @@
     document.addEventListener("DOMContentLoaded", () => {
       const auth = window.HostelLinkAuth?.auth || (window.firebase ? firebase.auth() : null);
       const db = window.HostelLinkAuth?.db || (window.firebase && firebase.firestore ? firebase.firestore() : null);
+      const getStoredProfile = window.HostelLinkAuth?.getStoredProfile || (() => {
+        try {
+          return JSON.parse(localStorage.getItem("staynest_profile") || "{}");
+        } catch {
+          return {};
+        }
+      });
+      const saveStoredProfile = window.HostelLinkAuth?.saveStoredProfile || ((profile) => {
+        try {
+          localStorage.setItem("staynest_profile", JSON.stringify(profile));
+        } catch {
+          // ignore storage issues
+        }
+      });
+      const getInitials = window.HostelLinkAuth?.getInitials || ((value) => {
+        if (!value) return "U";
+        const clean = String(value).trim();
+        const parts = clean.replace(/[@._-]+/g, " ").split(/\s+/).filter(Boolean);
+        if (!parts.length) return "U";
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      });
+      const syncProfileFields = window.HostelLinkAuth?.syncProfileFields || (() => {});
 
       const form = document.getElementById("profileForm");
       const fullName = document.getElementById("fullName");
@@ -1161,11 +1184,13 @@
       const statMessages = document.querySelectorAll("[data-stat-messages]");
 
       function showMessage(text, type = "success") {
+        if (!formMessage) return;
         formMessage.textContent = text;
         formMessage.className = `message show ${type}`;
       }
 
       function showToast(text) {
+        if (!toast) return;
         toast.textContent = text;
         toast.classList.add("show");
         clearTimeout(window.__staynestToastTimer);
@@ -1174,33 +1199,7 @@
         }, 2200);
       }
 
-      function getStoredProfile() {
-        try {
-          return JSON.parse(localStorage.getItem("staynest_profile") || "{}");
-        } catch {
-          return {};
-        }
-      }
-
-      function saveStoredProfile(profile) {
-        try {
-          localStorage.setItem("staynest_profile", JSON.stringify(profile));
-        } catch {
-          // ignore storage issues
-        }
-      }
-
-      function initials(value) {
-        if (!value) return "U";
-        const clean = String(value).trim();
-        const parts = clean.replace(/[@._-]+/g, " ").split(/\s+/).filter(Boolean);
-        if (!parts.length) return "U";
-        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-        return (parts[0][0] + parts[1][0]).toUpperCase();
-      }
-
       function setAvatar(imageUrl, fallbackText) {
-        const txt = fallbackText || "U";
         [avatarSmall, avatarLarge].forEach((avatar) => {
           if (!avatar) return;
           avatar.innerHTML = "";
@@ -1211,54 +1210,47 @@
             img.alt = "";
             avatar.appendChild(img);
           } else {
-            avatar.textContent = txt;
+            avatar.textContent = fallbackText || "U";
           }
         });
       }
 
-      function populate(profile, user) {
-        const name =
-          profile.fullName ||
-          user?.displayName ||
-          user?.email?.split("@")?.[0] ||
-          "User";
+      function applyCounts(profile) {
+        const saved = String(profile.savedCount ?? 0);
+        const bookings = String(profile.bookingCount ?? 0);
+        const messages = String(profile.messageCount ?? 0);
 
+        statSaved.forEach((el) => { el.textContent = saved; });
+        statBookings.forEach((el) => { el.textContent = bookings; });
+        statMessages.forEach((el) => { el.textContent = messages; });
+      }
+
+      function populate(profile, user) {
+        const name = profile.fullName || user?.displayName || user?.email?.split("@")?.[0] || "User";
         const mail = user?.email || profile.email || "";
 
-        fullName.value = profile.fullName || "";
-        email.value = mail;
-        phone.value = profile.phone || "";
-        studentId.value = profile.studentId || "";
-        institution.value = profile.institution || "";
-        department.value = profile.department || "";
-        year.value = profile.year || "";
-        photoURL.value = profile.photoURL || "";
-        bio.value = profile.bio || "";
+        if (fullName) fullName.value = profile.fullName || "";
+        if (email) email.value = mail;
+        if (phone) phone.value = profile.phone || "";
+        if (studentId) studentId.value = profile.studentId || "";
+        if (institution) institution.value = profile.institution || "";
+        if (department) department.value = profile.department || "";
+        if (year) year.value = profile.year || "";
+        if (photoURL) photoURL.value = profile.photoURL || "";
+        if (bio) bio.value = profile.bio || "";
 
-        profileName.textContent = name;
-        profileEmail.textContent = mail;
+        if (profileName) profileName.textContent = name;
+        if (profileEmail) profileEmail.textContent = mail;
 
-        userNameEls.forEach((el) => {
-          el.textContent = name;
-        });
+        userNameEls.forEach((el) => { el.textContent = name; });
+        userEmailEls.forEach((el) => { el.textContent = mail; });
 
-        userEmailEls.forEach((el) => {
-          el.textContent = mail;
-        });
+        setAvatar(profile.photoURL || user?.photoURL || "", getInitials(name));
+        applyCounts(profile);
 
-        setAvatar(profile.photoURL || user?.photoURL || "", initials(name));
-
-        statSaved.forEach((el) => {
-          el.textContent = String(profile.savedCount ?? 0);
-        });
-
-        statBookings.forEach((el) => {
-          el.textContent = String(profile.bookingCount ?? 0);
-        });
-
-        statMessages.forEach((el) => {
-          el.textContent = String(profile.messageCount ?? 0);
-        });
+        if (window.HostelLinkAuth?.syncProfileFields) {
+          syncProfileFields(profile);
+        }
       }
 
       function mergeProfileFromInputs(user) {
@@ -1267,18 +1259,18 @@
         return {
           ...existing,
           uid: user?.uid || existing.uid || "",
-          fullName: fullName.value.trim(),
-          email: email.value.trim() || user?.email || "",
-          phone: phone.value.trim(),
-          studentId: studentId.value.trim(),
-          institution: institution.value.trim(),
-          department: department.value.trim(),
-          year: year.value,
-          photoURL: photoURL.value.trim(),
-          bio: bio.value.trim(),
+          fullName: fullName?.value?.trim() || "",
+          email: email?.value?.trim() || user?.email || "",
+          phone: phone?.value?.trim() || "",
+          studentId: studentId?.value?.trim() || "",
+          institution: institution?.value?.trim() || "",
+          department: department?.value?.trim() || "",
+          year: year?.value || "",
+          photoURL: photoURL?.value?.trim() || "",
+          bio: bio?.value?.trim() || "",
           savedCount: existing.savedCount ?? 0,
           bookingCount: existing.bookingCount ?? 0,
-          messageCount: existing.messageCount ?? 0
+          messageCount: existing.messageCount ?? 0,
         };
       }
 
@@ -1286,29 +1278,49 @@
         return error?.message || "Could not save your profile. Please try again.";
       }
 
+      async function hydrateUserProfile(user) {
+        if (!user) return;
+
+        const stored = getStoredProfile();
+        let profile = {
+          ...stored,
+          uid: user.uid,
+          email: user.email || stored.email || "",
+          fullName: stored.fullName || user.displayName || user.email?.split("@")?.[0] || "User",
+          photoURL: stored.photoURL || user.photoURL || "",
+          savedCount: stored.savedCount ?? 0,
+          bookingCount: stored.bookingCount ?? 0,
+          messageCount: stored.messageCount ?? 0,
+        };
+
+        if (db) {
+          try {
+            const snap = await db.collection("users").doc(user.uid).get();
+            if (snap.exists) {
+              profile = {
+                ...profile,
+                ...(snap.data() || {}),
+                savedCount: snap.data()?.savedCount ?? profile.savedCount,
+                bookingCount: snap.data()?.bookingCount ?? profile.bookingCount,
+                messageCount: snap.data()?.messageCount ?? profile.messageCount,
+              };
+            }
+          } catch (error) {
+            console.warn("Firestore profile load skipped:", error);
+          }
+        }
+
+        saveStoredProfile(profile);
+        populate(profile, user);
+      }
+
       if (auth) {
         auth.onAuthStateChanged(async (user) => {
           if (!user) return;
-
-          const stored = getStoredProfile();
-          const merged = {
-            ...stored,
-            uid: user.uid,
-            email: user.email || stored.email || "",
-            fullName:
-              stored.fullName ||
-              user.displayName ||
-              user.email?.split("@")?.[0] ||
-              "User",
-            photoURL: stored.photoURL || user.photoURL || ""
-          };
-
-          saveStoredProfile(merged);
-          populate(merged, user);
+          await hydrateUserProfile(user);
         });
       } else {
-        const stored = getStoredProfile();
-        populate(stored, null);
+        populate(getStoredProfile(), null);
       }
 
       document.querySelectorAll("[data-logout-btn]").forEach((btn) => {
@@ -1324,62 +1336,65 @@
         });
       });
 
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
+      if (form) {
+        form.addEventListener("submit", async (event) => {
+          event.preventDefault();
 
-        const currentUser = auth?.currentUser || null;
-
-        if (!currentUser) {
-          showMessage("You are not signed in.", "error");
-          return;
-        }
-
-        if (email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
-          showMessage("Enter a valid email address.", "error");
-          email.focus();
-          return;
-        }
-
-        const updated = mergeProfileFromInputs(currentUser);
-
-        try {
-          saveBtn.disabled = true;
-          saveBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
-
-          saveStoredProfile(updated);
-
-          if (currentUser.updateProfile) {
-            await currentUser.updateProfile({
-              displayName: updated.fullName || "",
-              photoURL: updated.photoURL || ""
-            });
+          const currentUser = auth?.currentUser || null;
+          if (!currentUser) {
+            showMessage("You are not signed in.", "error");
+            return;
           }
 
-          if (db && currentUser) {
-            try {
-              await db.collection("users").doc(currentUser.uid).set(
-                {
-                  ...updated,
-                  updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                },
-                { merge: true }
-              );
-            } catch (dbError) {
-              console.warn("Firestore profile save skipped:", dbError);
+          const mail = email?.value?.trim() || "";
+          if (mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) {
+            showMessage("Enter a valid email address.", "error");
+            email?.focus();
+            return;
+          }
+
+          const updated = mergeProfileFromInputs(currentUser);
+
+          try {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+
+            saveStoredProfile(updated);
+
+            if (currentUser.updateProfile) {
+              await currentUser.updateProfile({
+                displayName: updated.fullName || "",
+                photoURL: updated.photoURL || "",
+              });
             }
-          }
 
-          populate(updated, currentUser);
-          showMessage("Profile saved successfully.", "success");
-          showToast("Profile updated");
-        } catch (error) {
-          showMessage(friendlyError(error), "error");
-        } finally {
-          saveBtn.disabled = false;
-          saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save profile';
-        }
-      });
+            if (db) {
+              try {
+                await db.collection("users").doc(currentUser.uid).set(
+                  {
+                    ...updated,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  },
+                  { merge: true }
+                );
+              } catch (dbError) {
+                console.warn("Firestore profile save skipped:", dbError);
+              }
+            }
+
+            populate(updated, currentUser);
+            showMessage("Profile saved successfully.", "success");
+            showToast("Profile updated");
+          } catch (error) {
+            showMessage(friendlyError(error), "error");
+          } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save profile';
+          }
+        });
+      }
     });
   </script>
+
 </body>
 </html>
