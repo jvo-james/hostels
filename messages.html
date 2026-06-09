@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Chat directly with hostel managers, caretakers, and representatives about availability, payments, and booking updates on StayNest." />
+  <title>StayNest | Messages</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="messages.css" />
+</head>
+<body>
+  <a class="skip-link" href="#messages-main">Skip to content</a>
+
+  <header class="site-header is-scrolled">
+    <div class="container header-inner">
+      <a href="index.html" class="brand" aria-label="StayNest home">
+        <span class="brand-mark"><i class="fa-solid fa-house-chimney"></i></span>
+        <span class="brand-text">StayNest</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="explore.html">Explore</a>
+        <a href="saved.html">Saved</a>
+        <a href="bookings.html">Bookings</a>
+        <a href="messages.html" class="active">Messages</a>
+        <a href="profile.html">Profile</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="login.html" class="text-link">Sign in</a>
+        <a href="register.html" class="btn btn-primary">Create account</a>
+      </div>
+
+      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <main id="messages-main">
+    <div class="container messages-shell">
+      <section class="messages-hero">
+        <div class="messages-hero-copy">
+          <span class="eyebrow"><i class="fa-solid fa-comments"></i> Accommodation communication hub</span>
+          <h1>Messages</h1>
+          <p>Talk directly with hostel managers, caretakers, or property representatives before booking. Ask about availability, room type, payments, or move-in updates.</p>
+        </div>
+
+        <div class="messages-hero-stats" aria-label="Message stats">
+          <div class="message-stat">
+            <strong>6</strong>
+            <span>Conversations</span>
+          </div>
+          <div class="message-stat">
+            <strong>3</strong>
+            <span>Unread</span>
+          </div>
+          <div class="message-stat">
+            <strong>15m</strong>
+            <span>Avg reply time</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="messages-layout" id="messagesLayout">
+        <!-- Sidebar -->
+        <aside class="conversation-panel" aria-label="Conversations list">
+          <div class="panel-card conversation-card">
+            <div class="conversation-search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="conversationSearch" placeholder="Search conversations..." />
+            </div>
+
+            <div class="conversation-list" id="conversationList">
+              <button class="conversation-item active" type="button" data-conversation="atlantic-view-hostel" aria-pressed="true">
+                <div class="conversation-avatar">
+                  <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=300&q=80" alt="Atlantic View Hostel" />
+                  <span class="status-dot online"></span>
+                </div>
+                <div class="conversation-body">
+                  <div class="conversation-top">
+                    <strong>Atlantic View Hostel</strong>
+                    <span>2m ago</span>
+                  </div>
+                  <p>Room available for September intake...</p>
+                </div>
+                <span class="unread-badge">2</span>
+              </button>
+
+              <button class="conversation-item" type="button" data-conversation="meridian-court" aria-pressed="false">
+                <div class="conversation-avatar">
+                  <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=300&q=80" alt="Meridian Court" />
+                  <span class="status-dot away"></span>
+                </div>
+                <div class="conversation-body">
+                  <div class="conversation-top">
+                    <strong>Meridian Court</strong>
+                    <span>18m ago</span>
+                  </div>
+                  <p>Payment receipt received. Please confirm...</p>
+                </div>
+                <span class="unread-badge">1</span>
+              </button>
+
+              <button class="conversation-item" type="button" data-conversation="harbor-ridge-suites" aria-pressed="false">
+                <div class="conversation-avatar">
+                  <img src="https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=300&q=80" alt="Harbor Ridge Suites" />
+                  <span class="status-dot online"></span>
+                </div>
+                <div class="conversation-body">
+                  <div class="conversation-top">
+                    <strong>Harbor Ridge Suites</strong>
+                    <span>1h ago</span>
+                  </div>
+                  <p>We have studio rooms available with Wi-Fi...</p>
+                </div>
+              </button>
+
+              <button class="conversation-item" type="button" data-conversation="blue-horizon-hostel" aria-pressed="false">
+                <div class="conversation-avatar">
+                  <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=300&q=80" alt="Blue Horizon Hostel" />
+                  <span class="status-dot offline"></span>
+                </div>
+                <div class="conversation-body">
+                  <div class="conversation-top">
+                    <strong>Blue Horizon Hostel</strong>
+                    <span>Yesterday</span>
+                  </div>
+                  <p>Your booking request was submitted...</p>
+                </div>
+              </button>
+
+              <button class="conversation-item" type="button" data-conversation="oak-residence" aria-pressed="false">
+                <div class="conversation-avatar">
+                  <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=300&q=80" alt="Oak Residence" />
+                  <span class="status-dot online"></span>
+                </div>
+                <div class="conversation-body">
+                  <div class="conversation-top">
+                    <strong>Oak Residence</strong>
+                    <span>Yesterday</span>
+                  </div>
+                  <p>We can reserve the studio room for you...</p>
+                </div>
+                <span class="unread-badge">1</span>
+              </button>
+
+              <button class="conversation-item" type="button" data-conversation="city-gate-hostel" aria-pressed="false">
+                <div class="conversation-avatar">
+                  <img src="https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=300&q=80" alt="City Gate Hostel" />
+                  <span class="status-dot offline"></span>
+                </div>
+                <div class="conversation-body">
+                  <div class="conversation-top">
+                    <strong>City Gate Hostel</strong>
+                    <span>2 days ago</span>
+                  </div>
+                  <p>We received your payment upload...</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Chat Area -->
+        <section class="chat-panel" aria-label="Chat area">
+          <div class="panel-card chat-card">
+            <div class="chat-header">
+              <div class="chat-header-left">
+                <button class="back-to-conversations" id="backToListBtn" type="button" aria-label="Back to conversations">
+                  <i class="fa-solid fa-arrow-left"></i>
+                </button>
+
+                <div class="chat-hostel-avatar">
+                  <img id="chatHostelImage" src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=300&q=80" alt="Atlantic View Hostel" />
+                  <span class="status-dot online"></span>
+                </div>
+
+                <div class="chat-header-copy">
+                  <h2 id="chatHostelName">Atlantic View Hostel</h2>
+                  <p id="chatStatusText">Usually replies within 15 minutes</p>
+                  <div class="chat-status-line">
+                    <span class="chat-online-indicator"><span class="pulse-dot"></span> Online</span>
+                    <span class="chat-divider">•</span>
+                    <span id="chatAreaText">Amamoma, Cape Coast</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-header-actions">
+                <a href="tel:+233240000001" class="icon-action" aria-label="Call hostel">
+                  <i class="fa-solid fa-phone"></i>
+                </a>
+                <button class="icon-action" type="button" aria-label="More options">
+                  <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="recent-activity-bar" aria-label="Recent activity">
+              <div class="activity-item">
+                <i class="fa-solid fa-calendar-check"></i>
+                <div>
+                  <strong>Booking request submitted</strong>
+                  <span>2 days ago</span>
+                </div>
+              </div>
+              <div class="activity-item">
+                <i class="fa-solid fa-receipt"></i>
+                <div>
+                  <strong>Payment receipt received</strong>
+                  <span>Yesterday</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="quick-questions" aria-label="Quick questions">
+              <button class="quick-question" type="button" data-fill="Ask about pricing">Ask about pricing</button>
+              <button class="quick-question" type="button" data-fill="Ask about room availability">Ask about room availability</button>
+              <button class="quick-question" type="button" data-fill="Ask about utilities">Ask about utilities</button>
+              <button class="quick-question" type="button" data-fill="Request hostel photos">Request hostel photos</button>
+            </div>
+
+            <div class="chat-thread" id="chatThread" aria-live="polite">
+              <div class="message-group incoming">
+                <div class="message-bubble">
+                  <p>Hello 👋</p>
+                  <p>Thanks for your interest in Atlantic View Hostel.</p>
+                  <span class="message-meta">09:12 • Seen</span>
+                </div>
+              </div>
+
+              <div class="message-group outgoing">
+                <div class="message-bubble">
+                  <p>Hi, do you have any rooms available near the engineering block?</p>
+                  <span class="message-meta">09:14 • Read</span>
+                </div>
+              </div>
+
+              <div class="message-group incoming">
+                <div class="message-bubble">
+                  <p>Yes, we currently have a few double occupancy rooms available.</p>
+                  <span class="message-meta">09:16 • Seen</span>
+                </div>
+              </div>
+
+              <div class="message-group incoming activity">
+                <div class="activity-chip">
+                  Booking request submitted
+                  <span>2 days ago</span>
+                </div>
+              </div>
+
+              <div class="message-group outgoing">
+                <div class="message-bubble">
+                  <p>Great, please share the current price and whether water is included.</p>
+                  <span class="message-meta">09:20 • Read</span>
+                </div>
+              </div>
+
+              <div class="message-group incoming">
+                <div class="message-bubble">
+                  <p>Pricing is GH₵ 5,200 for the semester. Water and security are included.</p>
+                  <span class="message-meta">09:22 • Seen</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator" hidden>
+              <span>Atlantic View Hostel is typing</span>
+              <div class="typing-dots">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+
+            <form class="composer" id="messageComposer" autocomplete="off">
+              <div class="composer-top">
+                <button class="attach-btn" type="button" aria-label="Attach image">
+                  <i class="fa-solid fa-image"></i>
+                </button>
+                <button class="attach-btn" type="button" aria-label="Attach document">
+                  <i class="fa-solid fa-paperclip"></i>
+                </button>
+
+                <label class="composer-input-wrap" for="messageInput">
+                  <textarea
+                    id="messageInput"
+                    class="composer-input"
+                    rows="1"
+                    placeholder="Type your message..."
+                  ></textarea>
+                </label>
+
+                <button class="send-btn" type="submit" aria-label="Send message">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </div>
+
+              <p class="composer-note">Press Enter to send, Shift + Enter for a new line.</p>
+            </form>
+          </div>
+        </section>
+
+        <!-- Info Panel -->
+        <aside class="info-panel" aria-label="Conversation information">
+          <div class="panel-card info-card">
+            <span class="eyebrow"><i class="fa-solid fa-building"></i> Hostel details</span>
+            <div class="info-hostel">
+              <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=300&q=80" alt="Atlantic View Hostel" />
+              <div>
+                <h3>Atlantic View Hostel</h3>
+                <p>Amamoma, Cape Coast</p>
+              </div>
+            </div>
+
+            <div class="info-list">
+              <div class="info-row">
+                <span>Contact number</span>
+                <strong>+233 24 000 0001</strong>
+              </div>
+              <div class="info-row">
+                <span>Distance from UCC</span>
+                <strong>0.7 km</strong>
+              </div>
+              <div class="info-row">
+                <span>Availability</span>
+                <strong>September intake open</strong>
+              </div>
+            </div>
+
+            <div class="info-actions">
+              <a href="details.html?id=sunrise-court-hostel" class="btn btn-primary btn-full">View Hostel</a>
+              <a href="saved.html" class="btn btn-outline btn-full">Save Hostel</a>
+              <a href="bookings.html" class="btn btn-dark btn-full">Start Booking</a>
+            </div>
+          </div>
+
+          <div class="panel-card info-card">
+            <span class="eyebrow"><i class="fa-solid fa-lightbulb"></i> Quick suggestions</span>
+            <p class="info-copy">Ask about room sizes, payment deadlines, or photos of the bathroom and kitchen area before you decide.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="messages-empty-state" id="emptyChatState" hidden>
+        <div class="empty-card">
+          <svg viewBox="0 0 420 300" role="img" aria-label="Conversation illustration">
+            <defs>
+              <linearGradient id="msgGrad" x1="0%" x2="100%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="#d8f3dc"></stop>
+                <stop offset="100%" stop-color="#ffffff"></stop>
+              </linearGradient>
+            </defs>
+            <rect x="78" y="54" width="264" height="154" rx="28" fill="url(#msgGrad)" stroke="#dbe7e1" stroke-width="3"></rect>
+            <rect x="120" y="88" width="148" height="16" rx="8" fill="#1b4332" opacity="0.86"></rect>
+            <rect x="120" y="122" width="168" height="12" rx="6" fill="#5b6f67" opacity="0.35"></rect>
+            <rect x="120" y="146" width="126" height="12" rx="6" fill="#5b6f67" opacity="0.25"></rect>
+            <circle cx="304" cy="134" r="28" fill="#d8f3dc" stroke="#c7e5ce"></circle>
+            <path d="M292 134l10 10 18-20" stroke="#1b4332" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M104 236c30 12 62 18 96 18 44 0 74-10 102-10 34 0 59 7 78 17" stroke="#d8f3dc" stroke-width="18" stroke-linecap="round"></path>
+          </svg>
+          <h2>Select a conversation</h2>
+          <p>Choose a hostel from your conversations to start chatting.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="messages.js"></script>
+</body>
+</html>
