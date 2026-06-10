@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta
     name="description"
-    content="Create your hostel account to save hostels, book rooms, and manage your profile."
+    content="Create your Hostel Link Ghana account to save hostels, book rooms, and manage your profile."
   />
-  <title>StayNest | Create account</title>
+  <title>Hostel Link Ghana | Create account</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -259,7 +259,8 @@
       left: 16px;
       top: 50%;
       transform: translateY(-50%);
-      color: rgba(16, 33, 26, 0.48);
+      color: rgba(27, 67, 50, 0.55);
+      font-size: 0.96rem;
       pointer-events: none;
     }
 
@@ -267,55 +268,66 @@
     .auth-select {
       width: 100%;
       border: 1.5px solid rgba(16, 33, 26, 0.12);
-      background: rgba(255, 255, 255, 0.98);
-      color: var(--text);
       border-radius: 18px;
-      padding: 15px 16px 15px 48px;
+      background: #fff;
+      padding: 0.92rem 1rem 0.92rem 2.8rem;
+      color: var(--text);
       outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    .auth-select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, rgba(27, 67, 50, 0.72) 50%),
+        linear-gradient(135deg, rgba(27, 67, 50, 0.72) 50%, transparent 50%);
+      background-position:
+        calc(100% - 22px) calc(50% - 3px),
+        calc(100% - 16px) calc(50% - 3px);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-right: 2.5rem;
     }
 
     .auth-input:focus,
     .auth-select:focus {
-      border-color: rgba(27, 67, 50, 0.45);
-      box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.08);
-      transform: translateY(-1px);
+      border-color: rgba(45, 106, 79, 0.45);
+      box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.11);
     }
 
     .password-row {
       display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: stretch;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
+      align-items: center;
     }
 
     .toggle-btn {
+      width: 48px;
+      height: 48px;
       border: 1.5px solid rgba(16, 33, 26, 0.12);
-      background: #fff;
-      color: var(--muted);
-      width: 52px;
       border-radius: 16px;
+      background: #fff;
+      color: var(--green);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      box-shadow: var(--shadow-soft);
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
     }
 
     .toggle-btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 16px 28px rgba(16, 33, 26, 0.10);
+      box-shadow: var(--shadow-soft);
     }
 
     .helper-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
-      margin-top: 2px;
     }
 
     .remember {
@@ -323,145 +335,123 @@
       align-items: center;
       gap: 10px;
       color: var(--muted);
-      font-weight: 600;
-      font-size: 0.94rem;
+      font-size: 0.92rem;
+      user-select: none;
     }
 
     .remember input {
       width: 18px;
       height: 18px;
-      accent-color: var(--green);
+      accent-color: var(--green-2);
     }
 
     .submit-btn {
       width: 100%;
       border: 0;
       border-radius: 18px;
-      padding: 15px 18px;
       background: linear-gradient(135deg, var(--green), var(--green-2));
       color: #fff;
+      padding: 1rem 1.15rem;
       font-weight: 900;
-      box-shadow: 0 18px 36px rgba(27, 67, 50, 0.20);
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      letter-spacing: -0.01em;
+      box-shadow: 0 18px 34px rgba(27, 67, 50, 0.22);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
     }
 
     .submit-btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 22px 42px rgba(27, 67, 50, 0.24);
+      box-shadow: 0 22px 40px rgba(27, 67, 50, 0.26);
     }
 
     .submit-btn:disabled {
-      opacity: 0.78;
+      opacity: 0.75;
       cursor: not-allowed;
       transform: none;
     }
 
-    .divider {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 18px 0 12px;
-      color: var(--muted);
-      font-size: 0.88rem;
+    .message {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-size: 0.92rem;
       font-weight: 700;
+      line-height: 1.4;
     }
 
-    .divider::before,
-    .divider::after {
-      content: "";
-      height: 1px;
-      background: rgba(16, 33, 26, 0.12);
-      flex: 1;
+    .message.show { display: block; }
+    .message.success {
+      background: rgba(216, 243, 220, 0.7);
+      color: var(--green);
+      border: 1px solid rgba(45, 106, 79, 0.12);
     }
 
-    .divider span {
-      padding: 0 14px;
+    .message.error {
+      background: rgba(255, 232, 232, 0.82);
+      color: #9a2f2f;
+      border: 1px solid rgba(201, 75, 75, 0.16);
     }
 
     .note-box {
       margin-top: 18px;
-      border-radius: 22px;
-      background: linear-gradient(135deg, rgba(27, 67, 50, 0.05), rgba(216, 243, 220, 0.55));
-      border: 1px solid rgba(27, 67, 50, 0.08);
-      padding: 16px;
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: rgba(245, 248, 246, 0.86);
+      border: 1px solid rgba(16, 33, 26, 0.08);
     }
 
     .note-box strong {
       display: block;
       margin-bottom: 6px;
       color: var(--green);
-      font-size: 0.95rem;
     }
 
     .note-box p {
       margin: 0;
       color: var(--muted);
       line-height: 1.6;
-      font-size: 0.94rem;
-    }
-
-    .message {
-      display: none;
-      border-radius: 16px;
-      padding: 13px 14px;
-      font-size: 0.94rem;
-      line-height: 1.5;
-      border: 1px solid transparent;
-      margin-top: 8px;
-    }
-
-    .message.show { display: block; }
-    .message.success {
-      background: rgba(45, 106, 79, 0.08);
-      border-color: rgba(45, 106, 79, 0.14);
-      color: var(--green);
-    }
-    .message.error {
-      background: rgba(160, 52, 52, 0.08);
-      border-color: rgba(160, 52, 52, 0.14);
-      color: #9a2f2f;
+      font-size: 0.93rem;
     }
 
     .form-footer {
       margin-top: 18px;
       display: flex;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       color: var(--muted);
-      font-size: 0.92rem;
+      font-size: 0.94rem;
+      flex-wrap: wrap;
     }
 
     .form-footer a {
-      color: var(--green);
+      color: var(--green-2);
       font-weight: 800;
     }
 
     .toast {
       position: fixed;
-      right: 18px;
-      bottom: 18px;
-      z-index: 400;
-      background: #10211a;
+      left: 50%;
+      bottom: 22px;
+      transform: translate(-50%, 16px);
+      background: rgba(16, 33, 26, 0.96);
       color: #fff;
+      padding: 12px 16px;
       border-radius: 999px;
-      padding: 14px 18px;
-      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.18);
-      transform: translateY(18px);
+      box-shadow: var(--shadow-md);
       opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.22s ease, transform 0.22s ease;
-      font-weight: 700;
+      visibility: hidden;
+      transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease;
+      z-index: 999;
     }
 
     .toast.show {
       opacity: 1;
-      transform: translateY(0);
+      visibility: visible;
+      transform: translate(-50%, 0);
     }
 
-    @media (max-width: 860px) {
+    @media (max-width: 880px) {
       .field-grid,
       .subgrid {
         grid-template-columns: 1fr;
@@ -473,8 +463,12 @@
     }
 
     @media (max-width: 560px) {
-      .heading-block h1 {
-        font-size: 2rem;
+      .page-wrap {
+        padding: 14px 0;
+      }
+
+      .container {
+        width: min(calc(100% - 20px), 980px);
       }
 
       .brand-text {
@@ -501,9 +495,9 @@
         <div class="auth-top">
           <a class="brand-row" href="index.html" aria-label="Go to home">
             <span class="brand-mark">
-              <img src="assets/logo.svg" alt="StayNest logo" onerror="this.style.display='none'; this.parentElement.textContent='S';">
+              <img src="logo.jpeg" alt="Hostel Link Ghana logo" onerror="this.style.display='none'; this.parentElement.textContent='H';">
             </span>
-            <span class="brand-text">StayNest</span>
+            <span class="brand-text">Hostel Link Ghana</span>
           </a>
 
           <div class="mini-badge">
@@ -513,7 +507,7 @@
         </div>
 
         <div class="heading-block">
-          <h1 id="pageTitle">Create your student account</h1>
+          <h1 id="pageTitle">Create your Hostel Link Ghana account</h1>
           <p>
             Register once, then your profile details can appear everywhere you are signed in.
             This account will be used for bookings, saved hostels, and your profile page.
@@ -558,6 +552,17 @@
               <div class="input-wrap">
                 <i class="fa-solid fa-phone input-icon"></i>
                 <input class="auth-input" id="phone" name="phone" type="tel" placeholder="0xx xxx xxxx" autocomplete="tel">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="role">Account type</label>
+              <div class="input-wrap">
+                <i class="fa-solid fa-id-badge input-icon"></i>
+                <select class="auth-select" id="role" name="role" required>
+                  <option value="student">Student</option>
+                  <option value="manager">Hostel manager</option>
+                </select>
               </div>
             </div>
 
@@ -652,7 +657,7 @@
           <div class="note-box">
             <strong>What gets saved</strong>
             <p>
-              Your name, email, phone, student ID, institution, department, level, and photo link can be stored
+              Your name, email, phone, role, student ID, institution, department, level, and photo link can be stored
               in Firebase so your profile page can show them after sign in.
             </p>
           </div>
@@ -675,6 +680,7 @@
       const fullName = document.getElementById("fullName");
       const email = document.getElementById("email");
       const phone = document.getElementById("phone");
+      const role = document.getElementById("role");
       const studentId = document.getElementById("studentId");
       const institution = document.getElementById("institution");
       const department = document.getElementById("department");
@@ -739,6 +745,7 @@
           fullName: fullName.value.trim(),
           email: email.value.trim(),
           phone: phone.value.trim(),
+          role: role.value,
           studentId: studentId.value.trim(),
           institution: institution.value.trim(),
           department: department.value.trim(),
