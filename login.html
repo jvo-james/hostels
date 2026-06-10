@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta
     name="description"
-    content="Sign in to your StayNest account to access bookings, saved hostels, and your profile."
+    content="Sign in to your Hostel Link Ghana account to access bookings, saved hostels, and your profile."
   />
-  <title>StayNest | Sign in</title>
+  <title>Hostel Link Ghana | Sign in</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -124,7 +124,7 @@
       overflow: hidden;
       padding: 28px;
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
+      grid-template-columns: 1.05fr 0.95fr;
       gap: 24px;
       align-items: stretch;
     }
@@ -229,7 +229,7 @@
     }
 
     .heading-block {
-      margin-bottom: 22px;
+      margin-bottom: 18px;
     }
 
     .heading-block h1 {
@@ -334,6 +334,7 @@
       color: var(--muted);
       font-weight: 600;
       font-size: 0.94rem;
+      user-select: none;
     }
 
     .remember input {
@@ -423,49 +424,57 @@
       gap: 12px;
       align-items: flex-start;
       background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 20px;
       padding: 14px;
-      backdrop-filter: blur(12px);
     }
 
     .feature-icon {
       width: 44px;
       height: 44px;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
+      border-radius: 14px;
       background: rgba(255, 255, 255, 0.14);
-      flex: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
     }
 
-    .feature-item h3 {
-      margin: 1px 0 4px;
-      font-size: 1rem;
-      line-height: 1.2;
+    .feature-item strong {
+      display: block;
+      font-size: 0.98rem;
+      margin-bottom: 4px;
     }
 
     .feature-item p {
       margin: 0;
-      color: rgba(255, 255, 255, 0.82);
-      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.84);
+      line-height: 1.55;
       font-size: 0.92rem;
     }
 
-    .right-panel .panel-title {
+    .panel-title {
       margin: 0 0 8px;
-      font-size: 1.45rem;
-      line-height: 1.1;
       font-family: "Playfair Display", Georgia, serif;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.02em;
+      font-size: 1.55rem;
     }
 
-    .right-panel .panel-copy {
+    .panel-subtitle {
       margin: 0;
       color: rgba(255, 255, 255, 0.84);
-      line-height: 1.7;
+      line-height: 1.65;
       font-size: 0.95rem;
-      max-width: 34ch;
+    }
+
+    .right-foot {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 0.88rem;
+      position: relative;
+      z-index: 1;
     }
 
     .toast {
@@ -495,8 +504,8 @@
         grid-template-columns: 1fr;
       }
 
-      .right-panel {
-        min-height: 260px;
+      .left-panel {
+        padding-right: 0;
       }
     }
 
@@ -534,9 +543,9 @@
           <div class="auth-top">
             <a class="brand-row" href="index.html" aria-label="Go to home">
               <span class="brand-mark">
-                <img src="assets/logo.svg" alt="StayNest logo" onerror="this.style.display='none'; this.parentElement.textContent='S';">
+                <img src="logo.jpeg" alt="Hostel Link Ghana logo" onerror="this.style.display='none'; this.parentElement.textContent='H';">
               </span>
-              <span class="brand-text">StayNest</span>
+              <span class="brand-text">Hostel Link Ghana</span>
             </a>
 
             <div class="mini-badge">
@@ -548,7 +557,7 @@
           <div class="heading-block">
             <h1 id="pageTitle">Welcome back</h1>
             <p>
-              Sign in to continue to your profile, bookings, saved hostels, and the rest of your student dashboard.
+              Sign in to continue to your profile, bookings, saved hostels, or manager portal.
             </p>
           </div>
 
@@ -566,7 +575,7 @@
               <div class="password-row">
                 <div class="input-wrap">
                   <i class="fa-solid fa-lock input-icon"></i>
-                  <input class="auth-input" id="password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+                  <input class="auth-input" id="password" name="password" type="password" placeholder="Your password" autocomplete="current-password" required>
                 </div>
                 <button class="toggle-btn" type="button" id="togglePassword" aria-label="Show password">
                   <i class="fa-solid fa-eye"></i>
@@ -580,7 +589,7 @@
                 Remember me
               </label>
 
-              <a class="forgot-link" href="#" id="forgotPasswordLink">Forgot password?</a>
+              <a class="forgot-link" href="register.html">Create account</a>
             </div>
 
             <button class="submit-btn" id="submitBtn" type="submit">
@@ -590,48 +599,46 @@
             <div class="message" id="formMessage" aria-live="polite"></div>
 
             <div class="form-footer">
-              <span>Do not have an account?</span>
-              <a href="register.html">Create account</a>
+              <span>Need an account?</span>
+              <a href="register.html">Register here</a>
             </div>
           </form>
         </div>
 
-        <aside class="right-panel">
-          <h2 class="panel-title">Your student profile comes alive here</h2>
-          <p class="panel-copy">
-            Once you sign in, the site can show your profile icon, dropdown details, and access to private pages.
+        <aside class="right-panel" aria-label="Login benefits">
+          <h2 class="panel-title">Everything in one place</h2>
+          <p class="panel-subtitle">
+            Your account connects to your hostel profile so the rest of the site can remember who you are.
           </p>
 
           <div class="feature-list">
             <div class="feature-item">
-              <div class="feature-icon">
-                <i class="fa-solid fa-user"></i>
-              </div>
+              <div class="feature-icon"><i class="fa-solid fa-bookmark"></i></div>
               <div>
-                <h3>Profile switch</h3>
-                <p>Guest links can disappear and the profile icon can show instead.</p>
+                <strong>Saved hostels</strong>
+                <p>Keep hostels you like and return to them later.</p>
               </div>
             </div>
 
             <div class="feature-item">
-              <div class="feature-icon">
-                <i class="fa-solid fa-bookmark"></i>
-              </div>
+              <div class="feature-icon"><i class="fa-solid fa-receipt"></i></div>
               <div>
-                <h3>Saved hostels</h3>
-                <p>Your account can keep track of the places you like.</p>
+                <strong>Bookings</strong>
+                <p>See your booking status once you make a reservation.</p>
               </div>
             </div>
 
             <div class="feature-item">
-              <div class="feature-icon">
-                <i class="fa-solid fa-calendar-check"></i>
-              </div>
+              <div class="feature-icon"><i class="fa-solid fa-user-shield"></i></div>
               <div>
-                <h3>Bookings</h3>
-                <p>Use the same account when booking as a student.</p>
+                <strong>Manager access</strong>
+                <p>Hostel managers are sent to the manager portal after sign in.</p>
               </div>
             </div>
+          </div>
+
+          <div class="right-foot">
+            Use the same email you registered with. If you are a hostel manager, your account must have the manager role saved in Firestore.
           </div>
         </aside>
       </section>
@@ -650,14 +657,12 @@
       const submitBtn = document.getElementById("submitBtn");
       const formMessage = document.getElementById("formMessage");
       const toast = document.getElementById("toast");
-      const rememberMe = document.getElementById("rememberMe");
-      const forgotPasswordLink = document.getElementById("forgotPasswordLink");
 
       const auth = window.firebase?.auth ? window.firebase.auth() : null;
       const db = window.firebase?.firestore ? window.firebase.firestore() : null;
-      const redirectTarget = new URLSearchParams(window.location.search).get("redirect") || "profile.html";
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const redirectTarget =
+        new URLSearchParams(window.location.search).get("redirect") || "profile.html";
 
       function showMessage(text, type = "success") {
         formMessage.textContent = text;
@@ -667,10 +672,10 @@
       function showToast(text) {
         toast.textContent = text;
         toast.classList.add("show");
-        clearTimeout(window.__staynestToastTimer);
-        window.__staynestToastTimer = setTimeout(() => {
+        clearTimeout(window.__hostelLinkToastTimer);
+        window.__hostelLinkToastTimer = setTimeout(() => {
           toast.classList.remove("show");
-        }, 2200);
+        }, 2000);
       }
 
       function setLoading(loading) {
@@ -683,33 +688,37 @@
       function friendlyError(error) {
         const code = error?.code || "";
         if (code.includes("auth/invalid-email")) return "Enter a valid email address.";
-        if (code.includes("auth/user-disabled")) return "This account is disabled.";
-        if (code.includes("auth/user-not-found")) return "No account found for that email.";
+        if (code.includes("auth/user-not-found")) return "No account found with that email.";
         if (code.includes("auth/wrong-password")) return "Incorrect password.";
+        if (code.includes("auth/invalid-credential")) return "Incorrect email or password.";
         if (code.includes("auth/network-request-failed")) return "Network error. Check your connection and try again.";
         return error?.message || "Sign in failed. Please try again.";
       }
 
-      function saveProfileLocally(user) {
-        if (!user) return;
-        const profile = {
-          uid: user.uid || "",
-          fullName: user.displayName || "",
-          email: user.email || "",
-          phone: "",
-          studentId: "",
-          institution: "",
-          department: "",
-          year: "",
-          photoURL: user.photoURL || "",
-          signedInAt: new Date().toISOString()
-        };
-
+      function saveProfileLocally(profile) {
         try {
-          localStorage.setItem("staynest_profile", JSON.stringify(profile));
+          localStorage.setItem("staynest_profile", JSON.stringify(profile || {}));
         } catch {
           // ignore storage issues
         }
+      }
+
+      async function getUserRole(user) {
+        if (!user) return "student";
+
+        try {
+          if (db) {
+            const snap = await db.collection("users").doc(user.uid).get();
+            if (snap.exists) {
+              const data = snap.data() || {};
+              return data.role || "student";
+            }
+          }
+        } catch (error) {
+          console.warn("Could not load role from Firestore:", error);
+        }
+
+        return "student";
       }
 
       togglePassword.addEventListener("click", () => {
@@ -722,36 +731,21 @@
       });
 
       if (auth) {
-        auth.onAuthStateChanged((user) => {
-          if (user) {
+        auth.onAuthStateChanged(async (user) => {
+          if (!user) return;
+
+          const role = await getUserRole(user);
+
+          if (role === "manager") {
+            window.location.replace("manager-portal.html");
+            return;
+          }
+
+          if (redirectTarget) {
             window.location.replace(redirectTarget);
           }
         });
       }
-
-      forgotPasswordLink.addEventListener("click", async (event) => {
-        event.preventDefault();
-
-        const emailValue = email.value.trim();
-        if (!emailRegex.test(emailValue)) {
-          showMessage("Enter your email first, then click forgot password.", "error");
-          email.focus();
-          return;
-        }
-
-        if (!auth) {
-          showMessage("Firebase Auth is not available yet.", "error");
-          return;
-        }
-
-        try {
-          await auth.sendPasswordResetEmail(emailValue);
-          showMessage("Password reset email sent. Check your inbox.", "success");
-          showToast("Reset link sent");
-        } catch (error) {
-          showMessage(friendlyError(error), "error");
-        }
-      });
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -759,8 +753,8 @@
         const emailValue = email.value.trim();
         const passwordValue = password.value.trim();
 
-        if (!emailRegex.test(emailValue)) {
-          showMessage("Please enter a valid email address.", "error");
+        if (!emailValue) {
+          showMessage("Please enter your email address.", "error");
           email.focus();
           return;
         }
@@ -778,41 +772,40 @@
 
         try {
           setLoading(true);
-
-          if (rememberMe.checked && auth.setPersistence) {
-            await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-          } else if (auth.setPersistence) {
-            await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
-          }
-
           const credential = await auth.signInWithEmailAndPassword(emailValue, passwordValue);
           const user = credential.user;
 
-          saveProfileLocally(user);
+          const profile = {
+            uid: user?.uid || "",
+            email: user?.email || emailValue,
+            fullName: user?.displayName || "",
+            photoURL: user?.photoURL || "",
+          };
 
+          saveProfileLocally(profile);
+
+          let role = "student";
           if (db && user) {
             try {
-              await db.collection("users").doc(user.uid).set(
-                {
-                  uid: user.uid,
-                  email: user.email || "",
-                  fullName: user.displayName || "",
-                  photoURL: user.photoURL || "",
-                  lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
-                },
-                { merge: true }
-              );
+              const snap = await db.collection("users").doc(user.uid).get();
+              if (snap.exists) {
+                const data = snap.data() || {};
+                role = data.role || "student";
+                saveProfileLocally({ ...profile, ...data });
+              }
             } catch (dbError) {
-              console.warn("Could not update last login:", dbError);
+              console.warn("Could not read user role:", dbError);
             }
           }
 
-          showMessage("Signed in successfully. Taking you to your profile...", "success");
-          showToast("Signed in");
+          showToast("Signed in successfully.");
+          showMessage("Signed in successfully. Redirecting...", "success");
+
+          const nextPage = role === "manager" ? "manager-portal.html" : redirectTarget;
 
           setTimeout(() => {
-            window.location.href = redirectTarget;
-          }, 700);
+            window.location.href = nextPage;
+          }, 650);
         } catch (error) {
           showMessage(friendlyError(error), "error");
         } finally {
