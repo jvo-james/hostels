@@ -1452,3 +1452,44 @@ button {
     width: calc(100vw - 14px);
   }
 }
+
+
+@media (max-width: 900px) {
+  .header-controls {
+    margin-left: auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .header-guest-actions {
+    display: none !important;
+  }
+
+  .header-user-actions {
+    display: inline-flex;
+  }
+
+  .profile-trigger {
+    min-height: 46px;
+    padding: 7px;
+    gap: 0;
+    border-radius: 14px;
+  }
+
+  .profile-trigger-name {
+    display: none;
+  }
+
+  .profile-dropdown {
+    right: 0;
+    left: auto;
+    width: min(320px, calc(100vw - 20px));
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+  }
+}
