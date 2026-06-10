@@ -1759,3 +1759,93 @@ button.book-now:focus-visible,
   outline: 3px solid rgba(45, 106, 79, 0.28);
   outline-offset: 3px;
 }
+
+
+/* =========================================
+   Booking modal: force internal scrolling
+   ========================================= */
+
+.booking-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12px;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background: rgba(8, 20, 15, 0.58);
+  backdrop-filter: blur(10px);
+  z-index: 2000;
+}
+
+.booking-modal.open {
+  display: flex;
+}
+
+.booking-dialog {
+  width: min(100%, 1080px);
+  max-height: calc(100dvh - 24px);
+  margin: auto 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  border-radius: 30px;
+}
+
+.booking-form-panel {
+  min-height: 0;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.booking-visual {
+  min-height: 0;
+}
+
+.booking-visual img {
+  min-height: 320px;
+  height: 100%;
+}
+
+/* mobile and tablet */
+@media (max-width: 900px) {
+  .booking-modal {
+    padding: 10px;
+  }
+
+  .booking-dialog {
+    grid-template-columns: 1fr;
+    width: min(100%, 720px);
+    max-height: calc(100dvh - 20px);
+    overflow-y: auto;
+  }
+
+  .booking-form-panel {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .booking-visual img {
+    min-height: 200px;
+    height: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .booking-modal {
+    padding: 8px;
+  }
+
+  .booking-dialog {
+    max-height: calc(100dvh - 16px);
+    border-radius: 22px;
+  }
+
+  .booking-form-panel {
+    padding: 18px;
+  }
+}
