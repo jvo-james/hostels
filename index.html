@@ -16,10 +16,12 @@
     rel="stylesheet"
   >
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="home.css" />
 </head>
@@ -29,14 +31,14 @@
 
   <header class="site-header">
     <div class="container header-inner">
-      <a href="index.html" class="brand" aria-label="StayNest home">
+      <a href="index.html" class="brand" aria-label="Hostel Link Ghana home">
         <span class="brand-mark" aria-hidden="true">
-          <img src="logo.jpeg" alt="" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
+          <img class="brand-logo" src="logo.jpeg" alt="" />
         </span>
         <span class="brand-text">Hostel Link Ghana</span>
       </a>
 
-      <nav class="site-nav" aria-label="Primary navigation">
+      <nav class="site-nav" aria-label="Primary navigation" id="site-nav">
         <a href="index.html" class="active">Home</a>
         <a href="explore.html">Explore</a>
         <a href="saved.html">Saved</a>
@@ -44,53 +46,56 @@
         <a href="messages.html">Messages</a>
       </nav>
 
-      <div class="header-actions" data-header-actions>
-        <div class="header-guest-actions" data-guest-actions>
-          <a href="login.html" class="text-link">Sign in</a>
-          <a href="register.html" class="btn btn-primary">Create account</a>
-        </div>
+      <div class="header-controls">
+        <div class="header-actions" data-header-actions>
+          <div class="header-guest-actions" data-guest-actions>
+            <a href="login.html" class="text-link">Sign in</a>
+            <a href="register.html" class="btn btn-primary">Create account</a>
+          </div>
 
-        <div class="header-user-actions" data-user-actions hidden>
-          <button
-            class="profile-trigger"
-            type="button"
-            aria-label="Open profile menu"
-            aria-expanded="false"
-            aria-controls="profile-menu"
-            data-profile-trigger
-          >
-            <span class="profile-avatar" data-profile-avatar>U</span>
-            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-          </button>
-
-          <div class="profile-dropdown" id="profile-menu" data-profile-dropdown hidden>
-            <div class="profile-dropdown-top">
-              <strong data-user-name>User Name</strong>
-              <span data-user-email>user@email.com</span>
-            </div>
-
-            <div class="profile-dropdown-links">
-              <a href="profile.html">
-                <i class="fa-regular fa-user"></i>
-                View profile
-              </a>
-              <a href="bookings.html">
-                <i class="fa-regular fa-calendar-check"></i>
-                My bookings
-              </a>
-            </div>
-
-            <button type="button" class="profile-logout" data-logout-btn>
-              <i class="fa-solid fa-right-from-bracket"></i>
-              Log out
+          <div class="header-user-actions" data-user-actions hidden>
+            <button
+              class="profile-trigger"
+              type="button"
+              aria-label="Open profile menu"
+              aria-expanded="false"
+              aria-controls="profile-menu"
+              data-profile-trigger
+            >
+              <span class="profile-avatar" data-profile-avatar>U</span>
+              <span class="profile-trigger-name" data-user-name>Account</span>
+              <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
             </button>
+
+            <div class="profile-dropdown" id="profile-menu" data-profile-dropdown hidden>
+              <div class="profile-dropdown-top">
+                <strong data-user-name>User Name</strong>
+                <span data-user-email>user@email.com</span>
+              </div>
+
+              <div class="profile-dropdown-links">
+                <a href="profile.html">
+                  <i class="fa-regular fa-user"></i>
+                  View profile
+                </a>
+                <a href="bookings.html">
+                  <i class="fa-regular fa-calendar-check"></i>
+                  My bookings
+                </a>
+              </div>
+
+              <button type="button" class="profile-logout" data-logout-btn>
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Log out
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
-        <i class="fa-solid fa-bars"></i>
-      </button>
+        <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -405,7 +410,7 @@
       <div>
         <a href="index.html" class="brand footer-brand">
           <span class="brand-mark" aria-hidden="true">
-            <img src="logo.jpeg" alt="" style="width: 100%; height: 100%; object-fit: contain; display: block;" />
+            <img class="brand-logo" src="logo.jpeg" alt="" />
           </span>
           <span class="brand-text">Hostel Link Ghana</span>
         </a>
