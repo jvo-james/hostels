@@ -1,6 +1,37 @@
 /* Explore page styles for StayNest */
 
-/* Base page structure */
+/* -----------------------------
+   Global safety / layout fixes
+------------------------------ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  min-width: 0;
+}
+
+/* -----------------------------
+   Base page structure
+------------------------------ */
 .explore-hero {
   position: relative;
   overflow: hidden;
@@ -23,11 +54,13 @@
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: 36px;
   align-items: center;
+  min-width: 0;
 }
 
 .explore-hero-copy {
   color: #fff;
   max-width: 720px;
+  min-width: 0;
 }
 
 .explore-hero-copy h1 {
@@ -52,6 +85,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
+  min-width: 0;
 }
 
 .explore-search-field {
@@ -62,6 +96,8 @@
   border-radius: 18px;
   padding: 14px 16px;
   box-shadow: 0 18px 36px rgba(10, 21, 16, 0.18);
+  min-width: 0;
+  width: 100%;
 }
 
 .explore-search-field i {
@@ -90,6 +126,7 @@
   padding-bottom: 4px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  min-width: 0;
 }
 
 .hero-chips::-webkit-scrollbar,
@@ -108,6 +145,7 @@
   font-size: 0.86rem;
   transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
   white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .chip:hover,
@@ -127,16 +165,20 @@
   display: grid;
   gap: 16px;
   justify-items: end;
+  min-width: 0;
 }
 
 .hero-map-card,
 .hero-note-card {
   width: min(100%, 540px);
+  max-width: 100%;
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(16px);
   box-shadow: 0 24px 50px rgba(10, 21, 16, 0.22);
+  overflow: hidden;
+  min-width: 0;
 }
 
 .hero-map-card {
@@ -150,6 +192,7 @@
   gap: 12px;
   color: #fff;
   margin-bottom: 14px;
+  min-width: 0;
 }
 
 .hero-map-top span {
@@ -192,6 +235,7 @@
 .hero-note-card i {
   font-size: 1.2rem;
   color: #d8f3dc;
+  flex: none;
 }
 
 .explore-toolbar-wrap {
@@ -211,6 +255,7 @@
   border: 1px solid rgba(16, 33, 26, 0.08);
   box-shadow: var(--shadow-md);
   backdrop-filter: blur(12px);
+  min-width: 0;
 }
 
 .toolbar-left,
@@ -219,6 +264,7 @@
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .results-pill {
@@ -234,6 +280,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .sort-wrap label {
@@ -281,6 +328,7 @@
   grid-template-columns: 320px minmax(0, 1fr);
   gap: 24px;
   align-items: start;
+  min-width: 0;
 }
 
 .filters-panel {
@@ -288,6 +336,7 @@
   top: 104px;
   display: grid;
   gap: 18px;
+  min-width: 0;
 }
 
 .panel-card {
@@ -297,6 +346,7 @@
   box-shadow: var(--shadow-sm);
   backdrop-filter: blur(12px);
   padding: 22px;
+  min-width: 0;
 }
 
 .panel-title-row {
@@ -322,6 +372,7 @@
   color: var(--green-2);
   font-weight: 800;
   padding: 0;
+  cursor: pointer;
 }
 
 .filter-group {
@@ -420,6 +471,7 @@ input[type="range"] {
 .results-panel {
   display: grid;
   gap: 22px;
+  min-width: 0;
 }
 
 .results-hero-card,
@@ -433,6 +485,7 @@ input[type="range"] {
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(16, 33, 26, 0.08);
   box-shadow: var(--shadow-sm);
+  min-width: 0;
 }
 
 .results-hero-copy h2 {
@@ -453,6 +506,7 @@ input[type="range"] {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
+  min-width: 0;
 }
 
 .listing-card {
@@ -461,10 +515,12 @@ input[type="range"] {
   flex-direction: column;
   min-height: 100%;
   overflow: hidden;
+  min-width: 0;
 }
 
 .hostel-image-wrap {
   position: relative;
+  min-width: 0;
 }
 
 .icon-btn {
@@ -481,11 +537,11 @@ input[type="range"] {
   background: rgba(255, 255, 255, 0.94);
   color: var(--green);
   box-shadow: 0 14px 24px rgba(16, 33, 26, 0.12);
-  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
 }
 
 .icon-btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-1px) scale(1.02);
 }
 
 .icon-btn.saved {
@@ -569,10 +625,95 @@ body.view-list .listing-card .hostel-bottom-row {
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(16, 33, 26, 0.08);
   box-shadow: var(--shadow-sm);
+  min-width: 0;
 }
 
 .explore-grid .hostel-body {
   padding: 18px 18px 20px;
+  min-width: 0;
+}
+
+/* Book Now button / icon styling */
+.book-now-btn,
+.btn-book-now,
+.book-now-icon-btn,
+.book-now-icon,
+a[data-action="book-now"],
+button[data-action="book-now"],
+a.book-now,
+button.book-now {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  box-shadow: 0 16px 28px rgba(27, 67, 50, 0.22);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, background 0.18s ease;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.book-now-btn i,
+.btn-book-now i,
+.book-now-icon-btn i,
+.book-now-icon i,
+a[data-action="book-now"] i,
+button[data-action="book-now"] i,
+a.book-now i,
+button.book-now i {
+  font-size: 0.95em;
+  line-height: 1;
+}
+
+.book-now-btn:hover,
+.btn-book-now:hover,
+.book-now-icon-btn:hover,
+.book-now-icon:hover,
+a[data-action="book-now"]:hover,
+button[data-action="book-now"]:hover,
+a.book-now:hover,
+button.book-now:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 34px rgba(27, 67, 50, 0.28);
+  filter: brightness(1.02);
+}
+
+.book-now-btn:active,
+.btn-book-now:active,
+.book-now-icon-btn:active,
+.book-now-icon:active,
+a[data-action="book-now"]:active,
+button[data-action="book-now"]:active,
+a.book-now:active,
+button.book-now:active {
+  transform: translateY(0);
+}
+
+.book-now-icon-btn,
+.book-now-icon {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.book-now-btn:focus-visible,
+.btn-book-now:focus-visible,
+.book-now-icon-btn:focus-visible,
+.book-now-icon:focus-visible,
+a[data-action="book-now"]:focus-visible,
+button[data-action="book-now"]:focus-visible,
+a.book-now:focus-visible,
+button.book-now:focus-visible {
+  outline: 3px solid rgba(45, 106, 79, 0.28);
+  outline-offset: 3px;
 }
 
 /* Mobile accordion support */
@@ -591,6 +732,11 @@ body.view-list .listing-card .hostel-bottom-row {
 .site-nav.open,
 .header-actions.open {
   display: flex;
+}
+
+/* Hide the duplicate non-dropdown title */
+.panel-title-row.desktop-only {
+  display: none !important;
 }
 
 /* Larger tablets and down */
@@ -766,6 +912,18 @@ body.view-list .listing-card .hostel-bottom-row {
   .hero-chips {
     margin-top: 14px;
     padding-bottom: 2px;
+    overflow: visible;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .hero-chips .chip {
+    flex: 1 1 calc(50% - 8px);
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+    min-width: 0;
+    padding: 10px 12px;
   }
 
   .explore-hero-visual {
@@ -846,6 +1004,7 @@ body.view-list .listing-card .hostel-bottom-row {
     font-weight: 800;
     color: var(--text);
     box-shadow: 0 12px 24px rgba(16, 33, 26, 0.06);
+    cursor: pointer;
   }
 
   .accordion-state {
@@ -870,10 +1029,6 @@ body.view-list .listing-card .hostel-bottom-row {
 
   .panel-toggle {
     margin-bottom: 0;
-  }
-
-  .desktop-only {
-    display: none;
   }
 
   .mini-zone-grid {
@@ -931,6 +1086,18 @@ body.view-list .listing-card .hostel-bottom-row {
   body.view-list .listing-card .hostel-image-wrap {
     width: 100%;
     min-width: 0;
+  }
+
+  .book-now-btn,
+  .btn-book-now,
+  .book-now-icon-btn,
+  .book-now-icon,
+  a[data-action="book-now"],
+  button[data-action="book-now"],
+  a.book-now,
+  button.book-now {
+    padding: 11px 16px;
+    gap: 8px;
   }
 }
 
@@ -1012,5 +1179,9 @@ body.view-list .listing-card .hostel-bottom-row {
 
   .hostel-top h3 {
     font-size: 0.88rem;
+  }
+
+  .hero-chips .chip {
+    flex: 1 1 100%;
   }
 }
