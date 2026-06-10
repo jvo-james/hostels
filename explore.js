@@ -1,6 +1,269 @@
 document.addEventListener("DOMContentLoaded", () => {
   "use strict";
 
+  const STATIC_HOSTELS = [
+    {
+      id: "sunrise-court-hostel",
+      name: "Sunrise Court Hostel",
+      area: "Ayensudo",
+      location: "Ayensudo, Cape Coast",
+      image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+      tag: "Popular",
+      tagClass: "",
+      rating: "4.8",
+      distance: "0.7",
+      priceYear: 9200,
+      type: "self-contained",
+      roomLabel: "Self-contained",
+      metaIcon1: "fa-house",
+      metaIcon2: "fa-wifi",
+      amenityLabel: "Wi-Fi",
+      amenities: "wifi water security furnished",
+      status: "active",
+      featured: true,
+    },
+    {
+      id: "campus-view-lodge",
+      name: "Campus View Lodge",
+      area: "UCC Road",
+      location: "UCC Road, Cape Coast",
+      image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+      tag: "New",
+      tagClass: "hostel-tag-soft",
+      rating: "4.7",
+      distance: "0.4",
+      priceYear: 10400,
+      type: "private-room",
+      roomLabel: "Private room",
+      metaIcon1: "fa-key",
+      metaIcon2: "fa-shield-heart",
+      amenityLabel: "Security",
+      amenities: "wifi security furnished water",
+      status: "active",
+      featured: false,
+    },
+    {
+      id: "blue-horizon-hostel",
+      name: "Blue Horizon Hostel",
+      area: "Anomabo",
+      location: "Anomabo, Cape Coast",
+      image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80",
+      tag: "Value",
+      tagClass: "hostel-tag-gold",
+      rating: "4.6",
+      distance: "1.3",
+      priceYear: 7800,
+      type: "shared-room",
+      roomLabel: "Shared room",
+      metaIcon1: "fa-people-roof",
+      metaIcon2: "fa-droplet",
+      amenityLabel: "Water",
+      amenities: "wifi water security furnished",
+      status: "active",
+      featured: false,
+    },
+    {
+      id: "harbor-ridge-suites",
+      name: "Harbor Ridge Suites",
+      area: "Ayensudo",
+      location: "Ayensudo, Cape Coast",
+      image: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1200&q=80",
+      tag: "Premium",
+      tagClass: "",
+      rating: "4.9",
+      distance: "0.9",
+      priceYear: 14200,
+      type: "studio",
+      roomLabel: "Studio",
+      metaIcon1: "fa-house",
+      metaIcon2: "fa-snowflake",
+      amenityLabel: "Furnished",
+      amenities: "wifi security furnished water",
+      status: "active",
+      featured: true,
+    },
+    {
+      id: "palmside-lodge",
+      name: "Palmside Lodge",
+      area: "Bakaano",
+      location: "Bakaano, Cape Coast",
+      image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+      tag: "Quiet",
+      tagClass: "hostel-tag-soft",
+      rating: "4.5",
+      distance: "1.1",
+      priceYear: 8600,
+      type: "private-room",
+      roomLabel: "Private room",
+      metaIcon1: "fa-door-open",
+      metaIcon2: "fa-shield-heart",
+      amenityLabel: "Secure",
+      amenities: "wifi security water",
+      status: "active",
+      featured: false,
+    },
+    {
+      id: "city-gate-hostel",
+      name: "City Gate Hostel",
+      area: "Kotokuraba",
+      location: "Kotokuraba, Cape Coast",
+      image: "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1200&q=80",
+      tag: "Budget",
+      tagClass: "hostel-tag-gold",
+      rating: "4.4",
+      distance: "1.6",
+      priceYear: 7100,
+      type: "shared-room",
+      roomLabel: "Shared room",
+      metaIcon1: "fa-people-roof",
+      metaIcon2: "fa-droplet",
+      amenityLabel: "Water",
+      amenities: "water security",
+      status: "active",
+      featured: false,
+    },
+    {
+      id: "meridian-court",
+      name: "Meridian Court",
+      area: "UCC Road",
+      location: "UCC Road, Cape Coast",
+      image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80",
+      tag: "Top pick",
+      tagClass: "",
+      rating: "4.6",
+      distance: "0.8",
+      priceYear: 9600,
+      type: "self-contained",
+      roomLabel: "Self-contained",
+      metaIcon1: "fa-house",
+      metaIcon2: "fa-wifi",
+      amenityLabel: "Wi-Fi",
+      amenities: "wifi water security furnished",
+      status: "active",
+      featured: true,
+    },
+    {
+      id: "bridge-house-hostel",
+      name: "Bridge House Hostel",
+      area: "Kotokuraba",
+      location: "Kotokuraba, Cape Coast",
+      image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
+      tag: "Affordable",
+      tagClass: "hostel-tag-soft",
+      rating: "4.3",
+      distance: "1.8",
+      priceYear: 5900,
+      type: "shared-room",
+      roomLabel: "Shared room",
+      metaIcon1: "fa-people-roof",
+      metaIcon2: "fa-shield-heart",
+      amenityLabel: "Secure",
+      amenities: "water security",
+      status: "active",
+      featured: false,
+    },
+    {
+      id: "oak-residence",
+      name: "Oak Residence",
+      area: "Ayensudo",
+      location: "Ayensudo, Cape Coast",
+      image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+      tag: "Recommended",
+      tagClass: "hostel-tag-gold",
+      rating: "4.8",
+      distance: "0.6",
+      priceYear: 12200,
+      type: "studio",
+      roomLabel: "Studio",
+      metaIcon1: "fa-house",
+      metaIcon2: "fa-snowflake",
+      amenityLabel: "Furnished",
+      amenities: "wifi security furnished water",
+      status: "active",
+      featured: true,
+    },
+    {
+      id: "seaview-hostel",
+      name: "Seaview Hostel",
+      area: "Anomabo",
+      location: "Anomabo, Cape Coast",
+      image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80",
+      tag: "Comfort",
+      tagClass: "",
+      rating: "4.5",
+      distance: "1.0",
+      priceYear: 8900,
+      type: "private-room",
+      roomLabel: "Private room",
+      metaIcon1: "fa-door-open",
+      metaIcon2: "fa-droplet",
+      amenityLabel: "Water",
+      amenities: "wifi water security",
+      status: "active",
+      featured: false,
+    },
+    {
+      id: "greenline-suites",
+      name: "Greenline Suites",
+      area: "UCC Road",
+      location: "UCC Road, Cape Coast",
+      image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
+      tag: "Close to campus",
+      tagClass: "hostel-tag-soft",
+      rating: "4.7",
+      distance: "0.5",
+      priceYear: 10300,
+      type: "self-contained",
+      roomLabel: "Self-contained",
+      metaIcon1: "fa-house",
+      metaIcon2: "fa-wifi",
+      amenityLabel: "Wi-Fi",
+      amenities: "wifi water security furnished",
+      status: "active",
+      featured: true,
+    },
+    {
+      id: "harbour-nest-hostel",
+      name: "Harbour Nest Hostel",
+      area: "Bakaano",
+      location: "Bakaano, Cape Coast",
+      image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+      tag: "Budget",
+      tagClass: "hostel-tag-gold",
+      rating: "4.2",
+      distance: "1.9",
+      priceYear: 6800,
+      type: "shared-room",
+      roomLabel: "Shared room",
+      metaIcon1: "fa-people-roof",
+      metaIcon2: "fa-shield-heart",
+      amenityLabel: "Security",
+      amenities: "water security",
+      status: "active",
+      featured: false,
+    },
+    {
+      id: "crescent-house",
+      name: "Crescent House",
+      area: "Ayensudo",
+      location: "Ayensudo, Cape Coast",
+      image: "https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1200&q=80",
+      tag: "Best for pairs",
+      tagClass: "",
+      rating: "4.6",
+      distance: "0.8",
+      priceYear: 11600,
+      type: "private-room",
+      roomLabel: "Private room",
+      metaIcon1: "fa-key",
+      metaIcon2: "fa-wifi",
+      amenityLabel: "Wi-Fi",
+      amenities: "wifi security furnished water",
+      status: "active",
+      featured: false,
+    },
+  ];
+
   const auth = window.HostelLinkAuth?.auth || (window.firebase?.auth ? window.firebase.auth() : null);
   const db = window.HostelLinkAuth?.db || (window.firebase?.firestore ? window.firebase.firestore() : null);
 
@@ -45,66 +308,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const accordionButtons = document.querySelectorAll("[data-accordion-btn]");
 
   const MOBILE_BREAKPOINT = 640;
-  const fallbackHostels = [
-    {
-      id: "sunrise-court-hostel",
-      name: "Sunrise Court Hostel",
-      area: "Ayensudo",
-      location: "Ayensudo, Cape Coast",
-      imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
-      status: "active",
-      featured: true,
-      priceYear: 9200,
-      roomType: "self-contained",
-      roomLabel: "Self-contained",
-      capacity: 18,
-      description: "A comfortable hostel close to campus with good water supply, Wi-Fi, and security.",
-      amenities: ["wifi", "water", "security", "furnished"],
-      rating: 4.8,
-      distance: 0.7,
-      updatedAt: null,
-    },
-    {
-      id: "campus-view-lodge",
-      name: "Campus View Lodge",
-      area: "UCC Road",
-      location: "UCC Road, Cape Coast",
-      imageUrl: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
-      status: "active",
-      featured: true,
-      priceYear: 10400,
-      roomType: "private-room",
-      roomLabel: "Private room",
-      capacity: 14,
-      description: "A neat and quiet hostel with private rooms and a calm study environment.",
-      amenities: ["wifi", "security", "furnished", "water"],
-      rating: 4.7,
-      distance: 0.4,
-      updatedAt: null,
-    },
-    {
-      id: "blue-horizon-hostel",
-      name: "Blue Horizon Hostel",
-      area: "Anomabo",
-      location: "Anomabo, Cape Coast",
-      imageUrl: "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80",
-      status: "active",
-      featured: false,
-      priceYear: 7800,
-      roomType: "shared-room",
-      roomLabel: "Shared room",
-      capacity: 22,
-      description: "Budget-friendly accommodation with basic amenities and easy access to transport.",
-      amenities: ["wifi", "water", "security"],
-      rating: 4.6,
-      distance: 1.3,
-      updatedAt: null,
-    },
-  ];
-
   const savedHostels = safeParse(localStorage.getItem("staynest_saved_hostels"), []);
-  const savedBookings = safeParse(localStorage.getItem("staynest_bookings"), []);
   const storedProfile = window.HostelLinkAuth?.getStoredProfile?.() || safeParse(localStorage.getItem("staynest_profile"), {});
+  const staticHostels = STATIC_HOSTELS.map((hostel) => normalizeHostel(hostel));
 
   const state = {
     query: "",
@@ -112,15 +318,13 @@ document.addEventListener("DOMContentLoaded", () => {
     area: "all",
     zone: "all",
     view: "grid",
-    sort: "recommended",
+    sort: sortSelect?.value || "recommended",
     types: new Set(Array.from(typeChecks).map((input) => input.dataset.type).filter(Boolean)),
     amenities: new Set(Array.from(amenityChecks).map((input) => input.dataset.amenity).filter(Boolean)),
   };
 
   let activeBookingHostel = null;
-  let allHostels = [];
-  let currentUser = null;
-  let profileCache = storedProfile || {};
+  let hostelsState = [...staticHostels];
 
   function safeParse(jsonText, fallback) {
     try {
@@ -135,7 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch {
-      // ignore storage issues
+      // ignore storage errors
     }
   }
 
@@ -148,35 +352,97 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/'/g, "&#39;");
   }
 
-  function formatPrice(value) {
-    const num = Number(value || 0);
-    return `GH₵ ${num.toLocaleString("en-GH")}`;
+  function currency(value) {
+    const amount = Number(value || 0);
+    return new Intl.NumberFormat("en-GH", {
+      style: "currency",
+      currency: "GHS",
+      maximumFractionDigits: 0,
+    }).format(amount).replace("GHS", "GH₵");
   }
 
-  function getInitials(value) {
-    const text = String(value || "").trim();
-    if (!text) return "U";
-    const parts = text.replace(/[@._-]+/g, " ").split(/\s+/).filter(Boolean);
-    if (!parts.length) return "U";
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+  function normalizeAmenities(value) {
+    if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+    return String(value || "")
+      .split(",")
+      .flatMap((item) => item.split(" "))
+      .map((item) => item.trim())
+      .filter(Boolean);
   }
 
-  function getDisplayName() {
-    return (
-      profileCache?.fullName ||
-      currentUser?.displayName ||
-      currentUser?.email?.split("@")?.[0] ||
-      "User"
-    );
+  function inferRoomLabel(type) {
+    const t = String(type || "").toLowerCase();
+    if (t.includes("self")) return "Self-contained";
+    if (t.includes("studio")) return "Studio";
+    if (t.includes("private")) return "Private room";
+    if (t.includes("shared")) return "Shared room";
+    return "Hostel room";
   }
 
-  function getBookingDefaults() {
+  function inferAmenityLabel(amenities) {
+    const list = normalizeAmenities(amenities).map((v) => v.toLowerCase());
+    if (list.includes("wifi") || list.includes("wi-fi")) return "Wi-Fi";
+    if (list.includes("security")) return "Security";
+    if (list.includes("furnished")) return "Furnished";
+    if (list.includes("water")) return "Water";
+    return "Amenities";
+  }
+
+  function inferTag(hostel) {
+    if (hostel.featured) return "Featured";
+    if ((hostel.status || "active") !== "active") return "Inactive";
+    return "Available";
+  }
+
+  function normalizeHostel(raw) {
+    const type = raw.type || raw.roomType || raw.room_label || raw.roomLabel || "self-contained";
+    const amenities = normalizeAmenities(raw.amenities || raw.amenityList || []);
+    const image = raw.image || raw.imageUrl || raw.photoURL || raw.photoUrl || "";
+    const location = raw.location || [raw.area, raw.city].filter(Boolean).join(", ");
+    const area = raw.area || raw.neighborhood || raw.zone || "";
+    const status = String(raw.status || "active").toLowerCase() === "inactive" ? "inactive" : "active";
+    const priceYear = Number(raw.priceYear ?? raw.yearlyPrice ?? raw.price ?? 0);
+    const rating = String(raw.rating || raw.score || "4.5");
+    const distance = String(raw.distance || raw.distanceKm || "0.0");
+
     return {
-      fullName: profileCache?.fullName || currentUser?.displayName || "",
-      studentId: profileCache?.studentId || "",
-      phone: profileCache?.phone || "",
+      id: String(raw.id || raw.docId || raw.name || cryptoRandomId()),
+      name: raw.name || raw.title || "Untitled hostel",
+      area,
+      location: location || area || "Location not set",
+      image: image || "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+      tag: raw.tag || raw.badge || inferTag({ featured: raw.featured, status }),
+      tagClass: raw.tagClass || "",
+      rating,
+      distance,
+      priceYear,
+      type,
+      roomLabel: raw.roomLabel || inferRoomLabel(type),
+      metaIcon1: raw.metaIcon1 || "fa-house",
+      metaIcon2: raw.metaIcon2 || "fa-wifi",
+      amenityLabel: raw.amenityLabel || inferAmenityLabel(amenities),
+      amenities,
+      status,
+      featured: !!raw.featured,
+      createdAt: raw.createdAt || null,
+      updatedAt: raw.updatedAt || null,
+      managerId: raw.managerId || null,
     };
+  }
+
+  function cryptoRandomId() {
+    if (window.crypto?.getRandomValues) {
+      const arr = new Uint32Array(2);
+      window.crypto.getRandomValues(arr);
+      return `local-${arr[0].toString(16)}${arr[1].toString(16)}`;
+    }
+    return `local-${Date.now()}`;
+  }
+
+  function getAllHostels() {
+    return [...hostelsState]
+      .map(normalizeHostel)
+      .filter((hostel, index, arr) => arr.findIndex((x) => x.id === hostel.id) === index);
   }
 
   function setHeaderScrolled() {
@@ -205,292 +471,250 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!toast) return;
     toast.textContent = text;
     toast.classList.add("show");
-    clearTimeout(window.__hostelLinkToastTimer);
-    window.__hostelLinkToastTimer = setTimeout(() => {
+    clearTimeout(window.__staynestToastTimer);
+    window.__staynestToastTimer = setTimeout(() => {
       toast.classList.remove("show");
-    }, 2300);
+    }, 2400);
   }
 
-  function setBookingMessage(text, type) {
-    if (!bookingMessage) return;
-    bookingMessage.textContent = text;
-    bookingMessage.className = `booking-message show ${type}`;
+  function updateSortState() {
+    if (!sortState || !sortSelect) return;
+    sortState.textContent = sortSelect.options[sortSelect.selectedIndex]?.textContent || "Recommended";
   }
 
-  function clearBookingMessage() {
-    if (!bookingMessage) return;
-    bookingMessage.textContent = "";
-    bookingMessage.className = "booking-message";
-  }
-
-  function normalizeAmenities(value) {
-    if (Array.isArray(value)) return value.map((item) => String(item).trim().toLowerCase()).filter(Boolean);
-    return String(value || "")
-      .split(/[,\s]+/)
-      .map((item) => item.trim().toLowerCase())
-      .filter(Boolean);
-  }
-
-  function hostelImage(hostel) {
-    return hostel?.imageUrl || hostel?.image || "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80";
-  }
-
-  function hostelRoomLabel(hostel) {
-    return (
-      hostel?.roomLabel ||
-      hostel?.roomType?.replace(/-/g, " ") ||
-      hostel?.type?.replace(/-/g, " ") ||
-      "Hostel"
-    );
-  }
-
-  function hostelRating(hostel) {
-    const rating = Number(hostel?.rating);
-    if (Number.isFinite(rating) && rating > 0) return rating.toFixed(1);
-    return "4.5";
-  }
-
-  function hostelDistance(hostel) {
-    const distance = Number(hostel?.distance);
-    if (Number.isFinite(distance)) return distance.toFixed(1);
-    return "0.8";
-  }
-
-  function sortedHostels(list) {
-    const items = [...list];
-
-    if (state.sort === "price-low") {
-      items.sort((a, b) => Number(a.priceYear || 0) - Number(b.priceYear || 0));
-    } else if (state.sort === "price-high") {
-      items.sort((a, b) => Number(b.priceYear || 0) - Number(a.priceYear || 0));
-    } else if (state.sort === "rating") {
-      items.sort((a, b) => Number(hostelRating(b)) - Number(hostelRating(a)));
-    } else if (state.sort === "near") {
-      items.sort((a, b) => Number(hostelDistance(a)) - Number(hostelDistance(b)));
-    } else {
-      items.sort((a, b) => {
-        const aFeatured = a.featured ? 1 : 0;
-        const bFeatured = b.featured ? 1 : 0;
-        if (bFeatured !== aFeatured) return bFeatured - aFeatured;
-
-        const aTime = a.updatedAt?.toDate ? a.updatedAt.toDate().getTime() : 0;
-        const bTime = b.updatedAt?.toDate ? b.updatedAt.toDate().getTime() : 0;
-        return bTime - aTime;
-      });
-    }
-
-    return items;
-  }
-
-  function matchesSearch(hostel, query) {
-    if (!query) return true;
-    const text = [
+  function buildSearchIndex(hostel) {
+    return [
       hostel.name,
       hostel.area,
       hostel.location,
-      hostel.roomType,
+      hostel.type,
       hostel.roomLabel,
-      ...(Array.isArray(hostel.amenities) ? hostel.amenities : normalizeAmenities(hostel.amenities)),
-    ]
-      .join(" ")
-      .toLowerCase();
-
-    return text.includes(query);
+      hostel.tag,
+      hostel.amenityLabel,
+      Array.isArray(hostel.amenities) ? hostel.amenities.join(" ") : hostel.amenities,
+      hostel.status,
+    ].join(" ").toLowerCase();
   }
 
-  function matchesArea(hostel) {
-    if (state.area !== "all" && String(hostel.area || "").toLowerCase() !== String(state.area).toLowerCase()) {
-      return false;
-    }
-    if (state.zone !== "all" && String(hostel.area || "").toLowerCase() !== String(state.zone).toLowerCase()) {
-      return false;
-    }
-    return true;
-  }
-
-  function matchesPrice(hostel) {
-    return Number(hostel.priceYear || 0) <= state.maxPrice;
-  }
-
-  function matchesType(hostel) {
-    const type = String(hostel.roomType || hostel.type || "").toLowerCase();
-    return state.types.size === 0 || state.types.has(type);
-  }
-
-  function matchesAmenities(hostel) {
-    const hostelAmenities = new Set(normalizeAmenities(hostel.amenities));
-    if (state.amenities.size === 0) return true;
-
-    for (const required of state.amenities) {
-      if (!hostelAmenities.has(required)) return false;
-    }
-    return true;
-  }
-
-  function filteredHostels() {
-    const query = state.query.trim().toLowerCase();
-    return sortedHostels(allHostels).filter((hostel) => {
-      if ((hostel.status || "active") !== "active") {
-        return false;
-      }
-      return (
-        matchesSearch(hostel, query) &&
-        matchesArea(hostel) &&
-        matchesPrice(hostel) &&
-        matchesType(hostel) &&
-        matchesAmenities(hostel)
-      );
-    });
-  }
-
-  function isSaved(hostel) {
-    const savedSet = new Set(
-      savedHostels.map((item) => String(item).trim().toLowerCase()).filter(Boolean)
-    );
-    const id = String(hostel.id || "").trim().toLowerCase();
-    const name = String(hostel.name || "").trim().toLowerCase();
-    return savedSet.has(id) || savedSet.has(name);
-  }
-
-  function isBooked(hostel) {
-    const bookedSet = new Set(
-      savedBookings.map((item) => String(item.hostelId || item.id || "").trim().toLowerCase()).filter(Boolean)
-    );
-    return bookedSet.has(String(hostel.id || "").toLowerCase());
-  }
-
-  function saveSavedHostels() {
-    saveJson("staynest_saved_hostels", savedHostels);
-  }
-
-  function saveBookings() {
-    saveJson("staynest_bookings", savedBookings);
-  }
-
-  function hostelsFallbackIfNeeded(list) {
-    if (Array.isArray(list) && list.length) return list;
-    return fallbackHostels;
-  }
-
-  function renderAvatar(name) {
-    return `<span class="profile-avatar-text">${escapeHtml(getInitials(name))}</span>`;
+  function hasSaved(hostel) {
+    return savedHostels.includes(hostel.id) || savedHostels.includes(hostel.name);
   }
 
   function hostelCardTemplate(hostel) {
-    const hostelName = escapeHtml(hostel.name || "Untitled hostel");
-    const hostelArea = escapeHtml(hostel.area || "Area not set");
-    const hostelLocation = escapeHtml(hostel.location || "Location not set");
-    const hostelPrice = formatPrice(hostel.priceYear);
-    const hostelType = escapeHtml(hostelRoomLabel(hostel));
-    const hostelDesc = escapeHtml(
-      hostel.description ||
-        "A neat and convenient hostel that is easy to compare and book."
-    );
-    const rating = escapeHtml(hostelRating(hostel));
-    const distance = escapeHtml(hostelDistance(hostel));
-    const amenities = normalizeAmenities(hostel.amenities);
-    const featured = hostel.featured ? `<span class="hostel-tag-soft">Featured</span>` : "";
-    const statusBadge = isBooked(hostel)
-      ? `<span class="hostel-tag-gold">Booked</span>`
-      : hostel.featured
-      ? `<span class="hostel-tag-gold">Top pick</span>`
-      : `<span class="hostel-tag-soft">Popular</span>`;
-    const savedClass = isSaved(hostel) ? "saved" : "";
+    const tagClass = hostel.tagClass ? ` ${hostel.tagClass}` : "";
+    const visible = hostel.visible === false ? "false" : "true";
+    const statusClass = hostel.status === "inactive" ? "inactive" : "active";
+    const amenities = Array.isArray(hostel.amenities) ? hostel.amenities : normalizeAmenities(hostel.amenities);
+    const image = escapeHtml(hostel.image);
+    const name = escapeHtml(hostel.name);
+    const location = escapeHtml(hostel.location);
+    const area = escapeHtml(hostel.area);
+    const roomLabel = escapeHtml(hostel.roomLabel);
+    const amenityLabel = escapeHtml(hostel.amenityLabel);
+    const tag = escapeHtml(hostel.tag || inferTag(hostel));
 
     return `
-      <article class="listing-card hostel-card" data-name="${escapeHtml(hostel.name || "")}" data-type="${escapeHtml(String(hostel.roomType || hostel.type || ""))}">
-        <div class="hostel-card-media">
-          <img class="hostel-card-image" src="${escapeHtml(hostelImage(hostel))}" alt="${hostelName}">
-          <div class="hostel-card-badges">
-            ${statusBadge}
-            ${featured}
-          </div>
-
-          <button class="card-save-btn ${savedClass}" type="button" data-save-btn data-hostel-id="${escapeHtml(hostel.id || "")}" aria-pressed="${isSaved(hostel)}" aria-label="Save hostel">
-            ${isSaved(hostel) ? '<i class="fa-solid fa-heart"></i>' : '<i class="fa-regular fa-heart"></i>'}
+      <article
+        class="hostel-card listing-card"
+        data-hostel-id="${escapeHtml(hostel.id)}"
+        data-price="${Number(hostel.priceYear || 0)}"
+        data-rating="${Number(hostel.rating || 0)}"
+        data-distance="${Number(hostel.distance || 0)}"
+        data-area="${area}"
+        data-type="${escapeHtml(hostel.type || "")}"
+        data-amenities="${escapeHtml(amenities.join(" "))}"
+        data-search="${escapeHtml(buildSearchIndex(hostel))}"
+        data-name="${name}"
+        data-location="${location}"
+        data-room="${roomLabel}"
+        data-image="${image}"
+        data-status="${statusClass}"
+        data-visible="${visible}"
+      >
+        <div class="hostel-image-wrap">
+          <img src="${image}" alt="${name}" />
+          <span class="hostel-tag${tagClass}">${tag}</span>
+          <button class="icon-btn save-btn ${hasSaved(hostel) ? "saved" : ""}" type="button" aria-label="Save hostel" aria-pressed="${hasSaved(hostel)}" data-save-btn>
+            ${hasSaved(hostel) ? '<i class="fa-solid fa-heart"></i>' : '<i class="fa-regular fa-heart"></i>'}
           </button>
         </div>
 
-        <div class="hostel-card-body">
-          <div class="hostel-card-top">
-            <div>
-              <h3>${hostelName}</h3>
-              <p class="hostel-location">
-                <i class="fa-solid fa-location-dot"></i>
-                ${hostelArea} • ${hostelLocation}
-              </p>
-            </div>
-            <div class="rating-pill">
-              <i class="fa-solid fa-star"></i>
-              ${rating}
+        <div class="hostel-body">
+          <div class="hostel-top">
+            <h3>${name}</h3>
+            <span class="hostel-rating"><i class="fa-solid fa-star"></i> ${escapeHtml(hostel.rating || "4.5")}</span>
+          </div>
+
+          <p class="hostel-location"><i class="fa-solid fa-location-dot"></i> ${location}</p>
+
+          <div class="hostel-meta-row">
+            <span><i class="fa-solid ${escapeHtml(hostel.metaIcon1 || "fa-house")}"></i> ${roomLabel}</span>
+            <span><i class="fa-solid ${escapeHtml(hostel.metaIcon2 || "fa-wifi")}"></i> ${amenityLabel}</span>
+          </div>
+
+          <div class="hostel-bottom-row">
+            <p class="hostel-price">${currency(hostel.priceYear)} <span>per year</span></p>
+            <div class="listing-actions">
+              <a href="details.html?id=${encodeURIComponent(hostel.id)}" class="mini-link">View details</a>
+              <button type="button" class="mini-link book-btn" data-book-now>Book now</button>
             </div>
           </div>
 
           <div class="hostel-meta-row">
-            <span><i class="fa-solid fa-house"></i> ${hostelType}</span>
-            <span><i class="fa-solid fa-ruler-combined"></i> ${distance} km</span>
-            <span><i class="fa-solid fa-bed"></i> ${escapeHtml(String(hostel.capacity || 0))} rooms</span>
-          </div>
-
-          <p class="hostel-description">${hostelDesc}</p>
-
-          <div class="amenity-row">
-            ${(amenities.slice(0, 4).length ? amenities.slice(0, 4) : ["security", "water"]).map((item) => {
-              const label = item.replace(/-/g, " ");
-              return `<span class="amenity-chip">${escapeHtml(label)}</span>`;
-            }).join("")}
-          </div>
-
-          <div class="price-row">
-            <div>
-              <span class="price-label">Yearly price</span>
-              <strong class="price-value">${hostelPrice}</strong>
-            </div>
-            <div class="price-side-note">
-              <span>From ${escapeHtml(hostel.area || "area")}</span>
-              <span>${escapeHtml(hostelLocation)}</span>
-            </div>
-          </div>
-
-          <div class="card-actions">
-            <button class="btn btn-outline" type="button" data-open-details data-hostel-id="${escapeHtml(hostel.id || "")}">
-              <i class="fa-solid fa-circle-info"></i>
-              Details
-            </button>
-            <button class="btn btn-dark" type="button" data-book-btn data-hostel-id="${escapeHtml(hostel.id || "")}">
-              <i class="fa-solid fa-calendar-check"></i>
-              Book now
-            </button>
+            <span><i class="fa-solid fa-location-crosshairs"></i> ${escapeHtml(hostel.distance || "0.0")} km</span>
+            <span><i class="fa-solid ${statusClass === "active" ? "fa-circle-check" : "fa-circle-minus"}"></i> ${statusClass === "active" ? "Active" : "Inactive"}</span>
           </div>
         </div>
       </article>
     `;
   }
 
-  function renderHostels() {
+  function filterHostels(list) {
+    const query = state.query.trim().toLowerCase();
+    const maxPrice = Number(state.maxPrice || 0);
+
+    return list.filter((hostel) => {
+      const search = buildSearchIndex(hostel);
+      const area = String(hostel.area || "").toLowerCase();
+      const type = String(hostel.type || "").toLowerCase();
+      const price = Number(hostel.priceYear || 0);
+      const amenities = normalizeAmenities(hostel.amenities).join(" ").toLowerCase();
+
+      const queryMatch = !query || search.includes(query);
+      const areaMatch = state.area === "all" || area === state.area.toLowerCase();
+      const zoneMatch = state.zone === "all" || area === state.zone.toLowerCase();
+      const priceMatch = !maxPrice || price <= maxPrice;
+      const typeMatch = state.types.size === 0 || state.types.has(type);
+      const amenityMatch =
+        state.amenities.size === 0 ||
+        [...state.amenities].every((item) => amenities.includes(item));
+
+      const statusMatch = hostel.status !== "inactive" || state.sort !== "featured-only";
+      return queryMatch && areaMatch && zoneMatch && priceMatch && typeMatch && amenityMatch && statusMatch;
+    });
+  }
+
+  function sortHostels(list) {
+    const sorted = [...list];
+
+    sorted.sort((a, b) => {
+      const priceA = Number(a.priceYear || 0);
+      const priceB = Number(b.priceYear || 0);
+      const ratingA = Number(a.rating || 0);
+      const ratingB = Number(b.rating || 0);
+      const distanceA = Number(a.distance || 0);
+      const distanceB = Number(b.distance || 0);
+      const featuredA = a.featured ? 1 : 0;
+      const featuredB = b.featured ? 1 : 0;
+
+      switch (state.sort) {
+        case "price-low":
+          return priceA - priceB;
+        case "price-high":
+          return priceB - priceA;
+        case "rating":
+          return ratingB - ratingA;
+        case "near":
+          return distanceA - distanceB;
+        case "recommended":
+        default:
+          return (
+            featuredB - featuredA ||
+            ratingB - ratingA ||
+            priceA - priceB ||
+            String(a.name || "").localeCompare(String(b.name || ""))
+          );
+      }
+    });
+
+    return sorted;
+  }
+
+  function updateCount(list) {
+    if (!resultsCount) return;
+    resultsCount.textContent = `${list.length} hostel${list.length === 1 ? "" : "s"} found`;
+  }
+
+  function updateSummary(list) {
+    const total = list.length;
+    const active = list.filter((item) => item.status !== "inactive").length;
+    const inactive = total - active;
+    const featured = list.filter((item) => item.featured).length;
+    const avg = total ? Math.round(list.reduce((sum, item) => sum + Number(item.priceYear || 0), 0) / total) : 0;
+
+    const heroTotal = document.getElementById("heroTotal");
+    const heroActive = document.getElementById("heroActive");
+    const heroDrafts = document.getElementById("heroDrafts");
+    const heroAvg = document.getElementById("heroAvg");
+
+    const sumAll = document.getElementById("sumAll");
+    const sumActive = document.getElementById("sumActive");
+    const sumInactive = document.getElementById("sumInactive");
+    const sumFeatured = document.getElementById("sumFeatured");
+
+    if (heroTotal) heroTotal.textContent = total;
+    if (heroActive) heroActive.textContent = active;
+    if (heroDrafts) heroDrafts.textContent = inactive;
+    if (heroAvg) heroAvg.textContent = currency(avg);
+
+    if (sumAll) sumAll.textContent = total;
+    if (sumActive) sumActive.textContent = active;
+    if (sumInactive) sumInactive.textContent = inactive;
+    if (sumFeatured) sumFeatured.textContent = featured;
+  }
+
+  function render() {
     if (!grid) return;
-    const hostels = filteredHostels();
 
-    resultsCount.textContent = `${hostels.length} hostel${hostels.length === 1 ? "" : "s"} found`;
-    grid.innerHTML = hostels.length
-      ? hostels.map(hostelCardTemplate).join("")
-      : `
-        <div class="empty-results">
-          <strong>No hostels match your filters.</strong>
-          <p>Try widening your search, increasing the price limit, or choosing a different area.</p>
-        </div>
-      `;
+    const all = getAllHostels();
+    const filtered = sortHostels(filterHostels(all));
 
+    grid.innerHTML = filtered.map(hostelCardTemplate).join("");
+    updateCount(filtered);
+    updateSummary(all);
+    updateSortState();
     syncSaveButtons();
+
+    const emptyState = document.getElementById("emptyState");
+    if (emptyState) emptyState.hidden = filtered.length !== 0;
+
+    const lastUpdated = document.getElementById("lastUpdated");
+    if (lastUpdated) {
+      const latest = [...all]
+        .filter((item) => item.updatedAt || item.createdAt)
+        .sort((a, b) => {
+          const at = toTime(b.updatedAt || b.createdAt);
+          const bt = toTime(a.updatedAt || a.createdAt);
+          return at - bt;
+        })[0];
+
+      lastUpdated.textContent = `Last update: ${latest ? formatDate(latest.updatedAt || latest.createdAt) : "—"}`;
+    }
+
+    function toTime(value) {
+      if (!value) return 0;
+      if (value?.toDate) return value.toDate().getTime();
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? 0 : d.getTime();
+    }
+  }
+
+  function formatDate(value) {
+    if (!value) return "just now";
+    const d = value?.toDate ? value.toDate() : new Date(value);
+    if (Number.isNaN(d.getTime())) return "just now";
+    return d.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
   }
 
   function syncSaveButtons() {
-    document.querySelectorAll("[data-save-btn]").forEach((button) => {
-      const id = String(button.dataset.hostelId || "").toLowerCase();
-      const hostel = allHostels.find((item) => String(item.id || "").toLowerCase() === id);
-      if (!hostel) return;
+    document.querySelectorAll(".listing-card").forEach((card) => {
+      const button = card.querySelector("[data-save-btn]");
+      if (!button) return;
 
-      const saved = isSaved(hostel);
+      const hostelId = card.dataset.hostelId || "";
+      const hostelName = card.dataset.name || "";
+      const saved = savedHostels.includes(hostelId) || savedHostels.includes(hostelName);
+
       button.classList.toggle("saved", saved);
       button.setAttribute("aria-pressed", String(saved));
       button.innerHTML = saved ? '<i class="fa-solid fa-heart"></i>' : '<i class="fa-regular fa-heart"></i>';
@@ -512,81 +736,83 @@ document.addEventListener("DOMContentLoaded", () => {
     chipButtons.forEach((button) => {
       button.classList.toggle("active", button.dataset.area === state.area);
     });
-
     zoneButtons.forEach((button) => {
       button.classList.toggle("active", button.dataset.zone === state.zone);
     });
   }
 
-  function applySearchLabel() {
-    if (priceLabel) {
-      priceLabel.textContent = formatPrice(state.maxPrice);
+  function refresh() {
+    if (priceLabel && priceRange) {
+      priceLabel.textContent = currency(Number(priceRange.value || state.maxPrice || 0));
     }
-
-    if (sortState) {
-      const labels = {
-        recommended: "Recommended",
-        "price-low": "Price: low to high",
-        "price-high": "Price: high to low",
-        rating: "Top rated",
-        near: "Closest to campus",
-      };
-      sortState.textContent = labels[state.sort] || "Recommended";
-    }
+    applyView();
+    render();
   }
 
-  function resetFilters() {
-    state.query = "";
-    state.maxPrice = Number(priceRange?.max || 15000);
-    state.area = "all";
-    state.zone = "all";
-    state.sort = "recommended";
-    state.types = new Set(Array.from(typeChecks).map((input) => input.dataset.type).filter(Boolean));
-    state.amenities = new Set(Array.from(amenityChecks).map((input) => input.dataset.amenity).filter(Boolean));
+  function getHostelFromCard(card) {
+    if (!card) return null;
+    return {
+      id: card.dataset.hostelId || "",
+      name: card.dataset.name || card.querySelector("h3")?.textContent?.trim() || "",
+      area: card.dataset.area || "",
+      location: card.dataset.location || "",
+      image: card.dataset.image || "",
+      priceYear: Number(card.dataset.price || 0),
+      rating: card.dataset.rating || "",
+      type: card.dataset.type || "self-contained",
+      roomLabel: card.dataset.room || inferRoomLabel(card.dataset.type || ""),
+    };
+  }
 
-    if (searchInput) searchInput.value = "";
-    if (priceRange) priceRange.value = state.maxPrice;
-    if (sortSelect) sortSelect.value = state.sort;
-    typeChecks.forEach((input) => (input.checked = true));
-    amenityChecks.forEach((input) => (input.checked = true));
+  function getBookingDefaults() {
+    const profile = window.HostelLinkAuth?.getStoredProfile?.() || storedProfile || {};
+    const user = auth?.currentUser || null;
+    return {
+      fullName: profile.fullName || user?.displayName || "",
+      studentId: profile.studentId || "",
+      phone: profile.phone || "",
+      email: profile.email || user?.email || "",
+    };
+  }
 
-    updateChips();
-    applySearchLabel();
-    renderHostels();
-    showToast("Filters reset.");
+  function setBookingMessage(text, type = "success") {
+    if (!bookingMessage) return;
+    bookingMessage.textContent = text;
+    bookingMessage.className = `booking-message show ${type}`;
   }
 
   function openBookingModal(hostel) {
+    if (!bookingModal || !hostel) return;
+
     activeBookingHostel = hostel;
-    if (!hostel || !bookingModal) return;
 
     const defaults = getBookingDefaults();
-
     bookingTitle.textContent = `Book ${hostel.name}`;
-    bookingHostelName.textContent = hostel.name || "Hostel name";
-    bookingHostelLocation.textContent = hostel.location || hostel.area || "Location";
-    bookingHostelPrice.innerHTML = `${formatPrice(hostel.priceYear)} <span>per year</span>`;
-    bookingHostelImage.src = hostelImage(hostel);
-    bookingHostelImage.alt = hostel.name || "Hostel";
-    bookingHostelMeta.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${hostelRoomLabel(hostel)} in ${hostel.area || "the chosen area"}`;
+    bookingHostelName.textContent = hostel.name;
+    bookingHostelLocation.textContent = hostel.location;
+    bookingHostelPrice.innerHTML = `${currency(hostel.priceYear)} <span>per year</span>`;
+    bookingHostelImage.src = hostel.image;
+    bookingHostelImage.alt = hostel.name;
+    bookingHostelMeta.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${hostel.roomLabel} in ${hostel.area}`;
 
-    bookingFullName.value = defaults.fullName;
-    bookingStudentId.value = defaults.studentId;
-    bookingPhone.value = defaults.phone;
-    bookingMoveInDate.value = "";
-    bookingRoomType.value = String(hostel.roomType || hostel.type || "self-contained");
-    bookingArea.value = hostel.area || "";
-    bookingNotes.value = "";
+    if (bookingFullName) bookingFullName.value = defaults.fullName;
+    if (bookingStudentId) bookingStudentId.value = defaults.studentId;
+    if (bookingPhone) bookingPhone.value = defaults.phone;
+    if (bookingMoveInDate) bookingMoveInDate.value = "";
+    if (bookingRoomType) bookingRoomType.value = hostel.type || "self-contained";
+    if (bookingArea) bookingArea.value = hostel.area || "";
+    if (bookingNotes) bookingNotes.value = "";
 
-    clearBookingMessage();
+    if (bookingMessage) {
+      bookingMessage.className = "booking-message";
+      bookingMessage.textContent = "";
+    }
 
     bookingModal.classList.add("open");
     bookingModal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
 
-    setTimeout(() => {
-      bookingFullName.focus();
-    }, 50);
+    setTimeout(() => bookingFullName?.focus(), 50);
   }
 
   function closeBookingModal() {
@@ -595,388 +821,395 @@ document.addEventListener("DOMContentLoaded", () => {
     bookingModal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
     activeBookingHostel = null;
-    clearBookingMessage();
-    bookingForm?.reset();
   }
 
-  function updateSavedHostel(hostel) {
-    const id = String(hostel.id || "").trim();
-    if (!id) return;
+  function getBookingsArray() {
+    return safeParse(localStorage.getItem("staynest_bookings"), []);
+  }
 
-    const index = savedHostels.findIndex((item) => String(item).trim().toLowerCase() === id.toLowerCase());
+  function saveBookingsArray(bookings) {
+    saveJson("staynest_bookings", bookings);
+  }
 
-    if (index >= 0) {
-      savedHostels.splice(index, 1);
-      saveSavedHostels();
-      showToast("Removed from saved hostels.");
-    } else {
-      savedHostels.push(id);
-      saveSavedHostels();
-      showToast("Saved to your list.");
+  function saveHostelsArray(list) {
+    saveJson("staynest_saved_hostels", list);
+  }
+
+  function updateProfileBookingCount() {
+    const profile = window.HostelLinkAuth?.getStoredProfile?.() || safeParse(localStorage.getItem("staynest_profile"), {});
+    const nextProfile = {
+      ...profile,
+      bookingCount: Number(profile.bookingCount || 0) + 1,
+    };
+
+    saveJson("staynest_profile", nextProfile);
+    window.HostelLinkAuth?.saveStoredProfile?.(nextProfile);
+
+    const currentUser = auth?.currentUser;
+    if (db && currentUser) {
+      db.collection("users")
+        .doc(currentUser.uid)
+        .set(
+          {
+            bookingCount: nextProfile.bookingCount,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        )
+        .catch((error) => console.warn("Could not update booking count:", error));
+    }
+  }
+
+  async function saveBooking(booking) {
+    const currentUser = auth?.currentUser;
+    if (!currentUser) {
+      window.location.href = `login.html?redirect=${encodeURIComponent("explore.html")}`;
+      return;
     }
 
-    renderHostels();
-  }
-
-  function updateCheckboxSets() {
-    state.types = new Set(
-      Array.from(typeChecks)
-        .filter((input) => input.checked)
-        .map((input) => input.dataset.type)
-        .filter(Boolean)
-    );
-
-    state.amenities = new Set(
-      Array.from(amenityChecks)
-        .filter((input) => input.checked)
-        .map((input) => input.dataset.amenity)
-        .filter(Boolean)
-    );
-  }
-
-  function bindAccordionCards() {
-    accordionButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const card = button.closest("[data-accordion-card]");
-        if (!card) return;
-        const open = card.classList.toggle("open");
-        button.setAttribute("aria-expanded", String(open));
-      });
-    });
-  }
-
-  function bindViewButtons() {
-    viewButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        state.view = button.dataset.view || "grid";
-        applyView();
-      });
-    });
-  }
-
-  function bindChipButtons() {
-    chipButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        state.area = button.dataset.area || "all";
-        updateChips();
-        renderHostels();
-      });
-    });
-
-    zoneButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        state.zone = button.dataset.zone || "all";
-        updateChips();
-        renderHostels();
-      });
-    });
-  }
-
-  function bindFilters() {
-    if (searchForm) {
-      searchForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        state.query = searchInput?.value || "";
-        renderHostels();
-        document.getElementById("hostelGrid")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    }
-
-    searchInput?.addEventListener("input", () => {
-      state.query = searchInput.value;
-      renderHostels();
-    });
-
-    priceRange?.addEventListener("input", () => {
-      state.maxPrice = Number(priceRange.value);
-      applySearchLabel();
-      renderHostels();
-    });
-
-    sortSelect?.addEventListener("change", () => {
-      state.sort = sortSelect.value || "recommended";
-      applySearchLabel();
-      renderHostels();
-    });
-
-    typeChecks.forEach((input) => {
-      input.addEventListener("change", () => {
-        updateCheckboxSets();
-        renderHostels();
-      });
-    });
-
-    amenityChecks.forEach((input) => {
-      input.addEventListener("change", () => {
-        updateCheckboxSets();
-        renderHostels();
-      });
-    });
-
-    resetBtn?.addEventListener("click", resetFilters);
-  }
-
-  async function loadProfileFromFirestore(user) {
-    if (!db || !user) return profileCache || {};
-    try {
-      const snap = await db.collection("users").doc(user.uid).get();
-      const data = snap.exists ? snap.data() || {} : {};
-      profileCache = { ...profileCache, ...data };
-      if (window.HostelLinkAuth?.saveStoredProfile) {
-        window.HostelLinkAuth.saveStoredProfile(profileCache);
-      } else {
-        saveJson("staynest_profile", profileCache);
+    if (db) {
+      try {
+        await db.collection("bookings").add(booking);
+      } catch (error) {
+        console.warn("Could not save booking to Firestore, falling back to localStorage:", error);
+        const bookings = getBookingsArray();
+        bookings.push(booking);
+        saveBookingsArray(bookings);
       }
-      return profileCache;
-    } catch (error) {
-      console.warn("Could not read profile:", error);
-      return profileCache || {};
+    } else {
+      const bookings = getBookingsArray();
+      bookings.push(booking);
+      saveBookingsArray(bookings);
+    }
+
+    updateProfileBookingCount();
+  }
+
+  function friendlyError(error) {
+    const code = error?.code || "";
+    if (code.includes("permission-denied")) return "You are not allowed to save this booking right now.";
+    if (code.includes("network-request-failed")) return "Network error. Please check your connection and try again.";
+    if (code.includes("auth/requires-recent-login")) return "Please sign in again and try once more.";
+    return error?.message || "Booking could not be saved.";
+  }
+
+  function handleGridClick(event) {
+    const saveButton = event.target.closest("[data-save-btn]");
+    const bookButton = event.target.closest("[data-book-now]");
+
+    if (saveButton) {
+      const card = saveButton.closest(".listing-card");
+      const hostel = getHostelFromCard(card);
+      if (!hostel) return;
+
+      const byId = savedHostels.indexOf(hostel.id);
+      const byName = savedHostels.indexOf(hostel.name);
+
+      if (byId !== -1) savedHostels.splice(byId, 1);
+      if (byName !== -1) savedHostels.splice(byName, 1);
+
+      const currentlySaved = byId !== -1 || byName !== -1;
+
+      if (currentlySaved) {
+        showToast(`Removed ${hostel.name} from saved`);
+      } else {
+        savedHostels.push(hostel.id);
+        showToast(`Saved ${hostel.name}`);
+      }
+
+      saveHostelsArray(savedHostels);
+      syncSaveButtons();
+
+      saveButton.animate(
+        [
+          { transform: "scale(1)" },
+          { transform: "scale(1.12)" },
+          { transform: "scale(1)" },
+        ],
+        { duration: 220, easing: "ease-out" }
+      );
+    }
+
+    if (bookButton) {
+      const card = bookButton.closest(".listing-card");
+      const hostel = getHostelFromCard(card);
+      if (!hostel) return;
+
+      if (!auth?.currentUser) {
+        window.location.href = `login.html?redirect=${encodeURIComponent("explore.html")}`;
+        return;
+      }
+
+      openBookingModal(hostel);
     }
   }
 
-  function createBookingPayload(hostel) {
-    return {
-      hostelId: hostel.id || "",
-      hostelName: hostel.name || "",
-      hostelArea: hostel.area || "",
-      hostelLocation: hostel.location || "",
-      priceYear: Number(hostel.priceYear || 0),
-      roomType: bookingRoomType.value || hostel.roomType || hostel.type || "self-contained",
+  function setHostelsFromFirestoreSnapshot(snapshot) {
+    const firestoreHostels = snapshot.docs.map((doc) => {
+      const data = doc.data() || {};
+      return normalizeHostel({
+        id: doc.id,
+        ...data,
+        image: data.image || data.imageUrl || data.photoURL || data.photoUrl || "",
+        roomType: data.roomType || data.type,
+        amenities: data.amenities || data.amenityList || [],
+      });
+    });
+
+    const merged = [...firestoreHostels, ...staticHostels];
+
+    const unique = [];
+    const seen = new Set();
+
+    for (const hostel of merged) {
+      if (seen.has(hostel.id)) continue;
+      seen.add(hostel.id);
+      unique.push(hostel);
+    }
+
+    hostelsState = unique;
+    refresh();
+  }
+
+  function bootstrap() {
+    render();
+    applyView();
+    updateChips();
+    syncAccordionModes();
+    setHeaderScrolled();
+    syncSaveButtons();
+
+    const params = new URLSearchParams(window.location.search);
+    const initialQuery = params.get("q") || "";
+    const initialArea = params.get("area") || "";
+    const initialZone = params.get("zone") || "";
+
+    if (initialQuery && searchInput) {
+      searchInput.value = initialQuery;
+      state.query = initialQuery;
+    }
+
+    if (initialArea) state.area = initialArea;
+    if (initialZone) state.zone = initialZone;
+    updateChips();
+    refresh();
+
+    if (priceRange) {
+      state.maxPrice = Number(priceRange.value || state.maxPrice || 15000);
+      if (priceLabel) priceLabel.textContent = currency(state.maxPrice);
+    }
+
+    if (auth?.currentUser) {
+      const profile = window.HostelLinkAuth?.getStoredProfile?.() || storedProfile;
+      window.HostelLinkAuth?.setAuthUI?.(auth.currentUser, profile, false);
+    }
+
+    if (db?.collection) {
+      db.collection("hostels").onSnapshot(
+        (snapshot) => setHostelsFromFirestoreSnapshot(snapshot),
+        (error) => {
+          console.warn("Hostels snapshot unavailable, using fallback data:", error);
+          hostelsState = [...staticHostels];
+          refresh();
+        }
+      );
+    } else {
+      hostelsState = [...staticHostels];
+      refresh();
+    }
+
+    if (auth?.onAuthStateChanged) {
+      auth.onAuthStateChanged((user) => {
+        const profile = window.HostelLinkAuth?.getStoredProfile?.() || safeParse(localStorage.getItem("staynest_profile"), {});
+        if (user) {
+          window.HostelLinkAuth?.setAuthUI?.(user, profile, false);
+        }
+      });
+    }
+  }
+
+  searchForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    state.query = searchInput?.value || "";
+    refresh();
+    document.getElementById("hostelGrid")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  searchInput?.addEventListener("input", () => {
+    state.query = searchInput.value;
+    refresh();
+  });
+
+  priceRange?.addEventListener("input", () => {
+    state.maxPrice = Number(priceRange.value || 0);
+    if (priceLabel) priceLabel.textContent = currency(state.maxPrice);
+    refresh();
+  });
+
+  sortSelect?.addEventListener("change", () => {
+    state.sort = sortSelect.value;
+    updateSortState();
+    refresh();
+  });
+
+  resetBtn?.addEventListener("click", () => {
+    state.query = "";
+    state.maxPrice = Number(priceRange?.max || 15000);
+    state.area = "all";
+    state.zone = "all";
+    state.sort = "recommended";
+    state.view = "grid";
+    state.types = new Set(Array.from(typeChecks).map((input) => input.dataset.type).filter(Boolean));
+    state.amenities = new Set(Array.from(amenityChecks).map((input) => input.dataset.amenity).filter(Boolean));
+
+    if (searchInput) searchInput.value = "";
+    if (priceRange) priceRange.value = String(state.maxPrice);
+    if (sortSelect) sortSelect.value = "recommended";
+    if (priceLabel) priceLabel.textContent = currency(state.maxPrice);
+
+    typeChecks.forEach((input) => (input.checked = true));
+    amenityChecks.forEach((input) => (input.checked = true));
+
+    updateChips();
+    applyView();
+    refresh();
+  });
+
+  chipButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      state.area = button.dataset.area || "all";
+      state.zone = "all";
+      updateChips();
+      refresh();
+    });
+  });
+
+  zoneButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      state.zone = button.dataset.zone || "all";
+      updateChips();
+      refresh();
+    });
+  });
+
+  typeChecks.forEach((input) => {
+    input.addEventListener("change", () => {
+      const type = input.dataset.type;
+      if (!type) return;
+      if (input.checked) state.types.add(type);
+      else state.types.delete(type);
+      refresh();
+    });
+  });
+
+  amenityChecks.forEach((input) => {
+    input.addEventListener("change", () => {
+      const amenity = input.dataset.amenity;
+      if (!amenity) return;
+      if (input.checked) state.amenities.add(amenity);
+      else state.amenities.delete(amenity);
+      refresh();
+    });
+  });
+
+  viewButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      state.view = button.dataset.view || "grid";
+      applyView();
+      refresh();
+    });
+  });
+
+  grid?.addEventListener("click", handleGridClick);
+
+  accordionButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const card = button.closest("[data-accordion-card]");
+      if (!card) return;
+      const open = card.classList.toggle("open");
+      button.setAttribute("aria-expanded", String(open));
+    });
+  });
+
+  bookingModal?.addEventListener("click", (event) => {
+    if (event.target === bookingModal) closeBookingModal();
+  });
+
+  closeBookingModalBtn?.addEventListener("click", closeBookingModal);
+  cancelBookingBtn?.addEventListener("click", closeBookingModal);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && bookingModal?.classList.contains("open")) {
+      closeBookingModal();
+    }
+  });
+
+  bookingForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!activeBookingHostel) return;
+
+    const user = auth?.currentUser;
+    if (!user) {
+      window.location.href = `login.html?redirect=${encodeURIComponent("explore.html")}`;
+      return;
+    }
+
+    if (
+      !bookingFullName?.value.trim() ||
+      !bookingStudentId?.value.trim() ||
+      !bookingPhone?.value.trim() ||
+      !bookingMoveInDate?.value
+    ) {
+      setBookingMessage("Please complete the required booking fields.", "error");
+      return;
+    }
+
+    const booking = {
+      uid: user.uid,
+      hostelId: activeBookingHostel.id,
+      hostelName: activeBookingHostel.name,
+      location: activeBookingHostel.location,
+      area: activeBookingHostel.area,
+      roomType: bookingRoomType?.value || activeBookingHostel.type,
+      roomLabel: activeBookingHostel.roomLabel,
       fullName: bookingFullName.value.trim(),
       studentId: bookingStudentId.value.trim(),
       phone: bookingPhone.value.trim(),
       moveInDate: bookingMoveInDate.value,
-      notes: bookingNotes.value.trim(),
+      notes: bookingNotes?.value.trim() || "",
+      pricePerYear: activeBookingHostel.priceYear,
       status: "pending",
-      bookingSource: "explore-page",
-      userId: currentUser?.uid || profileCache?.uid || "",
-      userEmail: currentUser?.email || profileCache?.email || "",
+      source: "explore",
       createdAt: new Date().toISOString(),
     };
-  }
-
-  async function saveBooking(hostel, payload) {
-    if (db && currentUser) {
-      await db.collection("bookings").add({
-        ...payload,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-      return;
-    }
-
-    savedBookings.push(payload);
-    saveBookings();
-  }
-
-  async function handleBookingSubmit(event) {
-    event.preventDefault();
-
-    if (!activeBookingHostel) {
-      showToast("Select a hostel first.");
-      return;
-    }
-
-    const hostel = activeBookingHostel;
-
-    if (!bookingFullName.value.trim() || !bookingStudentId.value.trim() || !bookingPhone.value.trim() || !bookingMoveInDate.value) {
-      setBookingMessage("Please fill in all required booking fields.", "error");
-      return;
-    }
-
-    const payload = createBookingPayload(hostel);
 
     try {
-      confirmBookingBtn.disabled = true;
-      confirmBookingBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Booking...';
-      setBookingMessage("Saving your booking...", "success");
-
-      await saveBooking(hostel, payload);
-
-      showToast("Booking saved successfully.");
-      setBookingMessage("Your booking has been saved successfully.", "success");
-
-      const targetBookings = {
-        ...payload,
-        hostelName: hostel.name || "",
-        hostelImage: hostelImage(hostel),
-        hostelPrice: Number(hostel.priceYear || 0),
-        hostelArea: hostel.area || "",
-        bookingId: payload.bookingId || `${hostel.id || "booking"}-${Date.now()}`,
-      };
-
-      if (!db || !currentUser) {
-        const existing = savedBookings.findIndex((item) => item.bookingId === targetBookings.bookingId);
-        if (existing === -1) savedBookings.push(targetBookings);
-        saveBookings();
-      } else {
-        try {
-          const bookingsPayload = {
-            ...targetBookings,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          };
-          await db.collection("bookings").add(bookingsPayload);
-        } catch (error) {
-          console.warn("Could not mirror booking to Firestore:", error);
-        }
+      if (confirmBookingBtn) {
+        confirmBookingBtn.disabled = true;
+        confirmBookingBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
       }
+
+      await saveBooking(booking);
+
+      setBookingMessage("Booking saved successfully. Taking you to your bookings...", "success");
+      showToast("Booking saved");
 
       setTimeout(() => {
-        closeBookingModal();
         window.location.href = "bookings.html";
-      }, 700);
+      }, 900);
     } catch (error) {
-      console.error(error);
-      setBookingMessage("Could not complete the booking. Please try again.", "error");
-      showToast("Booking failed.");
+      setBookingMessage(friendlyError(error), "error");
     } finally {
-      confirmBookingBtn.disabled = false;
-      confirmBookingBtn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Confirm booking';
-    }
-  }
-
-  async function handleCardAction(event) {
-    const saveBtn = event.target.closest("[data-save-btn]");
-    const bookBtn = event.target.closest("[data-book-btn]");
-    const detailsBtn = event.target.closest("[data-open-details]");
-
-    if (!saveBtn && !bookBtn && !detailsBtn) return;
-
-    const card = event.target.closest("[data-name]");
-    const hostelId = (saveBtn || bookBtn || detailsBtn)?.dataset?.hostelId || "";
-    const hostel = allHostels.find((item) => String(item.id || "") === String(hostelId));
-
-    if (!hostel) return;
-
-    if (saveBtn) {
-      updateSavedHostel(hostel);
-      return;
-    }
-
-    if (bookBtn) {
-      if (currentUser && !profileCache?.fullName) {
-        await loadProfileFromFirestore(currentUser);
-      }
-      openBookingModal(hostel);
-      return;
-    }
-
-    if (detailsBtn) {
-      showToast(`${hostel.name}: ${hostel.location}`);
-      const target = card || event.target.closest(".hostel-card");
-      target?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }
-
-  function bindGridActions() {
-    if (!grid) return;
-    grid.addEventListener("click", handleCardAction);
-  }
-
-  function bindBookingModal() {
-    closeBookingModalBtn?.addEventListener("click", closeBookingModal);
-    cancelBookingBtn?.addEventListener("click", closeBookingModal);
-
-    bookingModal?.addEventListener("click", (event) => {
-      if (event.target === bookingModal) {
-        closeBookingModal();
-      }
-    });
-
-    bookingForm?.addEventListener("submit", handleBookingSubmit);
-  }
-
-  function bindWindowEvents() {
-    window.addEventListener("scroll", setHeaderScrolled, { passive: true });
-    window.addEventListener("resize", () => {
-      syncAccordionModes();
-    });
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && bookingModal?.classList.contains("open")) {
-        closeBookingModal();
-      }
-    });
-  }
-
-  function initLocalViewState() {
-    applyView();
-    updateChips();
-    applySearchLabel();
-    syncAccordionModes();
-    setHeaderScrolled();
-  }
-
-  async function loadHostelsFromFirestore() {
-    if (!db) {
-      allHostels = fallbackHostels;
-      renderHostels();
-      return;
-    }
-
-    try {
-      db.collection("hostels").onSnapshot(
-        (snapshot) => {
-          const docs = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-
-          allHostels = hostelsFallbackIfNeeded(docs);
-          renderHostels();
-        },
-        (error) => {
-          console.error("Hostel listener failed:", error);
-          allHostels = fallbackHostels;
-          renderHostels();
-        }
-      );
-    } catch (error) {
-      console.error("Could not connect to hostels:", error);
-      allHostels = fallbackHostels;
-      renderHostels();
-    }
-  }
-
-  async function initAuth() {
-    if (!auth) return;
-
-    auth.onAuthStateChanged(async (user) => {
-      currentUser = user || null;
-      if (user) {
-        await loadProfileFromFirestore(user);
-      } else {
-        profileCache = storedProfile || {};
-      }
-      syncSaveButtons();
-    });
-  }
-
-  function setupPage() {
-    if (!grid) return;
-
-    initLocalViewState();
-    bindAccordionCards();
-    bindViewButtons();
-    bindChipButtons();
-    bindFilters();
-    bindGridActions();
-    bindBookingModal();
-    bindWindowEvents();
-
-    renderHostels();
-    loadHostelsFromFirestore();
-    initAuth();
-
-    const guest = document.querySelector("[data-guest-actions]");
-    const user = document.querySelector("[data-user-actions]");
-    if (guest && user) {
-      if (auth && window.HostelLinkAuth?.authStateReady?.()) {
-        // auth.js will manage the header; this just avoids flashes when possible
+      if (confirmBookingBtn) {
+        confirmBookingBtn.disabled = false;
+        confirmBookingBtn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Confirm booking';
       }
     }
-  }
+  });
 
-  setupPage();
+  window.addEventListener("scroll", setHeaderScrolled, { passive: true });
+  window.addEventListener("resize", syncAccordionModes);
+
+  bootstrap();
 });
