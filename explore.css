@@ -1658,3 +1658,104 @@ button.book-now:focus-visible,
   }
 }
 
+
+/* ================================
+   Booking modal scroll fix
+   ================================ */
+.booking-modal {
+  overflow-y: auto;
+  align-items: flex-start;
+  padding: 16px;
+}
+
+.booking-dialog {
+  max-height: calc(100dvh - 32px);
+  overflow: hidden;
+}
+
+.booking-form-panel {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.booking-form-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.booking-form-panel::-webkit-scrollbar-thumb {
+  background: rgba(27, 67, 50, 0.28);
+  border-radius: 999px;
+}
+
+/* On smaller screens, let the whole modal scroll naturally */
+@media (max-width: 900px) {
+  .booking-dialog {
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+
+  .booking-form-panel {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* ================================
+   Book Now button styling
+   ================================ */
+.listing-card .btn-primary,
+.listing-card .book-now-btn,
+.listing-card .btn-book-now,
+.listing-card a[data-action="book-now"],
+.listing-card button[data-action="book-now"],
+.listing-card a.book-now,
+.listing-card button.book-now {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 55%, #3a855c 100%);
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 16px 28px rgba(27, 67, 50, 0.22);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  cursor: pointer;
+}
+
+.listing-card .btn-primary:hover,
+.listing-card .book-now-btn:hover,
+.listing-card .btn-book-now:hover,
+.listing-card a[data-action="book-now"]:hover,
+.listing-card button[data-action="book-now"]:hover,
+.listing-card a.book-now:hover,
+.listing-card button.book-now:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 34px rgba(27, 67, 50, 0.28);
+  filter: brightness(1.03);
+}
+
+.listing-card .btn-primary:active,
+.listing-card .book-now-btn:active,
+.listing-card .btn-book-now:active,
+.listing-card a[data-action="book-now"]:active,
+.listing-card button[data-action="book-now"]:active,
+.listing-card a.book-now:active,
+.listing-card button.book-now:active {
+  transform: translateY(0);
+}
+
+.listing-card .btn-primary:focus-visible,
+.listing-card .book-now-btn:focus-visible,
+.listing-card .btn-book-now:focus-visible,
+.listing-card a[data-action="book-now"]:focus-visible,
+.listing-card button[data-action="book-now"]:focus-visible,
+.listing-card a.book-now:focus-visible,
+.listing-card button.book-now:focus-visible {
+  outline: 3px solid rgba(45, 106, 79, 0.28);
+  outline-offset: 3px;
+}
