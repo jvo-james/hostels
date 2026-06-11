@@ -258,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
       metaIcon1: "fa-key",
       metaIcon2: "fa-wifi",
       amenityLabel: "Wi-Fi",
-      amenities: ["wifi", "security", "furnished", "water"],
+      amenities: ["wifi", "security", "furnished"],
       status: "active",
       featured: false,
     },
@@ -266,6 +266,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const auth = window.HostelLinkAuth?.auth || (window.firebase?.auth ? window.firebase.auth() : null);
   const db = window.HostelLinkAuth?.db || (window.firebase?.firestore ? window.firebase.firestore() : null);
+
+  const HOSTELS_STORAGE_KEY = "hostel_link_hostels";
+  const HOSTELS_SYNC_EVENT = "hostels-updated";
 
   const grid = document.getElementById("hostelGrid");
   const resultsCount = document.getElementById("resultsCount");
@@ -308,12 +311,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const accordionButtons = document.querySelectorAll("[data-accordion-btn]");
 
   const MOBILE_BREAKPOINT = 640;
-  const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80";
+  const FALLBACK_IMAGE =
+    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80";
+
   const storedProfile =
     window.HostelLinkAuth?.getStoredProfile?.() ||
     safeParse(localStorage.getItem("staynest_profile"), {});
 
   const savedHostels = safeParse(localStorage.getItem("staynest_saved_hostels"), []);
+
   const state = {
     query: "",
     maxPrice: Number(priceRange?.value || 15000),
@@ -326,378 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   let activeBookingHostel = null;
-  let hostelsState = [...STATIC_HOSTELS.map(normalizeHostel)];
-
-  function injectStyles() {
-    if (document.getElementById("explore-js-styles")) return;
-
-    const style = document.createElement("style");
-    style.id = "explore-js-styles";
-    style.textContent = `
-      .listing-card{
-        background:#fff;
-        border:1px solid rgba(16,33,26,.10);
-        border-radius:26px;
-        overflow:hidden;
-        box-shadow:0 16px 34px rgba(16,33,26,.08);
-        display:flex;
-        flex-direction:column;
-        min-height:100%;
-        transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-      }
-      .listing-card:hover{
-        transform:translateY(-3px);
-        box-shadow:0 22px 48px rgba(16,33,26,.12);
-        border-color:rgba(45,106,79,.18);
-      }
-      .hostel-image-wrap{
-        position:relative;
-        aspect-ratio:16/10;
-        overflow:hidden;
-        background:#e9eee9;
-      }
-      .hostel-image-wrap img{
-        width:100%;
-        height:100%;
-        object-fit:cover;
-        display:block;
-      }
-      .hostel-tag{
-        position:absolute;
-        top:12px;
-        left:12px;
-        padding:8px 11px;
-        border-radius:999px;
-        background:rgba(16,33,26,.84);
-        color:#fff;
-        font-size:.78rem;
-        font-weight:900;
-        backdrop-filter:blur(8px);
-      }
-      .hostel-tag.hostel-tag-soft{
-        background:rgba(255,255,255,.90);
-        color:#1b4332;
-      }
-      .hostel-tag.hostel-tag-gold{
-        background:rgba(198,159,60,.92);
-        color:#fff;
-      }
-      .icon-btn.save-btn{
-        position:absolute;
-        top:12px;
-        right:12px;
-        width:40px;
-        height:40px;
-        border-radius:999px;
-        border:0;
-        background:rgba(255,255,255,.92);
-        color:#1b4332;
-        box-shadow:0 10px 22px rgba(0,0,0,.12);
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-      }
-      .icon-btn.save-btn.saved{
-        background:#1b4332;
-        color:#fff;
-      }
-      .hostel-body{
-        padding:16px;
-        display:grid;
-        gap:10px;
-        flex:1;
-      }
-      .hostel-top{
-        display:flex;
-        align-items:flex-start;
-        justify-content:space-between;
-        gap:10px;
-      }
-      .hostel-top h3{
-        margin:0;
-        font-size:1.05rem;
-        line-height:1.25;
-        letter-spacing:-.02em;
-      }
-      .hostel-rating{
-        flex:none;
-        display:inline-flex;
-        align-items:center;
-        gap:6px;
-        padding:7px 10px;
-        border-radius:999px;
-        background:rgba(216,243,220,.60);
-        color:#1b4332;
-        font-size:.84rem;
-        font-weight:900;
-      }
-      .hostel-location{
-        margin:0;
-        color:#66756f;
-        line-height:1.5;
-        font-size:.92rem;
-      }
-      .hostel-meta-row{
-        display:flex;
-        flex-wrap:wrap;
-        gap:8px;
-      }
-      .hostel-meta-row span{
-        display:inline-flex;
-        align-items:center;
-        gap:6px;
-        padding:7px 10px;
-        border-radius:999px;
-        background:#f6f8f6;
-        border:1px solid rgba(16,33,26,.06);
-        color:#23342d;
-        font-size:.8rem;
-        font-weight:800;
-      }
-      .hostel-bottom-row{
-        display:flex;
-        align-items:flex-end;
-        justify-content:space-between;
-        gap:12px;
-        flex-wrap:wrap;
-      }
-      .hostel-price{
-        margin:0;
-        font-size:1.15rem;
-        line-height:1.1;
-        font-weight:900;
-        color:#1b4332;
-        letter-spacing:-.02em;
-      }
-      .hostel-price span{
-        display:block;
-        font-size:.78rem;
-        color:#66756f;
-        font-weight:700;
-        margin-top:4px;
-      }
-      .listing-actions{
-        display:flex;
-        gap:8px;
-        flex-wrap:wrap;
-      }
-      .mini-link{
-        border:1px solid rgba(16,33,26,.10);
-        background:#fff;
-        color:#1b4332;
-        padding:9px 12px;
-        border-radius:14px;
-        font-size:.86rem;
-        font-weight:900;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        text-decoration:none;
-      }
-      .mini-link.book-btn{
-        background:linear-gradient(135deg,#1b4332,#2d6a4f);
-        color:#fff;
-        border-color:transparent;
-      }
-
-      .modal{
-        position:fixed;
-        inset:0;
-        background:rgba(16,33,26,.48);
-        display:none;
-        align-items:center;
-        justify-content:center;
-        padding:20px;
-        z-index:999;
-      }
-      .modal.open{display:flex}
-      .modal-panel{
-        width:min(980px,100%);
-        max-height:calc(100vh - 40px);
-        overflow:auto;
-        background:#fff;
-        border-radius:28px;
-        box-shadow:0 30px 80px rgba(0,0,0,.24);
-        border:1px solid rgba(255,255,255,.12);
-      }
-      .booking-layout{
-        display:grid;
-        grid-template-columns: .95fr 1.05fr;
-        min-height: 560px;
-      }
-      .booking-visual{
-        background:linear-gradient(180deg, #1b4332, #2d6a4f);
-        color:#fff;
-        position:relative;
-        overflow:hidden;
-      }
-      .booking-visual::before,
-      .booking-visual::after{
-        content:"";
-        position:absolute;
-        border-radius:999px;
-        background:rgba(255,255,255,.08);
-      }
-      .booking-visual::before{
-        width:240px;height:240px;right:-90px;top:-60px;
-      }
-      .booking-visual::after{
-        width:180px;height:180px;left:-70px;bottom:-50px;
-      }
-      .booking-visual img{
-        width:100%;
-        height:100%;
-        object-fit:cover;
-        display:block;
-        opacity:.92;
-      }
-      .booking-visual-overlay{
-        position:absolute;
-        inset:0;
-        padding:22px;
-        display:flex;
-        flex-direction:column;
-        justify-content:flex-end;
-        background:linear-gradient(180deg, rgba(16,33,26,.12), rgba(16,33,26,.80));
-      }
-      .booking-visual-overlay h3{
-        margin:0;
-        font-family:"Playfair Display", Georgia, serif;
-        font-size:2rem;
-        line-height:1.05;
-        letter-spacing:-.03em;
-      }
-      .booking-visual-overlay p{
-        margin:8px 0 0;
-        color:rgba(255,255,255,.88);
-        line-height:1.6;
-      }
-      .booking-price{
-        margin-top:14px;
-        font-size:1.5rem;
-        font-weight:900;
-      }
-      .booking-price span{
-        display:block;
-        font-size:.82rem;
-        margin-top:4px;
-        color:rgba(255,255,255,.84);
-        font-weight:700;
-      }
-      .booking-form-wrap{
-        padding:22px;
-      }
-      .booking-head{
-        display:flex;
-        align-items:flex-start;
-        justify-content:space-between;
-        gap:12px;
-        margin-bottom:18px;
-      }
-      .booking-head h2{
-        margin:0;
-        font-size:1.45rem;
-        letter-spacing:-.03em;
-      }
-      .booking-head p{
-        margin:6px 0 0;
-        color:#66756f;
-        line-height:1.6;
-      }
-      .close-btn{
-        width:42px;
-        height:42px;
-        border-radius:14px;
-        border:1px solid rgba(16,33,26,.10);
-        background:#fff;
-        color:#1b4332;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        box-shadow:0 10px 20px rgba(16,33,26,.08);
-      }
-      .booking-message{
-        display:none;
-        margin-bottom:14px;
-        padding:12px 14px;
-        border-radius:16px;
-        font-weight:700;
-        line-height:1.5;
-      }
-      .booking-message.show{display:block}
-      .booking-message.success{
-        background:rgba(45,106,79,.08);
-        border:1px solid rgba(45,106,79,.16);
-        color:#1b4332;
-      }
-      .booking-message.error{
-        background:rgba(160,52,52,.08);
-        border:1px solid rgba(160,52,52,.16);
-        color:#9a2f2f;
-      }
-      .booking-grid{
-        display:grid;
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        gap:12px;
-      }
-      .booking-field{
-        display:grid;
-        gap:8px;
-      }
-      .booking-field.full{grid-column:1 / -1}
-      .booking-field label{
-        font-size:.88rem;
-        font-weight:800;
-        color:#23342d;
-      }
-      .booking-field input,
-      .booking-field select,
-      .booking-field textarea{
-        width:100%;
-        border:1.5px solid rgba(16,33,26,.12);
-        border-radius:16px;
-        padding:13px 14px;
-        outline:none;
-        background:#fff;
-        color:#10211a;
-      }
-      .booking-field textarea{min-height:110px;resize:vertical}
-      .booking-field input:focus,
-      .booking-field select:focus,
-      .booking-field textarea:focus{
-        border-color:rgba(45,106,79,.42);
-        box-shadow:0 0 0 4px rgba(45,106,79,.10);
-      }
-      .booking-actions{
-        display:flex;
-        gap:10px;
-        flex-wrap:wrap;
-        margin-top:18px;
-      }
-      .booking-actions .btn{
-        padding:13px 16px;
-        border-radius:16px;
-      }
-      .booking-actions .btn.primary{
-        background:linear-gradient(135deg,#1b4332,#2d6a4f);
-        color:#fff;
-      }
-      .booking-actions .btn.secondary{
-        background:#fff;
-        border:1px solid rgba(16,33,26,.10);
-        color:#1b4332;
-      }
-
-      @media (max-width: 980px){
-        .booking-layout{grid-template-columns:1fr}
-      }
-      @media (max-width: 760px){
-        .hostel-grid{grid-template-columns:1fr}
-        .booking-grid{grid-template-columns:1fr}
-      }
-    `;
-    document.head.appendChild(style);
-  }
+  let hostelsState = [];
 
   function safeParse(jsonText, fallback) {
     try {
@@ -714,6 +349,29 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch {
       // ignore
     }
+  }
+
+  function loadSharedHostels() {
+    const shared = safeParse(localStorage.getItem(HOSTELS_STORAGE_KEY), []);
+    return Array.isArray(shared) ? shared : [];
+  }
+
+  function syncHostelsFromStorage() {
+    const sharedHostels = loadSharedHostels().map(normalizeHostel);
+    const staticHostels = STATIC_HOSTELS.map(normalizeHostel);
+
+    const merged = [...sharedHostels, ...staticHostels];
+    const unique = [];
+    const seen = new Set();
+
+    for (const hostel of merged) {
+      if (!hostel || seen.has(hostel.id)) continue;
+      seen.add(hostel.id);
+      unique.push(hostel);
+    }
+
+    hostelsState = unique;
+    refresh();
   }
 
   function currency(value) {
@@ -862,11 +520,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const merged = [...hostelsState];
     const unique = [];
     const seen = new Set();
+
     for (const hostel of merged) {
       if (!hostel || seen.has(hostel.id)) continue;
       seen.add(hostel.id);
       unique.push(normalizeHostel(hostel));
     }
+
     return unique;
   }
 
@@ -942,6 +602,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function sortHostels(list) {
     const sorted = [...list];
+
     sorted.sort((a, b) => {
       const priceA = Number(a.priceYear || 0);
       const priceB = Number(b.priceYear || 0);
@@ -966,6 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return featuredB - featuredA || ratingB - ratingA || priceA - priceB || String(a.name || "").localeCompare(String(b.name || ""));
       }
     });
+
     return sorted;
   }
 
@@ -1026,24 +688,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (sumFeatured) sumFeatured.textContent = featured;
   }
 
-  function render() {
-    if (!grid) return;
-
-    const all = getAllHostels();
-    const filtered = sortHostels(filterHostels(all));
-
-    grid.innerHTML = filtered.map(hostelCardTemplate).join("");
-    emptyStateToggle(filtered.length === 0);
-    updateCount(filtered);
-    updateSummary(all);
-    updateSortState();
-    syncSaveButtons();
-    updateLastUpdated(all);
-  }
-
   function emptyStateToggle(show) {
     const emptyState = document.getElementById("emptyState");
     if (emptyState) emptyState.hidden = !show;
+  }
+
+  function formatDate(value) {
+    if (!value) return "just now";
+    const d = value?.toDate ? value.toDate() : new Date(value);
+    if (Number.isNaN(d.getTime())) return "just now";
+    return d.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
   }
 
   function updateLastUpdated(all) {
@@ -1061,11 +715,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function formatDate(value) {
-    if (!value) return "just now";
-    const d = value?.toDate ? value.toDate() : new Date(value);
-    if (Number.isNaN(d.getTime())) return "just now";
-    return d.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+  function render() {
+    if (!grid) return;
+
+    const all = getAllHostels();
+    const filtered = sortHostels(filterHostels(all));
+
+    grid.innerHTML = filtered.map(hostelCardTemplate).join("");
+    emptyStateToggle(filtered.length === 0);
+    updateCount(filtered);
+    updateSummary(all);
+    updateSortState();
+    syncSaveButtons();
+    updateLastUpdated(all);
+  }
+
+  function refresh() {
+    if (priceLabel && priceRange) {
+      priceLabel.textContent = currency(Number(priceRange.value || state.maxPrice || 0));
+    }
+    applyView();
+    render();
   }
 
   function syncSaveButtons() {
@@ -1101,14 +771,6 @@ document.addEventListener("DOMContentLoaded", () => {
     zoneButtons.forEach((button) => {
       button.classList.toggle("active", button.dataset.zone === state.zone);
     });
-  }
-
-  function refresh() {
-    if (priceLabel && priceRange) {
-      priceLabel.textContent = currency(Number(priceRange.value || state.maxPrice || 0));
-    }
-    applyView();
-    render();
   }
 
   function getHostelFromCard(card) {
@@ -1313,30 +975,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function setHostelsFromFirestoreSnapshot(snapshot) {
-    const firestoreHostels = snapshot.docs.map((doc) =>
-      normalizeHostel({
-        id: doc.id,
-        ...doc.data(),
-      })
-    );
-
-    const merged = [...firestoreHostels, ...STATIC_HOSTELS.map(normalizeHostel)];
-    const unique = [];
-    const seen = new Set();
-
-    for (const hostel of merged) {
-      if (!hostel || seen.has(hostel.id)) continue;
-      seen.add(hostel.id);
-      unique.push(hostel);
-    }
-
-    hostelsState = unique;
-    refresh();
+  function setHostelsFromStorage() {
+    syncHostelsFromStorage();
   }
 
   function bootstrap() {
-    injectStyles();
     render();
     applyView();
     updateChips();
@@ -1364,20 +1007,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updateChips();
     refresh();
+    setHostelsFromStorage();
 
-    if (db?.collection) {
-      db.collection("hostels").onSnapshot(
-        (snapshot) => setHostelsFromFirestoreSnapshot(snapshot),
-        (error) => {
-          console.warn("Hostels snapshot unavailable, using fallback list:", error);
-          hostelsState = [...STATIC_HOSTELS.map(normalizeHostel)];
-          refresh();
-        }
-      );
-    } else {
-      hostelsState = [...STATIC_HOSTELS.map(normalizeHostel)];
-      refresh();
-    }
+    window.addEventListener("storage", (event) => {
+      if (event.key === HOSTELS_STORAGE_KEY) {
+        setHostelsFromStorage();
+      }
+    });
+
+    window.addEventListener(HOSTELS_SYNC_EVENT, setHostelsFromStorage);
+
+    setInterval(() => {
+      // lightweight fallback so the page picks up changes even if the custom event is missed
+      setHostelsFromStorage();
+    }, 1500);
 
     if (auth?.onAuthStateChanged) {
       auth.onAuthStateChanged((user) => {
