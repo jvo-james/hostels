@@ -714,7 +714,7 @@
       setBookedButtonState(btn, booked);
     });
 
-    const detailsBtn = document.querySelector("#bookNowBtn, #detailsBookBtn");
+    const detailsBtn = document.querySelector("#bookNowBtn, #bookNowTop, #detailsBookBtn");
     if (detailsBtn) {
       const hostel = getHostelFromDetailsPage();
       const id = hostel?.id || detailsBtn.dataset.hostelId || "";
@@ -1009,6 +1009,34 @@
     return normalizedLocal;
   }
 
+  async function syncHostelsFromFirestore() {
+    if (!db?.collection) return [];
+
+    try {
+      const snapshot = await db.collection("hostels").get();
+      if (!snapshot || snapshot.empty) return [];
+
+      const localHostels = loadJSON(STORAGE.hostels, []);
+      const merged = new Map(localHostels.map((item) => [String(item?.id || ""), item]).filter(([id]) => id));
+
+      snapshot.forEach((doc) => {
+        const data = doc.data ? doc.data() : {};
+        const hostel = normalizeHostel({
+          ...data,
+          id: data.id || doc.id,
+        });
+        merged.set(String(hostel.id), hostel);
+      });
+
+      const nextHostels = Array.from(merged.values());
+      saveJSON(STORAGE.hostels, nextHostels);
+      return nextHostels;
+    } catch (error) {
+      console.warn("Could not sync hostels from Firestore:", error);
+      return [];
+    }
+  }
+
   function normalizeHostel(raw) {
     const roomType = raw.roomType || raw.type || "self-contained";
     return {
@@ -1207,7 +1235,7 @@
     const imageEl = document.querySelector("[data-details-image], .details-image img, .details-hero img");
     const descEl = document.querySelector("[data-details-description], .details-description");
     const roomEl = document.querySelector("[data-details-room], .details-room");
-    const bookBtn = document.querySelector("#bookNowBtn, #detailsBookBtn, [data-book-now], [data-book-btn]");
+    const bookBtn = document.querySelector("#bookNowBtn, #bookNowTop, #detailsBookBtn, [data-book-now], [data-book-btn]");
     const saveBtn = document.querySelector("[data-save-hostel], [data-save-btn]");
     const bookedIds = getBookedHostelIds();
     const booked = bookedIds.has(String(hostel.id));
@@ -1386,6 +1414,13 @@
     updateBookedButtons();
     renderPage();
 
+    if (["explore", "details", "manager-portal"].includes(page)) {
+      syncHostelsFromFirestore().finally(() => {
+        renderPage();
+        updateBookedButtons();
+      });
+    }
+
     if (page === "register") renderRegisterRoleForm();
     if (page === "explore") renderExplorePage();
     if (page === "details") renderDetailsPage();
@@ -1407,5 +1442,174 @@
     renderBookingsPage,
     renderProfilePage,
     renderManagerPortalPage,
+  };
+})();
+(() => {
+  "use strict";
+
+  const HOSTELS_KEY = "hostel_link_hostels";
+  const HOSTELS_EVENT = "hostels-updated";
+  const FIRESTORE_COLLECTION = "hostels";
+
+  if (window.__hostelSyncBridgeReady) return;
+  window.__hostelSyncBridgeReady = true;
+
+  let syncingFromFirestore = false;
+  let firestoreUnsub = null;
+  let pushTimer = null;
+
+  function safeParse(value, fallback) {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && typeof parsed === "object" ? parsed : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function normalizeHostel(raw) {
+    const roomType = raw.type || raw.roomType || raw.room_label || raw.roomLabel || "self-contained";
+    return {
+      id: String(raw.id || raw.docId || raw.name || ""),
+      name: String(raw.name || raw.title || "Untitled hostel"),
+      area: String(raw.area || raw.neighborhood || raw.zone || ""),
+      location: String(raw.location || ""),
+      image: String(raw.image || raw.imageUrl || raw.photoURL || raw.photoUrl || ""),
+      type: String(roomType),
+      roomType: String(roomType),
+      roomLabel: String(raw.roomLabel || roomType),
+      priceYear: Number(raw.priceYear ?? raw.yearlyPrice ?? raw.price ?? 0),
+      amenities: Array.isArray(raw.amenities) ? raw.amenities : String(raw.amenities || "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+      status: String(raw.status || "active").toLowerCase() === "inactive" ? "inactive" : "active",
+      featured: !!raw.featured,
+      rating: String(raw.rating || "4.5"),
+      distance: String(raw.distance || "0.0"),
+      createdAt: raw.createdAt || null,
+      updatedAt: raw.updatedAt || null,
+      managerId: raw.managerId || null,
+    };
+  }
+
+  function getLocalHostels() {
+    const list = safeParse(localStorage.getItem(HOSTELS_KEY), []);
+    return Array.isArray(list) ? list.map(normalizeHostel).filter((item) => item.id) : [];
+  }
+
+  function emitHostelsUpdated() {
+    window.dispatchEvent(new CustomEvent(HOSTELS_EVENT, { detail: { source: "bridge" } }));
+    if (window.HostelLinkApp?.renderExplorePage) {
+      window.HostelLinkApp.renderExplorePage();
+    }
+  }
+
+  function writeLocalHostels(hostels) {
+    syncingFromFirestore = true;
+    try {
+      localStorage.setItem(HOSTELS_KEY, JSON.stringify(hostels));
+    } finally {
+      syncingFromFirestore = false;
+    }
+    emitHostelsUpdated();
+  }
+
+  function pushHostelsToFirestore(hostels) {
+    const db = window.firebase?.firestore ? firebase.firestore() : window.HostelLinkAuth?.db;
+    if (!db) return;
+
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(async () => {
+      try {
+        const batch = db.batch();
+        hostels.forEach((hostel) => {
+          if (!hostel.id) return;
+          const ref = db.collection(FIRESTORE_COLLECTION).doc(String(hostel.id));
+          batch.set(
+            ref,
+            {
+              ...hostel,
+              updatedAt: hostel.updatedAt || new Date().toISOString(),
+            },
+            { merge: true }
+          );
+        });
+        await batch.commit();
+      } catch (error) {
+        console.warn("Hostel Firestore push skipped:", error);
+      }
+    }, 250);
+  }
+
+  function startFirestoreMirror() {
+    const db = window.firebase?.firestore ? firebase.firestore() : window.HostelLinkAuth?.db;
+    if (!db || firestoreUnsub) return;
+
+    try {
+      firestoreUnsub = db.collection(FIRESTORE_COLLECTION).onSnapshot(
+        (snapshot) => {
+          const remote = snapshot.docs.map((doc) => normalizeHostel({ id: doc.id, ...doc.data() }));
+          const local = getLocalHostels();
+
+          const merged = [];
+          const seen = new Set();
+
+          [...local, ...remote].forEach((hostel) => {
+            if (!hostel || !hostel.id || seen.has(hostel.id)) return;
+            seen.add(hostel.id);
+            merged.push(hostel);
+          });
+
+          const currentText = localStorage.getItem(HOSTELS_KEY) || "[]";
+          const nextText = JSON.stringify(merged);
+
+          if (currentText !== nextText) {
+            writeLocalHostels(merged);
+          } else {
+            emitHostelsUpdated();
+          }
+        },
+        (error) => {
+          console.warn("Hostel Firestore mirror failed:", error);
+        }
+      );
+    } catch (error) {
+      console.warn("Hostel Firestore mirror unavailable:", error);
+    }
+  }
+
+  const originalSetItem = localStorage.setItem.bind(localStorage);
+  localStorage.setItem = function (key, value) {
+    const result = originalSetItem(key, value);
+
+    if (key === HOSTELS_KEY) {
+      emitHostelsUpdated();
+
+      if (!syncingFromFirestore) {
+        const hostels = safeParse(value, []);
+        if (Array.isArray(hostels)) {
+          pushHostelsToFirestore(hostels.map(normalizeHostel).filter((item) => item.id));
+        }
+      }
+    }
+
+    return result;
+  };
+
+  window.addEventListener("storage", (event) => {
+    if (event.key === HOSTELS_KEY) {
+      emitHostelsUpdated();
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    startFirestoreMirror();
+    emitHostelsUpdated();
+  });
+
+  window.HostelLinkApp = window.HostelLinkApp || {};
+  window.HostelLinkApp.syncHostelsNow = function () {
+    emitHostelsUpdated();
   };
 })();
