@@ -995,18 +995,21 @@
         lastUpdated.textContent = `Last update: ${latest?.updatedAt ? formatDate(latest.updatedAt) : "—"}`;
       }
 
-      async function ensureManager(user) {
-        if (!user) return null;
+const MANAGER_EMAIL = "your-manager-email@example.com";
 
-        try {
-          const snap = await db.collection("users").doc(user.uid).get();
-          const data = snap.exists ? snap.data() || {} : {};
-          return data;
-        } catch (error) {
-          console.error("Could not load manager profile:", error);
-          return null;
-        }
-      }
+async function ensureManager(user) {
+  if (!user) return null;
+
+  const email = (user.email || "").trim().toLowerCase();
+  if (email !== MANAGER_EMAIL.toLowerCase()) return { role: "student" };
+
+  return {
+    uid: user.uid,
+    email: user.email || "",
+    fullName: user.displayName || user.email || "Manager",
+    role: "manager",
+  };
+}
 
       async function saveHostel(event) {
         event.preventDefault();
