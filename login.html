@@ -703,24 +703,13 @@
         }
       }
 
-      async function getUserRole(user) {
-        if (!user) return "student";
+     const MANAGER_EMAIL = "your-manager-email@example.com";
 
-        try {
-          if (db) {
-            const snap = await db.collection("users").doc(user.uid).get();
-            if (snap.exists) {
-              const data = snap.data() || {};
-              return data.role || "student";
-            }
-          }
-        } catch (error) {
-          console.warn("Could not load role from Firestore:", error);
-        }
-
-        return "student";
-      }
-
+function getUserRole(user) {
+  const email = (user?.email || "").trim().toLowerCase();
+  return email === MANAGER_EMAIL.toLowerCase() ? "manager" : "student";
+}
+      
       togglePassword.addEventListener("click", () => {
         const hidden = password.type === "password";
         password.type = hidden ? "text" : "password";
@@ -784,19 +773,8 @@
 
           saveProfileLocally(profile);
 
-          let role = "student";
-          if (db && user) {
-            try {
-              const snap = await db.collection("users").doc(user.uid).get();
-              if (snap.exists) {
-                const data = snap.data() || {};
-                role = data.role || "student";
-                saveProfileLocally({ ...profile, ...data });
-              }
-            } catch (dbError) {
-              console.warn("Could not read user role:", dbError);
-            }
-          }
+         const role = getUserRole(user);
+saveProfileLocally({ ...profile, role });
 
           showToast("Signed in successfully.");
           showMessage("Signed in successfully. Redirecting...", "success");
