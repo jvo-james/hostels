@@ -709,8 +709,29 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="auth.js" defer></script>
-  <script src="script.js" defer></script>
+  <script>
+    (function initializeFirebase() {
+      const firebaseConfig = {
+        apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
+        authDomain: "vitra-ai-712ea.firebaseapp.com",
+        projectId: "vitra-ai-712ea",
+        storageBucket: "vitra-ai-712ea.appspot.com",
+        messagingSenderId: "306868103753",
+        appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98",
+      };
+
+      if (!window.firebase) return;
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+
+      window.StaynestAuth = {
+        auth: firebase.auth(),
+      };
+    })();
+  </script>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById("registerForm");
@@ -746,7 +767,6 @@
       const managerNote = document.getElementById("managerNote");
 
       const auth = window.firebase?.auth ? window.firebase.auth() : null;
-      const redirectTarget = new URLSearchParams(window.location.search).get("redirect") || "profile.html";
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
       function showMessage(text, type = "success") {
@@ -787,15 +807,22 @@
         } catch {
           // ignore storage issues
         }
-        try {
-          window.HostelLinkAuth?.saveStoredProfile?.(profile);
-        } catch {
-          // ignore storage issues
-        }
       }
 
       function currentRole() {
         return role.value === "manager" ? "manager" : "student";
+      }
+
+      function getRedirectForRole(roleName) {
+        return roleName === "manager" ? "manager-portal.html" : "profile.html";
+      }
+
+      function syncRedirectForRole(roleName) {
+        const target = getRedirectForRole(roleName);
+        const url = new URL(window.location.href);
+        url.searchParams.set("redirect", target);
+        window.history.replaceState({}, "", url.toString());
+        return target;
       }
 
       function syncProxyFields() {
@@ -870,9 +897,11 @@
       });
 
       role.addEventListener("change", () => {
-        setRoleUI(currentRole());
-        clearHiddenSectionFields(currentRole());
+        const selectedRole = currentRole();
+        setRoleUI(selectedRole);
+        clearHiddenSectionFields(selectedRole);
         syncProxyFields();
+        syncRedirectForRole(selectedRole);
       });
 
       [managerHostelName, managerHostelArea, managerHostelLocation, managerRooms, managerImageLink].forEach((input) => {
@@ -880,7 +909,9 @@
         input.addEventListener("change", syncProxyFields);
       });
 
-      setRoleUI(currentRole());
+      const initialRole = currentRole();
+      setRoleUI(initialRole);
+      syncRedirectForRole(initialRole);
       syncProxyFields();
 
       form.addEventListener("submit", async (event) => {
@@ -891,6 +922,7 @@
         const passwordValue = password.value.trim();
         const confirmValue = confirmPassword.value.trim();
         const selectedRole = currentRole();
+        syncRedirectForRole(selectedRole);
 
         if (!fullNameValue) {
           showMessage("Please enter your full name.", "error");
@@ -968,18 +1000,10 @@
 
         try {
           setLoading(true);
-
           syncProxyFields();
 
           const credential = await auth.createUserWithEmailAndPassword(emailValue, passwordValue);
           const user = credential.user;
-
-          const displayName = `${selectedRole}::${fullNameValue}`;
-
-          await user.updateProfile({
-            displayName,
-            photoURL: photoURL.value.trim() || null
-          });
 
           const profile = {
             uid: user.uid,
@@ -992,25 +1016,33 @@
             year: year.value || "",
             photoURL: photoURL.value.trim() || "",
             role: selectedRole,
-            displayName,
+            hostelName: selectedRole === "manager" ? managerHostelName.value.trim() : "",
+            hostelArea: selectedRole === "manager" ? managerHostelArea.value.trim() : "",
+            hostelLocation: selectedRole === "manager" ? managerHostelLocation.value.trim() : "",
+            hostelRooms: selectedRole === "manager" ? managerRooms.value.trim() : "",
+            managerNote: selectedRole === "manager" ? managerNote.value.trim() : "",
+            displayName: fullNameValue,
             createdAt: new Date().toISOString(),
           };
+
+          await user.updateProfile({
+            displayName: fullNameValue,
+            photoURL: profile.photoURL || null
+          });
 
           saveProfileLocally(profile);
 
           if (selectedRole === "manager") {
             showMessage("Manager account created successfully. Taking you to the manager portal...", "success");
             showToast("Welcome, manager!");
-            setTimeout(() => {
-              window.location.replace("manager-portal.html");
-            }, 400);
-          } else {
-            showMessage("Student account created successfully. Taking you to your profile...", "success");
-            showToast("Welcome!");
-            setTimeout(() => {
-              window.location.replace(redirectTarget || "profile.html");
-            }, 400);
+            window.location.href = "manager-portal.html";
+            return;
           }
+
+          showMessage("Student account created successfully. Taking you to your profile...", "success");
+          showToast("Welcome!");
+          window.location.href = "profile.html";
+          return;
         } catch (error) {
           showMessage(friendlyError(error), "error");
           console.error(error);
