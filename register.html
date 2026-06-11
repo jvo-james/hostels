@@ -5,39 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta
     name="description"
-    content="Create your Hostel Link Ghana account to save hostels, book rooms, and manage your profile."
+    content="Create a Hostel Link Ghana account. Students and hostel managers get role-specific registration and instant portal redirects."
   />
   <title>Hostel Link Ghana | Create account</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap"
-    rel="stylesheet"
-  >
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <style>
     :root {
       --bg: #f4f8f5;
-      --surface: rgba(255, 255, 255, 0.9);
+      --surface: rgba(255, 255, 255, 0.92);
+      --surface-2: rgba(255, 255, 255, 0.82);
       --text: #10211a;
-      --muted: #66756f;
+      --muted: #65736d;
       --green: #1b4332;
       --green-2: #2d6a4f;
       --mint: #d8f3dc;
-      --shadow: 0 26px 70px rgba(16, 33, 26, 0.16);
+      --border: rgba(16, 33, 26, 0.10);
+      --shadow: 0 26px 70px rgba(16, 33, 26, 0.14);
       --shadow-soft: 0 14px 34px rgba(16, 33, 26, 0.08);
       --radius-lg: 34px;
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-
     body {
       margin: 0;
       min-height: 100vh;
@@ -64,7 +61,6 @@
       color: #fff;
       font-weight: 800;
     }
-
     .skip-link:focus { left: 12px; }
 
     .page-wrap {
@@ -80,36 +76,15 @@
       position: absolute;
       border-radius: 999px;
       filter: blur(14px);
-      opacity: 0.75;
+      opacity: 0.72;
       pointer-events: none;
     }
-
-    .bg-orb.one {
-      width: 320px;
-      height: 320px;
-      left: -120px;
-      top: -110px;
-      background: rgba(216, 243, 220, 0.55);
-    }
-
-    .bg-orb.two {
-      width: 280px;
-      height: 280px;
-      right: -90px;
-      top: 70px;
-      background: rgba(200, 155, 60, 0.15);
-    }
-
-    .bg-orb.three {
-      width: 360px;
-      height: 360px;
-      right: 8%;
-      bottom: -160px;
-      background: rgba(27, 67, 50, 0.10);
-    }
+    .bg-orb.one { width: 320px; height: 320px; left: -120px; top: -110px; background: rgba(216, 243, 220, 0.55); }
+    .bg-orb.two { width: 280px; height: 280px; right: -90px; top: 70px; background: rgba(200, 155, 60, 0.15); }
+    .bg-orb.three { width: 360px; height: 360px; right: 8%; bottom: -160px; background: rgba(27, 67, 50, 0.10); }
 
     .container {
-      width: min(calc(100% - 32px), 980px);
+      width: min(calc(100% - 32px), 1080px);
       margin-inline: auto;
       position: relative;
       z-index: 1;
@@ -117,7 +92,7 @@
 
     .auth-card {
       background: var(--surface);
-      border: 1px solid rgba(16, 33, 26, 0.08);
+      border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow);
       backdrop-filter: blur(18px);
@@ -156,17 +131,13 @@
       overflow: hidden;
       flex: none;
     }
-
     .brand-mark img {
       width: 100%;
       height: 100%;
       object-fit: contain;
       padding: 8px;
     }
-
-    .brand-text {
-      font-size: 1.08rem;
-    }
+    .brand-text { font-size: 1.08rem; }
 
     .mini-badge {
       display: inline-flex;
@@ -182,23 +153,19 @@
       border: 1px solid rgba(27, 67, 50, 0.08);
     }
 
-    .heading-block {
-      margin-bottom: 22px;
-    }
-
+    .heading-block { margin-bottom: 20px; }
     .heading-block h1 {
       margin: 10px 0 0;
-      font-size: clamp(2rem, 1.5rem + 1.1vw, 2.9rem);
+      font-size: clamp(2rem, 1.5rem + 1.1vw, 2.95rem);
       line-height: 1.05;
       font-family: "Playfair Display", Georgia, serif;
       letter-spacing: -0.03em;
     }
-
     .heading-block p {
       margin: 12px 0 0;
       color: var(--muted);
       line-height: 1.65;
-      max-width: 58ch;
+      max-width: 68ch;
       font-size: 0.98rem;
     }
 
@@ -206,31 +173,80 @@
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
-
     .subcard {
       padding: 14px 12px;
       border-radius: 20px;
       background: rgba(255, 255, 255, 0.92);
-      border: 1px solid rgba(16, 33, 26, 0.08);
+      border: 1px solid var(--border);
       box-shadow: var(--shadow-soft);
       text-align: center;
     }
-
     .subcard strong {
       display: block;
       font-size: 1.02rem;
       line-height: 1.1;
       color: var(--green);
     }
-
     .subcard span {
       display: block;
       margin-top: 5px;
       color: var(--muted);
       font-size: 0.82rem;
-      line-height: 1.3;
+      line-height: 1.35;
+    }
+
+    .role-banner {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 24px;
+      background: rgba(245, 248, 246, 0.9);
+      border: 1px solid var(--border);
+      margin-bottom: 18px;
+    }
+    .role-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+      gap: 14px;
+      align-items: end;
+    }
+    .role-copy h2 {
+      margin: 0;
+      font-size: 1.18rem;
+      letter-spacing: -0.02em;
+    }
+    .role-copy p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.95rem;
+    }
+    .role-pill {
+      display: grid;
+      gap: 8px;
+    }
+    .role-pill label {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #23342d;
+    }
+    .auth-select,
+    .auth-input {
+      width: 100%;
+      border: 1.5px solid rgba(16, 33, 26, 0.12);
+      border-radius: 18px;
+      background: #fff;
+      color: var(--text);
+      padding: 0.92rem 1rem;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+    .auth-select:focus,
+    .auth-input:focus {
+      border-color: rgba(45, 106, 79, 0.45);
+      box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.11);
     }
 
     .field-grid {
@@ -238,22 +254,13 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 14px;
     }
-
-    .field-group {
-      display: grid;
-      gap: 8px;
-    }
-
+    .field-group { display: grid; gap: 8px; }
     .field-group label {
       font-size: 0.88rem;
       font-weight: 800;
       color: #23342d;
     }
-
-    .input-wrap {
-      position: relative;
-    }
-
+    .input-wrap { position: relative; }
     .input-icon {
       position: absolute;
       left: 16px;
@@ -263,39 +270,7 @@
       font-size: 0.96rem;
       pointer-events: none;
     }
-
-    .auth-input,
-    .auth-select {
-      width: 100%;
-      border: 1.5px solid rgba(16, 33, 26, 0.12);
-      border-radius: 18px;
-      background: #fff;
-      padding: 0.92rem 1rem 0.92rem 2.8rem;
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
-    }
-
-    .auth-select {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      background-image:
-        linear-gradient(45deg, transparent 50%, rgba(27, 67, 50, 0.72) 50%),
-        linear-gradient(135deg, rgba(27, 67, 50, 0.72) 50%, transparent 50%);
-      background-position:
-        calc(100% - 22px) calc(50% - 3px),
-        calc(100% - 16px) calc(50% - 3px);
-      background-size: 6px 6px, 6px 6px;
-      background-repeat: no-repeat;
-      padding-right: 2.5rem;
-    }
-
-    .auth-input:focus,
-    .auth-select:focus {
-      border-color: rgba(45, 106, 79, 0.45);
-      box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.11);
-    }
+    .icon-input { padding-left: 2.8rem; }
 
     .password-row {
       display: grid;
@@ -303,7 +278,6 @@
       gap: 10px;
       align-items: center;
     }
-
     .toggle-btn {
       width: 48px;
       height: 48px;
@@ -316,10 +290,26 @@
       justify-content: center;
       transition: transform 0.18s ease, box-shadow 0.18s ease;
     }
+    .toggle-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-soft); }
 
-    .toggle-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-soft);
+    .role-section {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid var(--border);
+    }
+    .role-section[hidden] { display: none !important; }
+    .role-section-head h3 {
+      margin: 0;
+      font-size: 1.06rem;
+      letter-spacing: -0.02em;
+    }
+    .role-section-head p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.94rem;
     }
 
     .helper-row {
@@ -328,8 +318,8 @@
       justify-content: space-between;
       gap: 14px;
       flex-wrap: wrap;
+      margin-top: 14px;
     }
-
     .remember {
       display: inline-flex;
       align-items: center;
@@ -338,7 +328,6 @@
       font-size: 0.92rem;
       user-select: none;
     }
-
     .remember input {
       width: 18px;
       height: 18px;
@@ -356,18 +345,10 @@
       letter-spacing: -0.01em;
       box-shadow: 0 18px 34px rgba(27, 67, 50, 0.22);
       transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+      margin-top: 14px;
     }
-
-    .submit-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 22px 40px rgba(27, 67, 50, 0.26);
-    }
-
-    .submit-btn:disabled {
-      opacity: 0.75;
-      cursor: not-allowed;
-      transform: none;
-    }
+    .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 22px 40px rgba(27, 67, 50, 0.26); }
+    .submit-btn:disabled { opacity: 0.75; cursor: not-allowed; transform: none; }
 
     .message {
       display: none;
@@ -378,14 +359,12 @@
       font-weight: 700;
       line-height: 1.4;
     }
-
     .message.show { display: block; }
     .message.success {
-      background: rgba(216, 243, 220, 0.7);
+      background: rgba(216, 243, 220, 0.72);
       color: var(--green);
       border: 1px solid rgba(45, 106, 79, 0.12);
     }
-
     .message.error {
       background: rgba(255, 232, 232, 0.82);
       color: #9a2f2f;
@@ -397,15 +376,13 @@
       padding: 14px 16px;
       border-radius: 20px;
       background: rgba(245, 248, 246, 0.86);
-      border: 1px solid rgba(16, 33, 26, 0.08);
+      border: 1px solid var(--border);
     }
-
     .note-box strong {
       display: block;
       margin-bottom: 6px;
       color: var(--green);
     }
-
     .note-box p {
       margin: 0;
       color: var(--muted);
@@ -423,7 +400,6 @@
       font-size: 0.94rem;
       flex-wrap: wrap;
     }
-
     .form-footer a {
       color: var(--green-2);
       font-weight: 800;
@@ -438,47 +414,32 @@
       color: #fff;
       padding: 12px 16px;
       border-radius: 999px;
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.22);
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease;
       z-index: 999;
     }
-
     .toast.show {
       opacity: 1;
       visibility: visible;
       transform: translate(-50%, 0);
     }
 
-    @media (max-width: 880px) {
+    @media (max-width: 900px) {
+      .subgrid,
       .field-grid,
-      .subgrid {
+      .role-row {
         grid-template-columns: 1fr;
-      }
-
-      .auth-card {
-        padding: 22px;
       }
     }
 
     @media (max-width: 560px) {
-      .page-wrap {
-        padding: 14px 0;
-      }
-
-      .container {
-        width: min(calc(100% - 20px), 980px);
-      }
-
-      .brand-text {
-        font-size: 1rem;
-      }
-
-      .auth-card {
-        border-radius: 28px;
-        padding: 18px;
-      }
+      .page-wrap { padding: 14px 0; }
+      .container { width: min(calc(100% - 20px), 1080px); }
+      .brand-text { font-size: 1rem; }
+      .auth-card { border-radius: 28px; padding: 18px; }
+      .role-section { padding: 14px; }
     }
   </style>
 </head>
@@ -508,34 +469,53 @@
 
         <div class="heading-block">
           <h1 id="pageTitle">Create your Hostel Link Ghana account</h1>
-          <p>
-            Register once, then your profile details can appear everywhere you are signed in.
-            This account will be used for bookings, saved hostels, and your profile page.
+          <p id="pageSubtitle">
+            Pick your role, fill in the matching details, and Firebase Auth will create your account.
+            Students go to the student area, while hostel managers go straight to the manager portal.
           </p>
         </div>
 
         <div class="subgrid">
           <div class="subcard">
-            <strong>Profile sync</strong>
-            <span>Your name, email, and school details can be saved to Firestore.</span>
+            <strong>Role-aware signup</strong>
+            <span>The form changes automatically for students and hostel managers.</span>
           </div>
           <div class="subcard">
-            <strong>Booking ready</strong>
-            <span>Use the same account for future hostel bookings.</span>
+            <strong>No Firestore role setup</strong>
+            <span>This prototype uses Firebase Auth and local profile storage only.</span>
           </div>
           <div class="subcard">
-            <strong>Signed in state</strong>
-            <span>After register, the profile icon can replace the login links.</span>
+            <strong>Instant redirect</strong>
+            <span>After sign-up, you land on the correct portal for your role.</span>
           </div>
         </div>
 
         <form id="registerForm" novalidate>
+          <div class="role-banner">
+            <div class="role-row">
+              <div class="role-copy">
+                <h2 id="roleTitle">Student registration</h2>
+                <p id="roleDescription">
+                  Student accounts show student-only details such as student ID, institution, department, and level.
+                </p>
+              </div>
+
+              <div class="role-pill">
+                <label for="role">Account type</label>
+                <select class="auth-select" id="role" name="role" required>
+                  <option value="student">Student</option>
+                  <option value="manager">Hostel manager</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
           <div class="field-grid">
             <div class="field-group">
-              <label for="fullName">Full name</label>
+              <label for="fullName" id="fullNameLabel">Full name</label>
               <div class="input-wrap">
                 <i class="fa-solid fa-user input-icon"></i>
-                <input class="auth-input" id="fullName" name="fullName" type="text" placeholder="Enter your full name" autocomplete="name" required>
+                <input class="auth-input icon-input" id="fullName" name="fullName" type="text" placeholder="Enter your full name" autocomplete="name" required>
               </div>
             </div>
 
@@ -543,66 +523,15 @@
               <label for="email">Email address</label>
               <div class="input-wrap">
                 <i class="fa-solid fa-envelope input-icon"></i>
-                <input class="auth-input" id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+                <input class="auth-input icon-input" id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
               </div>
             </div>
 
             <div class="field-group">
-              <label for="phone">Phone number</label>
+              <label for="phone" id="phoneLabel">Phone number</label>
               <div class="input-wrap">
                 <i class="fa-solid fa-phone input-icon"></i>
-                <input class="auth-input" id="phone" name="phone" type="tel" placeholder="0xx xxx xxxx" autocomplete="tel">
-              </div>
-            </div>
-
-            <div class="field-group">
-              <label for="role">Account type</label>
-              <div class="input-wrap">
-                <i class="fa-solid fa-id-badge input-icon"></i>
-                <select class="auth-select" id="role" name="role" required>
-                  <option value="student">Student</option>
-                  <option value="manager">Hostel manager</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="field-group">
-              <label for="studentId">Student ID</label>
-              <div class="input-wrap">
-                <i class="fa-solid fa-id-card input-icon"></i>
-                <input class="auth-input" id="studentId" name="studentId" type="text" placeholder="Your student ID" autocomplete="off">
-              </div>
-            </div>
-
-            <div class="field-group">
-              <label for="institution">Institution</label>
-              <div class="input-wrap">
-                <i class="fa-solid fa-school input-icon"></i>
-                <input class="auth-input" id="institution" name="institution" type="text" placeholder="Your school or university" autocomplete="organization">
-              </div>
-            </div>
-
-            <div class="field-group">
-              <label for="department">Department</label>
-              <div class="input-wrap">
-                <i class="fa-solid fa-building-columns input-icon"></i>
-                <input class="auth-input" id="department" name="department" type="text" placeholder="Your department" autocomplete="off">
-              </div>
-            </div>
-
-            <div class="field-group">
-              <label for="year">Level / year</label>
-              <div class="input-wrap">
-                <i class="fa-solid fa-layer-group input-icon"></i>
-                <select class="auth-select" id="year" name="year">
-                  <option value="">Select your level</option>
-                  <option value="100">100 Level</option>
-                  <option value="200">200 Level</option>
-                  <option value="300">300 Level</option>
-                  <option value="400">400 Level</option>
-                  <option value="500">500 Level</option>
-                  <option value="postgraduate">Postgraduate</option>
-                </select>
+                <input class="auth-input icon-input" id="phone" name="phone" type="tel" placeholder="0xx xxx xxxx" autocomplete="tel">
               </div>
             </div>
 
@@ -610,7 +539,7 @@
               <label for="photoURL">Profile photo URL</label>
               <div class="input-wrap">
                 <i class="fa-solid fa-image input-icon"></i>
-                <input class="auth-input" id="photoURL" name="photoURL" type="url" placeholder="Optional image link">
+                <input class="auth-input icon-input" id="photoURL" name="photoURL" type="url" placeholder="Optional image link">
               </div>
             </div>
 
@@ -619,7 +548,7 @@
               <div class="password-row">
                 <div class="input-wrap">
                   <i class="fa-solid fa-lock input-icon"></i>
-                  <input class="auth-input" id="password" name="password" type="password" placeholder="Create a password" autocomplete="new-password" minlength="6" required>
+                  <input class="auth-input icon-input" id="password" name="password" type="password" placeholder="Create a password" autocomplete="new-password" minlength="6" required>
                 </div>
                 <button class="toggle-btn" type="button" id="togglePassword" aria-label="Show password">
                   <i class="fa-solid fa-eye"></i>
@@ -632,7 +561,7 @@
               <div class="password-row">
                 <div class="input-wrap">
                   <i class="fa-solid fa-lock input-icon"></i>
-                  <input class="auth-input" id="confirmPassword" name="confirmPassword" type="password" placeholder="Repeat your password" autocomplete="new-password" minlength="6" required>
+                  <input class="auth-input icon-input" id="confirmPassword" name="confirmPassword" type="password" placeholder="Repeat your password" autocomplete="new-password" minlength="6" required>
                 </div>
                 <button class="toggle-btn" type="button" id="toggleConfirmPassword" aria-label="Show confirm password">
                   <i class="fa-solid fa-eye"></i>
@@ -641,14 +570,120 @@
             </div>
           </div>
 
-          <div class="helper-row" style="margin-top: 14px;">
+          <section class="role-section" id="studentSection" aria-labelledby="studentSectionTitle">
+            <div class="role-section-head">
+              <h3 id="studentSectionTitle">Student details</h3>
+              <p>These fields are shown when Student is selected.</p>
+            </div>
+
+            <div class="field-grid" style="margin-top: 14px;">
+              <div class="field-group">
+                <label for="studentId">Student ID</label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-id-card input-icon"></i>
+                  <input class="auth-input icon-input" id="studentId" name="studentId" type="text" placeholder="Your student ID" autocomplete="off">
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="institution">Institution</label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-school input-icon"></i>
+                  <input class="auth-input icon-input" id="institution" name="institution" type="text" placeholder="Your school or university" autocomplete="organization">
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="department">Department</label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-building-columns input-icon"></i>
+                  <input class="auth-input icon-input" id="department" name="department" type="text" placeholder="Your department" autocomplete="off">
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="year">Level / year</label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-layer-group input-icon"></i>
+                  <select class="auth-select icon-input" id="year" name="year">
+                    <option value="">Select your level</option>
+                    <option value="100">100 Level</option>
+                    <option value="200">200 Level</option>
+                    <option value="300">300 Level</option>
+                    <option value="400">400 Level</option>
+                    <option value="500">500 Level</option>
+                    <option value="postgraduate">Postgraduate</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="role-section" id="managerSection" aria-labelledby="managerSectionTitle" hidden>
+            <div class="role-section-head">
+              <h3 id="managerSectionTitle">Hostel manager details</h3>
+              <p>These fields are shown when Hostel manager is selected.</p>
+            </div>
+
+            <div class="field-grid" style="margin-top: 14px;">
+              <div class="field-group">
+                <label for="hostelName">Hostel name</label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-building input-icon"></i>
+                  <input class="auth-input icon-input" id="hostelName" name="hostelName" type="text" placeholder="Name of your hostel">
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="hostelArea">Hostel area</label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-location-dot input-icon"></i>
+                  <input class="auth-input icon-input" id="hostelArea" name="hostelArea" type="text" placeholder="Area, estate, or neighborhood">
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="hostelCity">City / town</label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-city input-icon"></i>
+                  <input class="auth-input icon-input" id="hostelCity" name="hostelCity" type="text" placeholder="Your city or town">
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="hostelCapacity">Approx. capacity</label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-people-group input-icon"></i>
+                  <input class="auth-input icon-input" id="hostelCapacity" name="hostelCapacity" type="number" min="0" step="1" placeholder="Optional room count">
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="hostelWebsite">Hostel photo / website link</label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-link input-icon"></i>
+                  <input class="auth-input icon-input" id="hostelWebsite" name="hostelWebsite" type="url" placeholder="Optional link for your hostel">
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="managerNote">Manager note</label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-pen-to-square input-icon"></i>
+                  <input class="auth-input icon-input" id="managerNote" name="managerNote" type="text" placeholder="Short note about your hostel">
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="helper-row">
             <label class="remember">
               <input type="checkbox" id="agreeTerms" required>
               I agree to the terms and privacy policy
             </label>
           </div>
 
-          <button class="submit-btn" id="submitBtn" type="submit" style="margin-top: 14px;">
+          <button class="submit-btn" id="submitBtn" type="submit">
             Create account
           </button>
 
@@ -656,9 +691,9 @@
 
           <div class="note-box">
             <strong>What gets saved</strong>
-            <p>
-              Your name, email, phone, role, student ID, institution, department, level, and photo link can be stored
-              in Firebase so your profile page can show them after sign in.
+            <p id="noteText">
+              Your profile is saved in browser storage so the app can show your details right away.
+              No Firestore role edit is needed for this prototype.
             </p>
           </div>
 
@@ -677,14 +712,26 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById("registerForm");
-      const fullName = document.getElementById("fullName");
-      const email = document.getElementById("email");
-      const phone = document.getElementById("phone");
       const role = document.getElementById("role");
+      const roleTitle = document.getElementById("roleTitle");
+      const roleDescription = document.getElementById("roleDescription");
+      const fullName = document.getElementById("fullName");
+      const fullNameLabel = document.getElementById("fullNameLabel");
+      const phone = document.getElementById("phone");
+      const phoneLabel = document.getElementById("phoneLabel");
+      const studentSection = document.getElementById("studentSection");
+      const managerSection = document.getElementById("managerSection");
       const studentId = document.getElementById("studentId");
       const institution = document.getElementById("institution");
       const department = document.getElementById("department");
       const year = document.getElementById("year");
+      const hostelName = document.getElementById("hostelName");
+      const hostelArea = document.getElementById("hostelArea");
+      const hostelCity = document.getElementById("hostelCity");
+      const hostelCapacity = document.getElementById("hostelCapacity");
+      const hostelWebsite = document.getElementById("hostelWebsite");
+      const managerNote = document.getElementById("managerNote");
+      const email = document.getElementById("email");
       const photoURL = document.getElementById("photoURL");
       const password = document.getElementById("password");
       const confirmPassword = document.getElementById("confirmPassword");
@@ -694,11 +741,11 @@
       const formMessage = document.getElementById("formMessage");
       const toast = document.getElementById("toast");
       const agreeTerms = document.getElementById("agreeTerms");
+      const noteText = document.getElementById("noteText");
 
       const auth = window.firebase?.auth ? window.firebase.auth() : null;
-      const db = window.firebase?.firestore ? window.firebase.firestore() : null;
       const redirectTarget = new URLSearchParams(window.location.search).get("redirect") || "profile.html";
-
+      const MANAGER_PORTAL = "manager-portal.html";
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
       function showMessage(text, type = "success") {
@@ -719,7 +766,9 @@
         submitBtn.disabled = loading;
         submitBtn.innerHTML = loading
           ? '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating account...'
-          : "Create account";
+          : role.value === "manager"
+            ? "Create manager account"
+            : "Create account";
       }
 
       function friendlyError(error) {
@@ -737,22 +786,107 @@
         } catch {
           // ignore storage issues
         }
+        try {
+          window.HostelLinkAuth?.saveStoredProfile?.(profile);
+        } catch {
+          // ignore storage issues
+        }
       }
 
-      function buildProfileData(uid) {
-        return {
+      function currentRole() {
+        return role.value === "manager" ? "manager" : "student";
+      }
+
+      function buildProfileData(uid, firebaseUser) {
+        const selectedRole = currentRole();
+        const base = {
           uid,
           fullName: fullName.value.trim(),
           email: email.value.trim(),
           phone: phone.value.trim(),
-          role: role.value,
-          studentId: studentId.value.trim(),
-          institution: institution.value.trim(),
-          department: department.value.trim(),
-          year: year.value,
+          role: selectedRole,
           photoURL: photoURL.value.trim(),
           createdAt: new Date().toISOString()
         };
+
+        if (selectedRole === "manager") {
+          return {
+            ...base,
+            hostelName: hostelName.value.trim(),
+            hostelArea: hostelArea.value.trim(),
+            hostelCity: hostelCity.value.trim(),
+            hostelCapacity: hostelCapacity.value.trim(),
+            hostelWebsite: hostelWebsite.value.trim(),
+            managerNote: managerNote.value.trim()
+          };
+        }
+
+        return {
+          ...base,
+          studentId: studentId.value.trim(),
+          institution: institution.value.trim(),
+          department: department.value.trim(),
+          year: year.value
+        };
+      }
+
+      function setRoleUI(selectedRole) {
+        const manager = selectedRole === "manager";
+        studentSection.hidden = manager;
+        managerSection.hidden = !manager;
+
+        roleTitle.textContent = manager ? "Hostel manager registration" : "Student registration";
+        roleDescription.textContent = manager
+          ? "Manager accounts show hostel details such as hostel name, location, city, and capacity."
+          : "Student accounts show student-only details such as student ID, institution, department, and level.";
+        fullNameLabel.textContent = manager ? "Manager full name" : "Full name";
+        phoneLabel.textContent = manager ? "Manager phone number" : "Phone number";
+        noteText.textContent = manager
+          ? "Your manager profile stays in browser storage for this prototype, and the form sends you straight to the manager portal after sign-up."
+          : "Your student profile stays in browser storage for this prototype, and the form sends you to the student area after sign-up.";
+        submitBtn.textContent = manager ? "Create manager account" : "Create account";
+      }
+
+      function clearHiddenSectionFields(selectedRole) {
+        const manager = selectedRole === "manager";
+        if (manager) {
+          studentId.value = "";
+          institution.value = "";
+          department.value = "";
+          year.value = "";
+        } else {
+          hostelName.value = "";
+          hostelArea.value = "";
+          hostelCity.value = "";
+          hostelCapacity.value = "";
+          hostelWebsite.value = "";
+          managerNote.value = "";
+        }
+      }
+
+      function validateRoleFields(selectedRole) {
+        if (selectedRole === "manager") {
+          if (!hostelName.value.trim()) return "Enter your hostel name.";
+          if (!hostelArea.value.trim()) return "Enter the hostel area.";
+          if (!hostelCity.value.trim()) return "Enter the city or town.";
+        } else {
+          if (!studentId.value.trim()) return "Enter your student ID.";
+          if (!institution.value.trim()) return "Enter your institution.";
+          if (!department.value.trim()) return "Enter your department.";
+          if (!year.value) return "Select your level or year.";
+        }
+        return "";
+      }
+
+      function persistAndRedirect(profile) {
+        saveProfileLocally(profile);
+        showMessage("Account created successfully. Taking you to your portal...", "success");
+        showToast(`Welcome, ${profile.fullName || "user"}!`);
+
+        const nextPage = profile.role === "manager" ? MANAGER_PORTAL : redirectTarget;
+        setTimeout(() => {
+          window.location.replace(nextPage);
+        }, 700);
       }
 
       togglePassword.addEventListener("click", () => {
@@ -773,13 +907,12 @@
         toggleConfirmPassword.setAttribute("aria-label", hidden ? "Hide confirm password" : "Show confirm password");
       });
 
-      if (auth) {
-        auth.onAuthStateChanged((user) => {
-          if (user) {
-            window.location.replace(redirectTarget);
-          }
-        });
-      }
+      role.addEventListener("change", () => {
+        setRoleUI(currentRole());
+        clearHiddenSectionFields(currentRole());
+      });
+
+      setRoleUI(currentRole());
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -788,6 +921,7 @@
         const emailValue = email.value.trim();
         const passwordValue = password.value.trim();
         const confirmValue = confirmPassword.value.trim();
+        const selectedRole = currentRole();
 
         if (!fullNameValue) {
           showMessage("Please enter your full name.", "error");
@@ -819,6 +953,12 @@
           return;
         }
 
+        const roleValidationError = validateRoleFields(selectedRole);
+        if (roleValidationError) {
+          showMessage(roleValidationError, "error");
+          return;
+        }
+
         if (!auth) {
           showMessage("Firebase Auth is not available yet. Connect Firebase before creating accounts.", "error");
           return;
@@ -829,8 +969,7 @@
 
           const credential = await auth.createUserWithEmailAndPassword(emailValue, passwordValue);
           const user = credential.user;
-
-          const profile = buildProfileData(user?.uid || "");
+          const profile = buildProfileData(user?.uid || "", user);
 
           if (user) {
             await user.updateProfile({
@@ -839,28 +978,7 @@
             });
           }
 
-          saveProfileLocally(profile);
-
-          if (db && user) {
-            try {
-              await db.collection("users").doc(user.uid).set(
-                {
-                  ...profile,
-                  createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                },
-                { merge: true }
-              );
-            } catch (dbError) {
-              console.warn("Could not save profile to Firestore:", dbError);
-            }
-          }
-
-          showMessage("Account created successfully. Taking you to your profile...", "success");
-          showToast(`Welcome, ${profile.fullName || "user"}!`);
-
-          setTimeout(() => {
-            window.location.href = redirectTarget;
-          }, 700);
+          persistAndRedirect(profile);
         } catch (error) {
           showMessage(friendlyError(error), "error");
         } finally {
