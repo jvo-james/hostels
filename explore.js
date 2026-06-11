@@ -356,6 +356,25 @@ document.addEventListener("DOMContentLoaded", () => {
     return Array.isArray(shared) ? shared : [];
   }
 
+  function getBookedHostelIds() {
+    const booked = safeParse(localStorage.getItem("staynest_booked_hostel_ids"), []);
+    return new Set(Array.isArray(booked) ? booked.map((id) => String(id)) : []);
+  }
+
+  function markBookedHostel(hostelId) {
+    const id = String(hostelId || "");
+    if (!id) return;
+
+    const bookedIds = getBookedHostelIds();
+    bookedIds.add(id);
+
+    try {
+      localStorage.setItem("staynest_booked_hostel_ids", JSON.stringify(Array.from(bookedIds)));
+    } catch {
+      // ignore
+    }
+  }
+
   function syncHostelsFromStorage() {
     const sharedHostels = loadSharedHostels().map(normalizeHostel);
     const staticHostels = STATIC_HOSTELS.map(normalizeHostel);
@@ -534,10 +553,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return savedHostels.includes(hostel.id) || savedHostels.includes(hostel.name);
   }
 
-  function hostelCardTemplate(hostel) {
+  function hostelCardTemplate(hostel, booked = false) {
     const amenities = normalizeAmenities(hostel.amenities);
     const tagClass = hostel.tagClass ? ` ${hostel.tagClass}` : "";
     const statusClass = hostel.status === "inactive" ? "inactive" : "active";
+    const defaultBookText = booked ? "Booked" : "Book now";
+    const bookButtonAttrs = booked ? 'data-booked="true" aria-disabled="true" disabled' : ""; 
 
     return `
       <article
@@ -581,7 +602,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <p class="hostel-price">${currency(hostel.priceYear)} <span>per year</span></p>
             <div class="listing-actions">
               <a href="details.html?id=${encodeURIComponent(hostel.id)}" class="mini-link">View details</a>
-              <button type="button" class="mini-link book-btn" data-book-now>Book now</button>
+              <button type="button" class="mini-link book-btn${booked ? " is-booked disabled" : ""}" data-book-now ${bookButtonAttrs}>${defaultBookText}</button>
             </div>
           </div>
 
@@ -719,9 +740,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!grid) return;
 
     const all = getAllHostels();
+    const bookedIds = getBookedHostelIds();
     const filtered = sortHostels(filterHostels(all));
 
-    grid.innerHTML = filtered.map(hostelCardTemplate).join("");
+    grid.innerHTML = filtered.map((hostel) => hostelCardTemplate(hostel, bookedIds.has(String(hostel.id)))).join("");
     emptyStateToggle(filtered.length === 0);
     updateCount(filtered);
     updateSummary(all);
@@ -917,6 +939,7 @@ document.addEventListener("DOMContentLoaded", () => {
       saveBookingsArray(bookings);
     }
 
+    markBookedHostel(booking.hostelId);
     updateProfileBookingCount();
     return true;
   }
@@ -962,6 +985,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (bookButton) {
+      if (bookButton.disabled || bookButton.getAttribute("aria-disabled") === "true") return;
       const card = bookButton.closest(".listing-card");
       const hostel = getHostelFromCard(card);
       if (!hostel) return;
@@ -1010,12 +1034,15 @@ document.addEventListener("DOMContentLoaded", () => {
     setHostelsFromStorage();
 
     window.addEventListener("storage", (event) => {
-      if (event.key === HOSTELS_STORAGE_KEY) {
+      if (event.key === HOSTELS_STORAGE_KEY || event.key === "staynest_booked_hostel_ids") {
         setHostelsFromStorage();
       }
     });
 
     window.addEventListener(HOSTELS_SYNC_EVENT, setHostelsFromStorage);
+    window.addEventListener("bookings-updated", () => {
+      refresh();
+    });
 
     setInterval(() => {
       // lightweight fallback so the page picks up changes even if the custom event is missed
@@ -1196,6 +1223,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       setBookingMessage("Saving your booking...", "success");
       await saveBooking(booking);
+      refresh();
 
       setBookingMessage("Booking saved successfully. Redirecting to bookings...", "success");
       showToast("Booking saved");
