@@ -224,7 +224,7 @@
   <div class="loading-wrap" id="loadingWrap">
     <div class="loading-card">
       <i class="fa-solid fa-circle-notch fa-spin"></i>
-      Loading manager portal...
+      Loading portal...
     </div>
   </div>
 
@@ -270,7 +270,7 @@
             </div>
             <div class="notice">
               <strong>Manager only</strong>
-              <span>Only the email you mark as manager can stay on this page.</span>
+              <span>Any signed-in manager account can use this portal, with no fixed email required.</span>
             </div>
           </div>
         </div>
@@ -431,7 +431,6 @@
         appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98",
       };
 
-      const MANAGER_EMAIL = "justicesenu@gmail.com"; // replace with the exact manager email
       const STORAGE_KEY = "hostel_link_hostels";
       const PROFILE_KEY = "staynest_profile";
 
@@ -864,12 +863,6 @@
         }
 
         currentUser = user;
-        const email = (user.email || "").trim().toLowerCase();
-        if (email !== MANAGER_EMAIL.trim().toLowerCase()) {
-          window.location.replace("index.html");
-          return;
-        }
-
         const profile = loadProfile();
         managerName.textContent = profile.fullName || user.displayName || user.email || "Manager";
 
