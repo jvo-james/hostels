@@ -481,8 +481,8 @@
             <span>The form changes automatically for students and hostel managers.</span>
           </div>
           <div class="subcard">
-            <strong>No Firestore role setup</strong>
-            <span>This prototype uses Firebase Auth and local profile storage only.</span>
+            <strong>Firebase Auth only</strong>
+            <span>This prototype uses Firebase Authentication for sign-in and sign-up.</span>
           </div>
           <div class="subcard">
             <strong>Instant redirect</strong>
@@ -570,7 +570,7 @@
             </div>
           </div>
 
-          <section class="role-section" id="studentSection" aria-labelledby="studentSectionTitle">
+          <section class="role-section" id="studentSection" data-student-register-field aria-labelledby="studentSectionTitle">
             <div class="role-section-head">
               <h3 id="studentSectionTitle">Student details</h3>
               <p>These fields are shown when Student is selected.</p>
@@ -581,7 +581,7 @@
                 <label for="studentId">Student ID</label>
                 <div class="input-wrap">
                   <i class="fa-solid fa-id-card input-icon"></i>
-                  <input class="auth-input icon-input" id="studentId" name="studentId" type="text" placeholder="Your student ID" autocomplete="off">
+                  <input class="auth-input icon-input" id="studentId" name="studentId" type="text" placeholder="Your student ID" autocomplete="off" required>
                 </div>
               </div>
 
@@ -589,7 +589,7 @@
                 <label for="institution">Institution</label>
                 <div class="input-wrap">
                   <i class="fa-solid fa-school input-icon"></i>
-                  <input class="auth-input icon-input" id="institution" name="institution" type="text" placeholder="Your school or university" autocomplete="organization">
+                  <input class="auth-input icon-input" id="institution" name="institution" type="text" placeholder="Your school or university" autocomplete="organization" required>
                 </div>
               </div>
 
@@ -597,7 +597,7 @@
                 <label for="department">Department</label>
                 <div class="input-wrap">
                   <i class="fa-solid fa-building-columns input-icon"></i>
-                  <input class="auth-input icon-input" id="department" name="department" type="text" placeholder="Your department" autocomplete="off">
+                  <input class="auth-input icon-input" id="department" name="department" type="text" placeholder="Your department" autocomplete="off" required>
                 </div>
               </div>
 
@@ -605,7 +605,7 @@
                 <label for="year">Level / year</label>
                 <div class="input-wrap">
                   <i class="fa-solid fa-layer-group input-icon"></i>
-                  <select class="auth-select icon-input" id="year" name="year">
+                  <select class="auth-select icon-input" id="year" name="year" required>
                     <option value="">Select your level</option>
                     <option value="100">100 Level</option>
                     <option value="200">200 Level</option>
@@ -619,50 +619,50 @@
             </div>
           </section>
 
-          <section class="role-section" id="managerSection" aria-labelledby="managerSectionTitle" hidden>
+          <section class="role-section" id="managerSection" data-manager-register-field hidden aria-labelledby="managerSectionTitle">
             <div class="role-section-head">
               <h3 id="managerSectionTitle">Hostel manager details</h3>
-              <p>These fields are shown when Hostel manager is selected.</p>
+              <p>These fields appear when Hostel manager is selected.</p>
             </div>
 
             <div class="field-grid" style="margin-top: 14px;">
               <div class="field-group">
-                <label for="hostelName">Hostel name</label>
+                <label for="managerHostelName">Hostel name</label>
                 <div class="input-wrap">
                   <i class="fa-solid fa-building input-icon"></i>
-                  <input class="auth-input icon-input" id="hostelName" name="hostelName" type="text" placeholder="Name of your hostel">
+                  <input class="auth-input icon-input" id="managerHostelName" type="text" placeholder="Name of your hostel">
                 </div>
               </div>
 
               <div class="field-group">
-                <label for="hostelArea">Hostel area</label>
+                <label for="managerHostelArea">Hostel area</label>
                 <div class="input-wrap">
                   <i class="fa-solid fa-location-dot input-icon"></i>
-                  <input class="auth-input icon-input" id="hostelArea" name="hostelArea" type="text" placeholder="Area, estate, or neighborhood">
+                  <input class="auth-input icon-input" id="managerHostelArea" type="text" placeholder="Area, estate, or neighborhood">
                 </div>
               </div>
 
               <div class="field-group">
-                <label for="hostelCity">City / town</label>
+                <label for="managerHostelLocation">Hostel location</label>
                 <div class="input-wrap">
-                  <i class="fa-solid fa-city input-icon"></i>
-                  <input class="auth-input icon-input" id="hostelCity" name="hostelCity" type="text" placeholder="Your city or town">
+                  <i class="fa-solid fa-map-pin input-icon"></i>
+                  <input class="auth-input icon-input" id="managerHostelLocation" type="text" placeholder="City, town, or exact location">
                 </div>
               </div>
 
               <div class="field-group">
-                <label for="hostelCapacity">Approx. capacity</label>
+                <label for="managerRooms">Number of rooms</label>
                 <div class="input-wrap">
                   <i class="fa-solid fa-people-group input-icon"></i>
-                  <input class="auth-input icon-input" id="hostelCapacity" name="hostelCapacity" type="number" min="0" step="1" placeholder="Optional room count">
+                  <input class="auth-input icon-input" id="managerRooms" type="number" min="0" step="1" placeholder="e.g. 12">
                 </div>
               </div>
 
               <div class="field-group">
-                <label for="hostelWebsite">Hostel photo / website link</label>
+                <label for="managerImageLink">Hostel image link</label>
                 <div class="input-wrap">
-                  <i class="fa-solid fa-link input-icon"></i>
-                  <input class="auth-input icon-input" id="hostelWebsite" name="hostelWebsite" type="url" placeholder="Optional link for your hostel">
+                  <i class="fa-solid fa-image input-icon"></i>
+                  <input class="auth-input icon-input" id="managerImageLink" type="url" placeholder="Paste an image link">
                 </div>
               </div>
 
@@ -670,7 +670,7 @@
                 <label for="managerNote">Manager note</label>
                 <div class="input-wrap">
                   <i class="fa-solid fa-pen-to-square input-icon"></i>
-                  <input class="auth-input icon-input" id="managerNote" name="managerNote" type="text" placeholder="Short note about your hostel">
+                  <input class="auth-input icon-input" id="managerNote" type="text" placeholder="Short note about your hostel">
                 </div>
               </div>
             </div>
@@ -684,6 +684,7 @@
           </div>
 
           <button class="submit-btn" id="submitBtn" type="submit">
+            <i class="fa-solid fa-user-plus"></i>
             Create account
           </button>
 
@@ -709,6 +710,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="auth.js" defer></script>
+  <script src="script.js" defer></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById("registerForm");
@@ -725,13 +727,6 @@
       const institution = document.getElementById("institution");
       const department = document.getElementById("department");
       const year = document.getElementById("year");
-      const hostelName = document.getElementById("hostelName");
-      const hostelArea = document.getElementById("hostelArea");
-      const hostelCity = document.getElementById("hostelCity");
-      const hostelCapacity = document.getElementById("hostelCapacity");
-      const hostelWebsite = document.getElementById("hostelWebsite");
-      const managerNote = document.getElementById("managerNote");
-      const email = document.getElementById("email");
       const photoURL = document.getElementById("photoURL");
       const password = document.getElementById("password");
       const confirmPassword = document.getElementById("confirmPassword");
@@ -743,9 +738,15 @@
       const agreeTerms = document.getElementById("agreeTerms");
       const noteText = document.getElementById("noteText");
 
+      const managerHostelName = document.getElementById("managerHostelName");
+      const managerHostelArea = document.getElementById("managerHostelArea");
+      const managerHostelLocation = document.getElementById("managerHostelLocation");
+      const managerRooms = document.getElementById("managerRooms");
+      const managerImageLink = document.getElementById("managerImageLink");
+      const managerNote = document.getElementById("managerNote");
+
       const auth = window.firebase?.auth ? window.firebase.auth() : null;
       const redirectTarget = new URLSearchParams(window.location.search).get("redirect") || "profile.html";
-      const MANAGER_PORTAL = "manager-portal.html";
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
       function showMessage(text, type = "success") {
@@ -767,8 +768,8 @@
         submitBtn.innerHTML = loading
           ? '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating account...'
           : role.value === "manager"
-            ? "Create manager account"
-            : "Create account";
+            ? '<i class="fa-solid fa-building"></i> Create manager account'
+            : '<i class="fa-solid fa-user-plus"></i> Create account';
       }
 
       function friendlyError(error) {
@@ -797,54 +798,39 @@
         return role.value === "manager" ? "manager" : "student";
       }
 
-      function buildProfileData(uid, firebaseUser) {
-        const selectedRole = currentRole();
-        const base = {
-          uid,
-          fullName: fullName.value.trim(),
-          email: email.value.trim(),
-          phone: phone.value.trim(),
-          role: selectedRole,
-          photoURL: photoURL.value.trim(),
-          createdAt: new Date().toISOString()
-        };
+      function syncProxyFields() {
+        const isManager = currentRole() === "manager";
 
-        if (selectedRole === "manager") {
-          return {
-            ...base,
-            hostelName: hostelName.value.trim(),
-            hostelArea: hostelArea.value.trim(),
-            hostelCity: hostelCity.value.trim(),
-            hostelCapacity: hostelCapacity.value.trim(),
-            hostelWebsite: hostelWebsite.value.trim(),
-            managerNote: managerNote.value.trim()
-          };
+        if (isManager) {
+          studentId.value = managerHostelName.value.trim();
+          institution.value = managerHostelArea.value.trim();
+          department.value = managerHostelLocation.value.trim();
+          year.value = managerRooms.value.trim();
+          photoURL.value = managerImageLink.value.trim();
         }
-
-        return {
-          ...base,
-          studentId: studentId.value.trim(),
-          institution: institution.value.trim(),
-          department: department.value.trim(),
-          year: year.value
-        };
       }
 
       function setRoleUI(selectedRole) {
         const manager = selectedRole === "manager";
+
         studentSection.hidden = manager;
         managerSection.hidden = !manager;
 
         roleTitle.textContent = manager ? "Hostel manager registration" : "Student registration";
         roleDescription.textContent = manager
-          ? "Manager accounts show hostel details such as hostel name, location, city, and capacity."
+          ? "Fill in your hostel details below. These values will be used by the manager portal."
           : "Student accounts show student-only details such as student ID, institution, department, and level.";
-        fullNameLabel.textContent = manager ? "Manager full name" : "Full name";
-        phoneLabel.textContent = manager ? "Manager phone number" : "Phone number";
+
+        fullNameLabel.textContent = manager ? "Manager name" : "Full name";
+        phoneLabel.textContent = manager ? "Manager phone" : "Phone number";
+
         noteText.textContent = manager
-          ? "Your manager profile stays in browser storage for this prototype, and the form sends you straight to the manager portal after sign-up."
-          : "Your student profile stays in browser storage for this prototype, and the form sends you to the student area after sign-up.";
-        submitBtn.textContent = manager ? "Create manager account" : "Create account";
+          ? "Your manager profile is saved in browser storage for this prototype, and you will go straight to the manager portal after sign-up."
+          : "Your student profile is saved in browser storage for this prototype, and you will go to the student page after sign-up.";
+
+        submitBtn.innerHTML = manager
+          ? '<i class="fa-solid fa-building"></i> Create manager account'
+          : '<i class="fa-solid fa-user-plus"></i> Create account';
       }
 
       function clearHiddenSectionFields(selectedRole) {
@@ -854,39 +840,15 @@
           institution.value = "";
           department.value = "";
           year.value = "";
+          photoURL.value = "";
         } else {
-          hostelName.value = "";
-          hostelArea.value = "";
-          hostelCity.value = "";
-          hostelCapacity.value = "";
-          hostelWebsite.value = "";
+          managerHostelName.value = "";
+          managerHostelArea.value = "";
+          managerHostelLocation.value = "";
+          managerRooms.value = "";
+          managerImageLink.value = "";
           managerNote.value = "";
         }
-      }
-
-      function validateRoleFields(selectedRole) {
-        if (selectedRole === "manager") {
-          if (!hostelName.value.trim()) return "Enter your hostel name.";
-          if (!hostelArea.value.trim()) return "Enter the hostel area.";
-          if (!hostelCity.value.trim()) return "Enter the city or town.";
-        } else {
-          if (!studentId.value.trim()) return "Enter your student ID.";
-          if (!institution.value.trim()) return "Enter your institution.";
-          if (!department.value.trim()) return "Enter your department.";
-          if (!year.value) return "Select your level or year.";
-        }
-        return "";
-      }
-
-      function persistAndRedirect(profile) {
-        saveProfileLocally(profile);
-        showMessage("Account created successfully. Taking you to your portal...", "success");
-        showToast(`Welcome, ${profile.fullName || "user"}!`);
-
-        const nextPage = profile.role === "manager" ? MANAGER_PORTAL : redirectTarget;
-        setTimeout(() => {
-          window.location.replace(nextPage);
-        }, 700);
       }
 
       togglePassword.addEventListener("click", () => {
@@ -910,15 +872,22 @@
       role.addEventListener("change", () => {
         setRoleUI(currentRole());
         clearHiddenSectionFields(currentRole());
+        syncProxyFields();
+      });
+
+      [managerHostelName, managerHostelArea, managerHostelLocation, managerRooms, managerImageLink].forEach((input) => {
+        input.addEventListener("input", syncProxyFields);
+        input.addEventListener("change", syncProxyFields);
       });
 
       setRoleUI(currentRole());
+      syncProxyFields();
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
 
         const fullNameValue = fullName.value.trim();
-        const emailValue = email.value.trim();
+        const emailValue = document.getElementById("email").value.trim();
         const passwordValue = password.value.trim();
         const confirmValue = confirmPassword.value.trim();
         const selectedRole = currentRole();
@@ -931,7 +900,7 @@
 
         if (!emailRegex.test(emailValue)) {
           showMessage("Please enter a valid email address.", "error");
-          email.focus();
+          document.getElementById("email").focus();
           return;
         }
 
@@ -953,10 +922,43 @@
           return;
         }
 
-        const roleValidationError = validateRoleFields(selectedRole);
-        if (roleValidationError) {
-          showMessage(roleValidationError, "error");
-          return;
+        if (selectedRole === "student") {
+          if (!studentId.value.trim()) {
+            showMessage("Please enter your student ID.", "error");
+            studentId.focus();
+            return;
+          }
+          if (!institution.value.trim()) {
+            showMessage("Please enter your institution.", "error");
+            institution.focus();
+            return;
+          }
+          if (!department.value.trim()) {
+            showMessage("Please enter your department.", "error");
+            department.focus();
+            return;
+          }
+          if (!year.value) {
+            showMessage("Please select your level or year.", "error");
+            year.focus();
+            return;
+          }
+        } else {
+          if (!managerHostelName.value.trim()) {
+            showMessage("Please enter your hostel name.", "error");
+            managerHostelName.focus();
+            return;
+          }
+          if (!managerHostelArea.value.trim()) {
+            showMessage("Please enter your hostel area.", "error");
+            managerHostelArea.focus();
+            return;
+          }
+          if (!managerHostelLocation.value.trim()) {
+            showMessage("Please enter your hostel location.", "error");
+            managerHostelLocation.focus();
+            return;
+          }
         }
 
         if (!auth) {
@@ -967,26 +969,56 @@
         try {
           setLoading(true);
 
+          syncProxyFields();
+
           const credential = await auth.createUserWithEmailAndPassword(emailValue, passwordValue);
           const user = credential.user;
-          const profile = buildProfileData(user?.uid || "", user);
 
-          if (user) {
-            await user.updateProfile({
-              displayName: profile.fullName,
-              photoURL: profile.photoURL || ""
-            });
+          const displayName = `${selectedRole}::${fullNameValue}`;
+
+          await user.updateProfile({
+            displayName,
+            photoURL: photoURL.value.trim() || null
+          });
+
+          const profile = {
+            uid: user.uid,
+            email: emailValue,
+            fullName: fullNameValue,
+            phone: phone.value.trim() || "",
+            studentId: studentId.value.trim() || "",
+            institution: institution.value.trim() || "",
+            department: department.value.trim() || "",
+            year: year.value || "",
+            photoURL: photoURL.value.trim() || "",
+            role: selectedRole,
+            displayName,
+            createdAt: new Date().toISOString(),
+          };
+
+          saveProfileLocally(profile);
+
+          if (selectedRole === "manager") {
+            showMessage("Manager account created successfully. Taking you to the manager portal...", "success");
+            showToast("Welcome, manager!");
+            setTimeout(() => {
+              window.location.replace("manager-portal.html");
+            }, 400);
+          } else {
+            showMessage("Student account created successfully. Taking you to your profile...", "success");
+            showToast("Welcome!");
+            setTimeout(() => {
+              window.location.replace(redirectTarget || "profile.html");
+            }, 400);
           }
-
-          persistAndRedirect(profile);
         } catch (error) {
           showMessage(friendlyError(error), "error");
+          console.error(error);
         } finally {
           setLoading(false);
         }
       });
     });
   </script>
-  <script src="script.js"></script>
 </body>
 </html>
