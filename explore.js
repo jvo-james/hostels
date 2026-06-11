@@ -268,6 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const db = window.HostelLinkAuth?.db || (window.firebase?.firestore ? window.firebase.firestore() : null);
 
   const HOSTELS_STORAGE_KEY = "hostel_link_hostels";
+  const HOSTELS_COLLECTION = "hostels";
   const HOSTELS_SYNC_EVENT = "hostels-updated";
 
   const grid = document.getElementById("hostelGrid");
@@ -333,6 +334,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let activeBookingHostel = null;
   let hostelsState = [];
+  let remoteHostelsState = [];
+  let remoteHostelsReady = false;
+  let remoteHostelsUnsubscribe = null;
 
   function safeParse(jsonText, fallback) {
     try {
@@ -356,6 +360,50 @@ document.addEventListener("DOMContentLoaded", () => {
     return Array.isArray(shared) ? shared : [];
   }
 
+  function loadRemoteHostels() {
+    return remoteHostelsState.map((hostel) => normalizeHostel(hostel));
+  }
+
+  function mergeHostelSources() {
+    const sharedHostels = loadSharedHostels().map(normalizeHostel);
+    const remoteHostels = loadRemoteHostels();
+    const staticHostels = STATIC_HOSTELS.map(normalizeHostel);
+
+    const merged = [...remoteHostels, ...sharedHostels, ...staticHostels];
+    const unique = [];
+    const seen = new Set();
+
+    for (const hostel of merged) {
+      if (!hostel || seen.has(hostel.id)) continue;
+      seen.add(hostel.id);
+      unique.push(hostel);
+    }
+
+    hostelsState = unique;
+    refresh();
+  }
+
+  function subscribeToRemoteHostels() {
+    if (!db?.collection) return;
+
+    try {
+      remoteHostelsUnsubscribe?.();
+    } catch {
+      // ignore
+    }
+
+    remoteHostelsUnsubscribe = db.collection(HOSTELS_COLLECTION).onSnapshot((snapshot) => {
+      remoteHostelsState = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      remoteHostelsReady = true;
+      mergeHostelSources();
+    }, (error) => {
+      console.warn("Could not subscribe to hostel updates:", error);
+    });
+  }
+
   function getBookedHostelIds() {
     const booked = safeParse(localStorage.getItem("staynest_booked_hostel_ids"), []);
     return new Set(Array.isArray(booked) ? booked.map((id) => String(id)) : []);
@@ -376,6 +424,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function syncHostelsFromStorage() {
+    if (remoteHostelsReady) {
+      mergeHostelSources();
+      return;
+    }
+
     const sharedHostels = loadSharedHostels().map(normalizeHostel);
     const staticHostels = STATIC_HOSTELS.map(normalizeHostel);
 
@@ -1032,6 +1085,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateChips();
     refresh();
     setHostelsFromStorage();
+    subscribeToRemoteHostels();
 
     window.addEventListener("storage", (event) => {
       if (event.key === HOSTELS_STORAGE_KEY || event.key === "staynest_booked_hostel_ids") {
@@ -1048,6 +1102,14 @@ document.addEventListener("DOMContentLoaded", () => {
       // lightweight fallback so the page picks up changes even if the custom event is missed
       setHostelsFromStorage();
     }, 1500);
+
+    window.addEventListener("beforeunload", () => {
+      try {
+        remoteHostelsUnsubscribe?.();
+      } catch {
+        // ignore
+      }
+    });
 
     if (auth?.onAuthStateChanged) {
       auth.onAuthStateChanged((user) => {
