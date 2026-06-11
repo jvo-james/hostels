@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Hostel manager portal for Hostel Link Ghana. Add, edit, and manage hostels in real time." />
+  <meta name="description" content="Hostel manager portal for Hostel Link Ghana. Add, edit, hide, and delete hostels instantly." />
   <title>Hostel Link Ghana | Manager Portal</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,6 @@
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <style>
     :root{
@@ -79,31 +78,21 @@
       background:linear-gradient(135deg,#fff,rgba(216,243,220,.84));
       box-shadow:0 14px 28px rgba(0,0,0,.14);
       display:flex;align-items:center;justify-content:center;
+      font-weight:900;color:var(--green);
     }
     .brand-mark img{width:100%;height:100%;object-fit:contain;padding:8px}
-    .brand-title{
-      display:flex;flex-direction:column;line-height:1.05;
-    }
-    .brand-title strong{
-      font-size:1.05rem;
-    }
-    .brand-title span{
-      font-size:.84rem;color:var(--muted);font-weight:700;margin-top:4px;
-    }
+    .brand-title{display:flex;flex-direction:column;line-height:1.05}
+    .brand-title strong{font-size:1.05rem}
+    .brand-title span{font-size:.84rem;color:var(--muted);font-weight:700;margin-top:4px}
 
-    .top-actions{
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-    }
+    .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .pill{
       display:inline-flex;align-items:center;gap:8px;
       padding:10px 14px;border-radius:999px;border:1px solid var(--border);
       background:rgba(255,255,255,.72);box-shadow:var(--shadow-soft);
       font-weight:800;font-size:.9rem;
     }
-    .pill.user{
-      background:rgba(27,67,50,.07);
-      color:var(--green);
-    }
+    .pill.user{background:rgba(27,67,50,.07);color:var(--green)}
 
     .btn{
       border:0;cursor:pointer;
@@ -112,17 +101,9 @@
       transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;
     }
     .btn:hover{transform:translateY(-1px)}
-    .btn-primary{
-      background:linear-gradient(135deg,var(--green),var(--green-2));
-      color:#fff;box-shadow:0 18px 36px rgba(27,67,50,.22);
-    }
-    .btn-ghost{
-      background:#fff;border:1px solid var(--border);color:var(--green);
-      box-shadow:var(--shadow-soft);
-    }
-    .btn-danger{
-      background:#fff;border:1px solid rgba(163,42,42,.16);color:#9a2f2f;
-    }
+    .btn-primary{background:linear-gradient(135deg,var(--green),var(--green-2));color:#fff;box-shadow:0 18px 36px rgba(27,67,50,.22)}
+    .btn-ghost{background:#fff;border:1px solid var(--border);color:var(--green);box-shadow:var(--shadow-soft)}
+    .btn-danger{background:#fff;border:1px solid rgba(163,42,42,.16);color:#9a2f2f}
 
     .hero{
       background:linear-gradient(135deg, rgba(255,255,255,.88), rgba(255,255,255,.68));
@@ -134,13 +115,7 @@
       margin-bottom:18px;
     }
 
-    .hero-grid{
-      display:grid;
-      grid-template-columns:1.2fr .8fr;
-      gap:18px;
-      align-items:stretch;
-    }
-
+    .hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
     .hero h1{
       margin:0;
       font-family:"Playfair Display", Georgia, serif;
@@ -148,326 +123,87 @@
       line-height:1.02;
       letter-spacing:-.03em;
     }
-    .hero p{
-      margin:12px 0 0;
-      color:var(--muted);
-      line-height:1.7;
-      max-width:68ch;
-    }
+    .hero p{margin:12px 0 0;color:var(--muted);line-height:1.7;max-width:68ch}
 
-    .notice-row{
-      display:grid;
-      gap:12px;
-      margin-top:18px;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-    }
+    .notice-row{display:grid;gap:12px;margin-top:18px;grid-template-columns:repeat(3,minmax(0,1fr))}
     .notice{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:20px;
-      padding:14px;
-      box-shadow:var(--shadow-soft);
+      background:#fff;border:1px solid var(--border);border-radius:20px;padding:14px;box-shadow:var(--shadow-soft)
     }
-    .notice strong{
-      display:block;color:var(--green);font-size:.96rem;margin-bottom:6px
-    }
-    .notice span{
-      display:block;color:var(--muted);font-size:.9rem;line-height:1.5
-    }
+    .notice strong{display:block;color:var(--green);font-size:.96rem;margin-bottom:6px}
+    .notice span{display:block;color:var(--muted);font-size:.9rem;line-height:1.5}
 
     .hero-side{
-      border-radius:24px;
-      padding:18px;
-      background:linear-gradient(135deg,var(--green),var(--green-2));
-      color:#fff;
-      position:relative;
-      overflow:hidden;
+      border-radius:24px;padding:18px;background:linear-gradient(135deg,var(--green),var(--green-2));color:#fff;position:relative;overflow:hidden
     }
-    .hero-side::before,
-    .hero-side::after{
-      content:"";
-      position:absolute;border-radius:999px;background:rgba(255,255,255,.08);
-      filter:blur(2px);
-    }
+    .hero-side::before,.hero-side::after{content:"";position:absolute;border-radius:999px;background:rgba(255,255,255,.08);filter:blur(2px)}
     .hero-side::before{width:220px;height:220px;right:-90px;top:-80px}
     .hero-side::after{width:180px;height:180px;left:-70px;bottom:-60px}
-    .hero-side h2{
-      margin:0 0 8px;font-family:"Playfair Display", Georgia, serif;
-      font-size:1.6rem;letter-spacing:-.02em;
-    }
-    .hero-side p{
-      margin:0;color:rgba(255,255,255,.86);line-height:1.6;font-size:.95rem
-    }
-    .stats{
-      display:grid;gap:12px;margin-top:18px;grid-template-columns:repeat(2,minmax(0,1fr));
-      position:relative;z-index:1;
-    }
-    .stat{
-      background:rgba(255,255,255,.1);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:18px;
-      padding:14px;
-    }
+    .hero-side h2{margin:0 0 8px;font-family:"Playfair Display", Georgia, serif;font-size:1.6rem;letter-spacing:-.02em}
+    .hero-side p{margin:0;color:rgba(255,255,255,.86);line-height:1.6;font-size:.95rem}
+    .stats{display:grid;gap:12px;margin-top:18px;grid-template-columns:repeat(2,minmax(0,1fr));position:relative;z-index:1}
+    .stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:14px}
     .stat strong{display:block;font-size:1.25rem;margin-bottom:4px}
     .stat span{display:block;color:rgba(255,255,255,.82);font-size:.88rem;line-height:1.45}
 
     .panel{
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:var(--radius-lg);
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(18px);
-      padding:22px;
-      margin-top:18px;
+      background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);backdrop-filter:blur(18px);padding:22px;margin-top:18px
     }
+    .panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+    .panel-head h2{margin:0;font-size:1.5rem;letter-spacing:-.03em}
+    .panel-head p{margin:6px 0 0;color:var(--muted);line-height:1.55}
 
-    .panel-head{
-      display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;
-      margin-bottom:18px;
-    }
-    .panel-head h2{
-      margin:0;font-size:1.5rem;letter-spacing:-.03em;
-    }
-    .panel-head p{
-      margin:6px 0 0;color:var(--muted);line-height:1.55
-    }
-
-    .toolbar{
-      display:grid;
-      grid-template-columns:1.3fr .8fr .8fr auto;
-      gap:12px;
-      margin-bottom:18px;
-    }
-    .search,
-    .select,
-    .input,
-    .textarea{
-      width:100%;
-      border:1.5px solid rgba(16,33,26,.12);
-      border-radius:18px;
-      background:#fff;
-      color:var(--text);
-      padding:14px 15px;
-      outline:none;
-      transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    .toolbar{display:grid;grid-template-columns:1.3fr .8fr .8fr auto;gap:12px;margin-bottom:18px}
+    .search,.select,.input,.textarea{
+      width:100%;border:1.5px solid rgba(16,33,26,.12);border-radius:18px;background:#fff;color:var(--text);padding:14px 15px;outline:none;transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease;
     }
     .textarea{min-height:118px;line-height:1.55}
-    .search:focus,
-    .select:focus,
-    .input:focus,
-    .textarea:focus{
-      border-color:rgba(45,106,79,.42);
-      box-shadow:0 0 0 4px rgba(45,106,79,.10);
-      transform:translateY(-1px);
-    }
+    .search:focus,.select:focus,.input:focus,.textarea:focus{border-color:rgba(45,106,79,.42);box-shadow:0 0 0 4px rgba(45,106,79,.10);transform:translateY(-1px)}
 
-    .form-grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:14px;
-    }
-    .field{
-      display:grid;gap:8px;
-    }
-    .field label{
-      font-size:.88rem;font-weight:800;color:#23342d;
-    }
+    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .field{display:grid;gap:8px}
+    .field label{font-size:.88rem;font-weight:800;color:#23342d}
     .field.full{grid-column:1 / -1}
 
-    .split{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:14px;
-    }
-
-    .checkbox-row{
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-      padding:12px 0 4px;color:var(--muted);font-weight:700
-    }
+    .split{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .checkbox-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 4px;color:var(--muted);font-weight:700}
     .checkbox-row input{width:18px;height:18px;accent-color:var(--green-2)}
+    .form-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px}
 
-    .form-actions{
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-      margin-top:18px;
-    }
+    .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+    .summary-card{background:#fff;border:1px solid var(--border);border-radius:22px;padding:16px;box-shadow:var(--shadow-soft)}
+    .summary-card .label{display:block;color:var(--muted);font-size:.86rem;font-weight:800;margin-bottom:8px}
+    .summary-card .value{display:block;font-size:1.35rem;font-weight:900;letter-spacing:-.03em;color:var(--green)}
 
-    .summary-grid{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:12px;
-      margin-bottom:18px;
-    }
-    .summary-card{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:22px;
-      padding:16px;
-      box-shadow:var(--shadow-soft);
-    }
-    .summary-card .label{
-      display:block;color:var(--muted);font-size:.86rem;font-weight:800;margin-bottom:8px
-    }
-    .summary-card .value{
-      display:block;font-size:1.35rem;font-weight:900;letter-spacing:-.03em;color:var(--green)
-    }
+    .grid-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+    .grid-head strong{font-size:.95rem;color:var(--muted)}
 
-    .grid-head{
-      display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
-      margin-bottom:12px;
-    }
-    .grid-head strong{
-      font-size:.95rem;color:var(--muted)
-    }
-
-    .hostel-grid{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:16px;
-    }
-
-    .hostel-card{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:24px;
-      overflow:hidden;
-      box-shadow:var(--shadow-soft);
-      display:flex;
-      flex-direction:column;
-      min-height:100%;
-    }
-
-    .hostel-image{
-      position:relative;
-      aspect-ratio:16/10;
-      background:#e9eee9;
-      overflow:hidden;
-    }
-    .hostel-image img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
-    .tag{
-      position:absolute;
-      top:12px;left:12px;
-      padding:8px 10px;border-radius:999px;
-      background:rgba(16,33,26,.84);
-      color:#fff;font-size:.78rem;font-weight:900;
-      backdrop-filter:blur(10px);
-    }
-    .tag.alt{
-      background:rgba(255,255,255,.88);
-      color:var(--green);
-    }
-
-    .hostel-body{
-      padding:16px;
-      display:grid;
-      gap:10px;
-      flex:1;
-    }
-    .hostel-body h3{
-      margin:0;
-      font-size:1.05rem;
-      line-height:1.25;
-      letter-spacing:-.02em;
-    }
-    .meta{
-      display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:.9rem
-    }
-    .meta span{
-      display:inline-flex;align-items:center;gap:6px;
-      background:#f6f8f6;border:1px solid rgba(16,33,26,.06);
-      border-radius:999px;padding:7px 10px
-    }
-
-    .desc{
-      color:var(--muted);
-      line-height:1.6;
-      font-size:.92rem;
-      margin:0;
-    }
-
-    .amenities{
-      display:flex;gap:8px;flex-wrap:wrap
-    }
-    .amenity{
-      display:inline-flex;align-items:center;
-      padding:7px 10px;border-radius:999px;
-      background:rgba(45,106,79,.08);
-      color:var(--green);
-      font-size:.8rem;
-      font-weight:800;
-    }
-
-    .card-footer{
-      margin-top:auto;
-      padding-top:6px;
-      display:grid;
-      gap:10px;
-    }
-    .price-row{
-      display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;
-    }
-    .price{
-      font-weight:900;color:var(--green);font-size:1.12rem;letter-spacing:-.02em
-    }
-    .status{
-      display:inline-flex;align-items:center;gap:6px;
-      padding:7px 10px;border-radius:999px;font-size:.8rem;font-weight:900;
-    }
+    .hostel-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .hostel-card{background:#fff;border:1px solid var(--border);border-radius:24px;overflow:hidden;box-shadow:var(--shadow-soft);display:flex;flex-direction:column;min-height:100%}
+    .hostel-image{position:relative;aspect-ratio:16/10;background:#e9eee9;overflow:hidden}
+    .hostel-image img{width:100%;height:100%;object-fit:cover;display:block}
+    .tag{position:absolute;top:12px;left:12px;padding:8px 10px;border-radius:999px;background:rgba(16,33,26,.84);color:#fff;font-size:.78rem;font-weight:900;backdrop-filter:blur(10px)}
+    .tag.alt{background:rgba(255,255,255,.88);color:var(--green)}
+    .hostel-body{padding:16px;display:grid;gap:10px;flex:1}
+    .hostel-body h3{margin:0;font-size:1.05rem;line-height:1.25;letter-spacing:-.02em}
+    .meta{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:.9rem}
+    .meta span{display:inline-flex;align-items:center;gap:6px;background:#f6f8f6;border:1px solid rgba(16,33,26,.06);border-radius:999px;padding:7px 10px}
+    .desc{color:var(--muted);line-height:1.6;font-size:.92rem;margin:0}
+    .amenities{display:flex;gap:8px;flex-wrap:wrap}
+    .amenity{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;background:rgba(45,106,79,.08);color:var(--green);font-size:.8rem;font-weight:800}
+    .card-footer{margin-top:auto;padding-top:6px;display:grid;gap:10px}
+    .price-row{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .price{font-weight:900;color:var(--green);font-size:1.12rem;letter-spacing:-.02em}
+    .status{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;font-size:.8rem;font-weight:900}
     .status.active{background:rgba(45,106,79,.10);color:var(--green)}
     .status.inactive{background:rgba(154,47,47,.10);color:#9a2f2f}
-
-    .actions{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:8px;
-    }
-    .actions .btn{
-      width:100%;
-      padding:10px 12px;
-      border-radius:14px;
-      font-size:.86rem;
-    }
-
-    .empty{
-      background:#fff;
-      border:1px dashed rgba(16,33,26,.14);
-      border-radius:24px;
-      padding:28px;
-      text-align:center;
-      color:var(--muted);
-    }
-    .empty strong{
-      display:block;
-      color:var(--green);
-      font-size:1.05rem;
-      margin-bottom:8px;
-    }
-
-    .toast{
-      position:fixed;right:18px;bottom:18px;z-index:500;
-      background:#10211a;color:#fff;border-radius:999px;padding:14px 18px;
-      box-shadow:0 18px 38px rgba(0,0,0,.18);
-      transform:translateY(18px);
-      opacity:0;pointer-events:none;
-      transition:opacity .22s ease, transform .22s ease;
-      font-weight:700;
-    }
+    .actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .actions .btn{width:100%;padding:10px 12px;border-radius:14px;font-size:.86rem}
+    .empty{background:#fff;border:1px dashed rgba(16,33,26,.14);border-radius:24px;padding:28px;text-align:center;color:var(--muted)}
+    .empty strong{display:block;color:var(--green);font-size:1.05rem;margin-bottom:8px}
+    .toast{position:fixed;right:18px;bottom:18px;z-index:500;background:#10211a;color:#fff;border-radius:999px;padding:14px 18px;box-shadow:0 18px 38px rgba(0,0,0,.18);transform:translateY(18px);opacity:0;pointer-events:none;transition:opacity .22s ease, transform .22s ease;font-weight:700}
     .toast.show{opacity:1;transform:translateY(0)}
-
-    .loading-wrap{
-      position:fixed;inset:0;background:rgba(244,248,245,.88);
-      display:grid;place-items:center;z-index:600;
-      backdrop-filter:blur(10px);
-    }
-    .loading-card{
-      background:#fff;border:1px solid var(--border);
-      border-radius:24px;padding:20px 22px;box-shadow:var(--shadow-soft);
-      display:flex;align-items:center;gap:12px;font-weight:800;color:var(--green)
-    }
+    .loading-wrap{position:fixed;inset:0;background:rgba(244,248,245,.88);display:grid;place-items:center;z-index:600;backdrop-filter:blur(10px)}
+    .loading-card{background:#fff;border:1px solid var(--border);border-radius:24px;padding:20px 22px;box-shadow:var(--shadow-soft);display:flex;align-items:center;gap:12px;font-weight:800;color:var(--green)}
 
     @media (max-width: 1180px){
       .hostel-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -505,16 +241,10 @@
       </a>
 
       <div class="top-actions">
-        <span class="pill user">
-          <i class="fa-solid fa-user-tie"></i>
-          <span data-user-name>Manager</span>
-        </span>
+        <span class="pill user"><i class="fa-solid fa-user-tie"></i> <span id="managerName">Manager</span></span>
         <a class="pill" href="explore.html"><i class="fa-solid fa-compass"></i> Explore</a>
         <a class="pill" href="bookings.html"><i class="fa-solid fa-ticket"></i> Bookings</a>
-        <button class="btn btn-ghost" type="button" data-logout-btn>
-          <i class="fa-solid fa-right-from-bracket"></i>
-          Sign out
-        </button>
+        <button class="btn btn-ghost" type="button" id="signOutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
       </div>
     </div>
   </header>
@@ -526,149 +256,117 @@
           <h1>Manage hostels in real time</h1>
           <p>
             Add new hostels, edit details, hide inactive listings, and remove entries when needed.
-            Every change updates this page immediately because the list listens to Firestore live.
+            Every change updates this page immediately, so the portal always shows the latest state.
           </p>
 
           <div class="notice-row">
             <div class="notice">
-              <strong>Live updates</strong>
-              <span>When you add, edit, or delete a hostel, the portal refreshes automatically.</span>
+              <strong>Instant refresh</strong>
+              <span>When you save, edit, or delete a hostel, the grid updates right away.</span>
             </div>
             <div class="notice">
-              <strong>Clean workflow</strong>
-              <span>Use the form once, then edit any hostel from the listing cards below.</span>
+              <strong>Prototype-friendly</strong>
+              <span>This version uses Firebase Auth for login and browser storage for portal data.</span>
             </div>
             <div class="notice">
               <strong>Manager only</strong>
-              <span>Signed-in users with role <em>manager</em> can access this page.</span>
+              <span>Only the email you mark as manager can stay on this page.</span>
             </div>
           </div>
         </div>
 
         <aside class="hero-side">
-          <h2>Quick overview</h2>
-          <p>These numbers update from the Firestore <code>hostels</code> collection.</p>
+          <h2>Today’s snapshot</h2>
+          <p>Track how many hostels are active, hidden, featured, and how many total are in the portal.</p>
           <div class="stats">
-            <div class="stat">
-              <strong id="heroTotal">0</strong>
-              <span>Total hostels</span>
-            </div>
-            <div class="stat">
-              <strong id="heroActive">0</strong>
-              <span>Active listings</span>
-            </div>
-            <div class="stat">
-              <strong id="heroDrafts">0</strong>
-              <span>Inactive listings</span>
-            </div>
-            <div class="stat">
-              <strong id="heroAvg">₵0</strong>
-              <span>Average yearly price</span>
-            </div>
+            <div class="stat"><strong id="heroTotal">0</strong><span>Total hostels</span></div>
+            <div class="stat"><strong id="heroActive">0</strong><span>Active listings</span></div>
+            <div class="stat"><strong id="heroHidden">0</strong><span>Hidden listings</span></div>
+            <div class="stat"><strong id="heroFeatured">0</strong><span>Featured</span></div>
           </div>
         </aside>
       </div>
     </section>
 
-    <section class="panel" aria-labelledby="manageTitle">
+    <section class="panel" aria-labelledby="formTitle">
       <div class="panel-head">
         <div>
-          <h2 id="manageTitle">Add or edit a hostel</h2>
-          <p>Fill the form once to create a listing. Click edit on any card to update it.</p>
+          <h2 id="formTitle">Add hostel</h2>
+          <p>Use this form to create or update a hostel listing.</p>
         </div>
-        <span class="pill"><i class="fa-solid fa-database"></i> Collection: hostels</span>
+        <span class="pill" id="editState"><i class="fa-solid fa-pen-to-square"></i> Create mode</span>
       </div>
 
-      <form id="hostelForm">
+      <form id="hostelForm" novalidate>
         <div class="form-grid">
           <div class="field">
-            <label for="name">Hostel name</label>
-            <input class="input" id="name" type="text" placeholder="e.g. Sunrise Court Hostel" required>
+            <label for="name">Hostel name *</label>
+            <input class="input" id="name" type="text" placeholder="Example Hostel" required>
           </div>
-
           <div class="field">
-            <label for="area">Area</label>
-            <input class="input" id="area" type="text" placeholder="e.g. Ayensudo" required>
+            <label for="area">Area / campus *</label>
+            <input class="input" id="area" type="text" placeholder="Kumasi / Legon / Cape Coast" required>
           </div>
-
           <div class="field">
-            <label for="location">Location</label>
-            <input class="input" id="location" type="text" placeholder="e.g. Ayensudo, Cape Coast" required>
+            <label for="location">Location *</label>
+            <input class="input" id="location" type="text" placeholder="Near main gate" required>
           </div>
-
           <div class="field">
-            <label for="priceYear">Price per year (GHS)</label>
-            <input class="input" id="priceYear" type="number" min="0" step="1" placeholder="e.g. 9200" required>
+            <label for="priceYear">Price per year (GHS) *</label>
+            <input class="input" id="priceYear" type="number" min="0" step="1" placeholder="2500" required>
           </div>
-
           <div class="field">
             <label for="roomType">Room type</label>
-            <select class="select" id="roomType" required>
+            <select class="select" id="roomType">
               <option value="self-contained">Self-contained</option>
-              <option value="private-room">Private room</option>
               <option value="shared-room">Shared room</option>
-              <option value="studio">Studio</option>
+              <option value="single-room">Single room</option>
+              <option value="double-room">Double room</option>
             </select>
           </div>
-
           <div class="field">
-            <label for="capacity">Capacity / rooms available</label>
-            <input class="input" id="capacity" type="number" min="1" step="1" placeholder="e.g. 12" required>
+            <label for="capacity">Room count *</label>
+            <input class="input" id="capacity" type="number" min="0" step="1" placeholder="20" required>
           </div>
-
           <div class="field full">
             <label for="imageUrl">Image URL</label>
-            <input class="input" id="imageUrl" type="url" placeholder="Paste an image link here">
+            <input class="input" id="imageUrl" type="url" placeholder="https://...">
           </div>
-
           <div class="field full">
             <label for="description">Description</label>
-            <textarea class="textarea" id="description" placeholder="Write a short hostel description"></textarea>
+            <textarea class="textarea" id="description" placeholder="Short description of the hostel"></textarea>
           </div>
-
           <div class="field full">
             <label for="amenities">Amenities</label>
-            <input class="input" id="amenities" type="text" placeholder="Comma-separated, e.g. wifi, water, security, furnished">
+            <input class="input" id="amenities" type="text" placeholder="Wi-Fi, water, security, washing area">
           </div>
+        </div>
 
-          <div class="split field full">
-            <div class="field">
-              <label for="status">Status</label>
-              <select class="select" id="status" required>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="featured">Featured</label>
-              <div class="checkbox-row">
-                <input id="featured" type="checkbox">
-                <span>Highlight this hostel on the list</span>
-              </div>
-            </div>
-
-            <div class="field">
-              <label for="managerNote">Manager note</label>
-              <input class="input" id="managerNote" type="text" placeholder="Optional note for your records">
+        <div class="split" style="margin-top:14px;">
+          <div class="field">
+            <label for="status">Status</label>
+            <select class="select" id="status">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="managerNote">Manager note</label>
+            <input class="input" id="managerNote" type="text" placeholder="Internal note">
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <div class="checkbox-row">
+              <input id="featured" type="checkbox">
+              <label for="featured">Mark as featured</label>
             </div>
           </div>
         </div>
 
         <div class="form-actions">
-          <button class="btn btn-primary" type="submit" id="saveBtn">
-            <i class="fa-solid fa-floppy-disk"></i>
-            Save hostel
-          </button>
-          <button class="btn btn-ghost" type="button" id="resetBtn">
-            <i class="fa-solid fa-rotate-left"></i>
-            Reset form
-          </button>
-          <button class="btn btn-danger" type="button" id="cancelEditBtn" hidden>
-            <i class="fa-solid fa-xmark"></i>
-            Cancel edit
-          </button>
-          <span class="pill" id="editState"><i class="fa-solid fa-pen-to-square"></i> Create mode</span>
+          <button class="btn btn-primary" id="saveBtn" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save hostel</button>
+          <button class="btn btn-ghost" id="resetBtn" type="button"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+          <button class="btn btn-danger" id="cancelEditBtn" type="button" hidden><i class="fa-solid fa-xmark"></i> Cancel edit</button>
         </div>
       </form>
     </section>
@@ -677,7 +375,7 @@
       <div class="panel-head">
         <div>
           <h2 id="listTitle">Hostel listings</h2>
-          <p>Search, filter, and manage every hostel from one place.</p>
+          <p>Search, filter, sort, and manage every hostel from one place.</p>
         </div>
         <strong id="resultsCount">0 hostels</strong>
       </div>
@@ -695,53 +393,57 @@
           <option value="price-asc">Price low → high</option>
           <option value="price-desc">Price high → low</option>
         </select>
-        <button class="btn btn-ghost" type="button" id="clearFilters">
-          <i class="fa-solid fa-filter-circle-xmark"></i>
-          Clear
-        </button>
+        <button class="btn btn-ghost" type="button" id="clearFilters"><i class="fa-solid fa-filter-circle-xmark"></i> Clear</button>
       </div>
 
       <div class="summary-grid">
-        <div class="summary-card">
-          <span class="label">All hostels</span>
-          <span class="value" id="sumAll">0</span>
-        </div>
-        <div class="summary-card">
-          <span class="label">Active</span>
-          <span class="value" id="sumActive">0</span>
-        </div>
-        <div class="summary-card">
-          <span class="label">Inactive</span>
-          <span class="value" id="sumInactive">0</span>
-        </div>
-        <div class="summary-card">
-          <span class="label">Featured</span>
-          <span class="value" id="sumFeatured">0</span>
-        </div>
+        <div class="summary-card"><span class="label">All hostels</span><span class="value" id="sumAll">0</span></div>
+        <div class="summary-card"><span class="label">Active</span><span class="value" id="sumActive">0</span></div>
+        <div class="summary-card"><span class="label">Inactive</span><span class="value" id="sumInactive">0</span></div>
+        <div class="summary-card"><span class="label">Featured</span><span class="value" id="sumFeatured">0</span></div>
       </div>
 
       <div class="grid-head">
-        <strong>Changes here update instantly when Firestore changes.</strong>
         <strong id="lastUpdated">Last update: —</strong>
+        <strong>Changes are saved locally and re-render instantly.</strong>
       </div>
 
       <div class="hostel-grid" id="hostelGrid"></div>
       <div class="empty" id="emptyState" hidden>
         <strong>No hostels yet</strong>
-        <span>Add the first hostel using the form above.</span>
+        <span>Add your first hostel using the form above.</span>
       </div>
     </section>
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="auth.js" defer></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const authAPI = window.HostelLinkAuth || {};
-      const auth = authAPI.auth || (window.firebase?.auth ? window.firebase.auth() : null);
-      const db = authAPI.db || (window.firebase?.firestore ? window.firebase.firestore() : null);
+    (function () {
+      "use strict";
 
+      const firebaseConfig = {
+        apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
+        authDomain: "vitra-ai-712ea.firebaseapp.com",
+        projectId: "vitra-ai-712ea",
+        storageBucket: "vitra-ai-712ea.appspot.com",
+        messagingSenderId: "306868103753",
+        appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98",
+      };
+
+      const MANAGER_EMAIL = "your-manager-email@example.com"; // replace with the exact manager email
+      const STORAGE_KEY = "hostel_link_hostels";
+      const PROFILE_KEY = "staynest_profile";
+
+      if (!window.firebase) {
+        const loadingWrap = document.getElementById("loadingWrap");
+        loadingWrap.innerHTML = '<div class="loading-card"><i class="fa-solid fa-triangle-exclamation"></i> Firebase is not loaded.</div>';
+        return;
+      }
+
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+      const auth = firebase.auth();
       const loadingWrap = document.getElementById("loadingWrap");
       const toast = document.getElementById("toast");
       const hostelForm = document.getElementById("hostelForm");
@@ -757,11 +459,13 @@
       const sortBy = document.getElementById("sortBy");
       const clearFilters = document.getElementById("clearFilters");
       const lastUpdated = document.getElementById("lastUpdated");
+      const signOutBtn = document.getElementById("signOutBtn");
+      const managerName = document.getElementById("managerName");
 
       const heroTotal = document.getElementById("heroTotal");
       const heroActive = document.getElementById("heroActive");
-      const heroDrafts = document.getElementById("heroDrafts");
-      const heroAvg = document.getElementById("heroAvg");
+      const heroHidden = document.getElementById("heroHidden");
+      const heroFeatured = document.getElementById("heroFeatured");
 
       const sumAll = document.getElementById("sumAll");
       const sumActive = document.getElementById("sumActive");
@@ -784,9 +488,32 @@
       };
 
       let currentUser = null;
-      let managerProfile = null;
       let editingId = null;
-      let hostelsCache = [];
+      let hostelsCache = loadHostels();
+
+      function safeParse(value, fallback) {
+        try {
+          const parsed = JSON.parse(value);
+          return parsed && typeof parsed === "object" ? parsed : fallback;
+        } catch {
+          return fallback;
+        }
+      }
+
+      function loadHostels() {
+        return Array.isArray(safeParse(localStorage.getItem(STORAGE_KEY), []))
+          ? safeParse(localStorage.getItem(STORAGE_KEY), [])
+          : [];
+      }
+
+      function saveHostels(items) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items || []));
+        hostelsCache = [...(items || [])];
+      }
+
+      function loadProfile() {
+        return safeParse(localStorage.getItem(PROFILE_KEY), {});
+      }
 
       function showToast(message) {
         toast.textContent = message;
@@ -809,32 +536,40 @@
 
       function formatDate(value) {
         if (!value) return "just now";
-        const d = value?.toDate ? value.toDate() : new Date(value);
+        const d = new Date(value);
         if (Number.isNaN(d.getTime())) return "just now";
-        return d.toLocaleString([], {
-          dateStyle: "medium",
-          timeStyle: "short"
-        });
+        return d.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+      }
+
+      function currentTimeISO() {
+        return new Date().toISOString();
+      }
+
+      function id() {
+        return `hostel_${Math.random().toString(36).slice(2, 9)}_${Date.now().toString(36)}`;
       }
 
       function setLoading(isLoading) {
         saveBtn.disabled = isLoading;
         saveBtn.innerHTML = isLoading
           ? '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...'
-          : '<i class="fa-solid fa-floppy-disk"></i> Save hostel';
+          : editingId
+            ? '<i class="fa-solid fa-pen-to-square"></i> Update hostel'
+            : '<i class="fa-solid fa-floppy-disk"></i> Save hostel';
       }
 
-      function setEditMode(id = null) {
-        editingId = id;
-        if (id) {
+      function setEditMode(value = null) {
+        editingId = value;
+        if (editingId) {
           editState.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Editing mode';
           cancelEditBtn.hidden = false;
-          saveBtn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Update hostel';
+          document.getElementById("formTitle").textContent = "Edit hostel";
         } else {
           editState.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Create mode';
           cancelEditBtn.hidden = true;
-          saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save hostel';
+          document.getElementById("formTitle").textContent = "Add hostel";
         }
+        setLoading(false);
       }
 
       function resetForm() {
@@ -852,7 +587,7 @@
         fields.priceYear.value = hostel.priceYear ?? "";
         fields.roomType.value = hostel.roomType || "self-contained";
         fields.capacity.value = hostel.capacity ?? "";
-        fields.imageUrl.value = hostel.imageUrl || hostel.image || "";
+        fields.imageUrl.value = hostel.imageUrl || "";
         fields.description.value = hostel.description || "";
         fields.amenities.value = Array.isArray(hostel.amenities) ? hostel.amenities.join(", ") : (hostel.amenities || "");
         fields.status.value = hostel.status || "active";
@@ -871,10 +606,7 @@
 
         if (query) {
           filtered = filtered.filter((item) =>
-            [item.name, item.area, item.location]
-              .join(" ")
-              .toLowerCase()
-              .includes(query)
+            [item.name, item.area, item.location].join(" ").toLowerCase().includes(query)
           );
         }
 
@@ -886,10 +618,7 @@
           if (sort === "name-asc") return String(a.name || "").localeCompare(String(b.name || ""));
           if (sort === "price-asc") return Number(a.priceYear || 0) - Number(b.priceYear || 0);
           if (sort === "price-desc") return Number(b.priceYear || 0) - Number(a.priceYear || 0);
-
-          const aTime = a.updatedAt?.toDate ? a.updatedAt.toDate().getTime() : 0;
-          const bTime = b.updatedAt?.toDate ? b.updatedAt.toDate().getTime() : 0;
-          return bTime - aTime;
+          return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
         });
 
         return filtered;
@@ -898,7 +627,7 @@
       function updateStats(items) {
         const total = items.length;
         const active = items.filter((item) => (item.status || "active") === "active").length;
-        const inactive = items.filter((item) => (item.status || "active") === "inactive").length;
+        const inactive = total - active;
         const featured = items.filter((item) => !!item.featured).length;
         const avg = total
           ? Math.round(items.reduce((sum, item) => sum + Number(item.priceYear || 0), 0) / total)
@@ -906,21 +635,20 @@
 
         heroTotal.textContent = total;
         heroActive.textContent = active;
-        heroDrafts.textContent = inactive;
-        heroAvg.textContent = currency(avg);
+        heroHidden.textContent = inactive;
+        heroFeatured.textContent = featured;
 
         sumAll.textContent = total;
         sumActive.textContent = active;
         sumInactive.textContent = inactive;
         sumFeatured.textContent = featured;
+
+        return avg;
       }
 
       function hostelCard(hostel) {
-        const image = hostel.imageUrl || hostel.image || "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80";
-        const amenities = Array.isArray(hostel.amenities)
-          ? hostel.amenities
-          : normalizeAmenities(hostel.amenities);
-
+        const image = hostel.imageUrl || "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80";
+        const amenities = Array.isArray(hostel.amenities) ? hostel.amenities : normalizeAmenities(hostel.amenities);
         const status = hostel.status || "active";
         const roomLabel = hostel.roomType || "hostel";
         const featuredBadge = hostel.featured ? '<span class="tag alt"><i class="fa-solid fa-star"></i> Featured</span>' : '';
@@ -933,7 +661,6 @@
               <span class="tag ${status === "active" ? "" : "alt"}">${status === "active" ? "Active" : "Inactive"}</span>
               ${featuredBadge}
             </div>
-
             <div class="hostel-body">
               <div>
                 <h3>${hostel.name || "Untitled hostel"}</h3>
@@ -943,33 +670,19 @@
                   <span><i class="fa-solid fa-bed"></i> ${hostel.capacity || 0} rooms</span>
                 </div>
               </div>
-
               <p class="desc">${hostel.description || "No description provided yet."}</p>
-
               <div class="amenities">
                 ${amenities.slice(0, 5).map((item) => `<span class="amenity">${item}</span>`).join("")}
               </div>
-
               <div class="card-footer">
                 <div class="price-row">
                   <div class="price">${currency(hostel.priceYear)}</div>
-                  <span class="status ${statusClass}">
-                    <i class="fa-solid ${status === "active" ? "fa-circle-check" : "fa-circle-minus"}"></i>
-                    ${status === "active" ? "Active" : "Inactive"}
-                  </span>
+                  <span class="status ${statusClass}"><i class="fa-solid ${status === "active" ? "fa-circle-check" : "fa-circle-minus"}"></i> ${status === "active" ? "Active" : "Inactive"}</span>
                 </div>
-
                 <div class="actions">
-                  <button class="btn btn-ghost" type="button" data-action="edit" data-id="${hostel.id}">
-                    <i class="fa-solid fa-pen"></i> Edit
-                  </button>
-                  <button class="btn ${status === "active" ? "btn-danger" : "btn-primary"}" type="button" data-action="toggle" data-id="${hostel.id}">
-                    <i class="fa-solid ${status === "active" ? "fa-eye-slash" : "fa-eye"}"></i>
-                    ${status === "active" ? "Hide" : "Show"}
-                  </button>
-                  <button class="btn btn-danger" type="button" data-action="delete" data-id="${hostel.id}">
-                    <i class="fa-solid fa-trash"></i> Delete
-                  </button>
+                  <button class="btn btn-ghost" type="button" data-action="edit" data-id="${hostel.id}"><i class="fa-solid fa-pen"></i> Edit</button>
+                  <button class="btn ${status === "active" ? "btn-danger" : "btn-primary"}" type="button" data-action="toggle" data-id="${hostel.id}"><i class="fa-solid ${status === "active" ? "fa-eye-slash" : "fa-eye"}"></i> ${status === "active" ? "Hide" : "Show"}</button>
+                  <button class="btn btn-danger" type="button" data-action="delete" data-id="${hostel.id}"><i class="fa-solid fa-trash"></i> Delete</button>
                 </div>
               </div>
             </div>
@@ -982,40 +695,28 @@
         resultsCount.textContent = `${filtered.length} hostel${filtered.length === 1 ? "" : "s"}`;
         emptyState.hidden = filtered.length !== 0;
         hostelGrid.innerHTML = filtered.map(hostelCard).join("");
-        updateStats(hostelsCache);
 
         const latest = hostelsCache
           .filter((item) => item.updatedAt)
-          .sort((a, b) => {
-            const aTime = a.updatedAt?.toDate ? a.updatedAt.toDate().getTime() : 0;
-            const bTime = b.updatedAt?.toDate ? b.updatedAt.toDate().getTime() : 0;
-            return bTime - aTime;
-          })[0];
+          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
 
+        const avg = updateStats(hostelsCache);
         lastUpdated.textContent = `Last update: ${latest?.updatedAt ? formatDate(latest.updatedAt) : "—"}`;
+        document.title = `Hostel Link Ghana | Manager Portal (${hostelsCache.length})`;
+        return avg;
       }
 
-const MANAGER_EMAIL = "your-manager-email@example.com";
-
-async function ensureManager(user) {
-  if (!user) return null;
-
-  const email = (user.email || "").trim().toLowerCase();
-  if (email !== MANAGER_EMAIL.toLowerCase()) return { role: "student" };
-
-  return {
-    uid: user.uid,
-    email: user.email || "",
-    fullName: user.displayName || user.email || "Manager",
-    role: "manager",
-  };
-}
+      function persistAndRender(nextItems, message) {
+        saveHostels(nextItems);
+        renderList();
+        if (message) showToast(message);
+      }
 
       async function saveHostel(event) {
         event.preventDefault();
 
-        if (!db || !currentUser) {
-          showToast("Firestore is not ready yet.");
+        if (!currentUser) {
+          showToast("Please sign in first.");
           return;
         }
 
@@ -1037,36 +738,44 @@ async function ensureManager(user) {
           return;
         }
 
-        const payload = {
-          name,
-          area,
-          location,
-          priceYear,
-          roomType,
-          capacity,
-          imageUrl,
-          description,
-          amenities,
-          status,
-          featured,
-          managerNote,
-          managerId: currentUser.uid,
-          managerName: managerProfile?.fullName || currentUser.displayName || currentUser.email || "Manager",
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        };
+        setLoading(true);
 
         try {
-          setLoading(true);
+          const profile = loadProfile();
+          const payload = {
+            id: editingId || id(),
+            name,
+            area,
+            location,
+            priceYear,
+            roomType,
+            capacity,
+            imageUrl,
+            description,
+            amenities,
+            status,
+            featured,
+            managerNote,
+            managerId: currentUser.uid,
+            managerName: profile.fullName || currentUser.displayName || currentUser.email || "Manager",
+            updatedAt: currentTimeISO(),
+            createdAt: editingId
+              ? (hostelsCache.find((item) => item.id === editingId)?.createdAt || currentTimeISO())
+              : currentTimeISO(),
+          };
 
+          const next = [...hostelsCache];
           if (editingId) {
-            await db.collection("hostels").doc(editingId).set(payload, { merge: true });
-            showToast("Hostel updated.");
+            const index = next.findIndex((item) => item.id === editingId);
+            if (index === -1) {
+              next.unshift(payload);
+            } else {
+              next[index] = { ...next[index], ...payload };
+            }
+            persistAndRender(next, "Hostel updated.");
           } else {
-            await db.collection("hostels").add({
-              ...payload,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            });
-            showToast("Hostel added.");
+            next.unshift(payload);
+            persistAndRender(next, "Hostel added.");
           }
 
           resetForm();
@@ -1078,55 +787,40 @@ async function ensureManager(user) {
         }
       }
 
-      async function handleCardAction(action, id) {
-        const ref = db.collection("hostels").doc(id);
+      function handleCardAction(action, idValue) {
+        const next = [...hostelsCache];
+        const index = next.findIndex((item) => item.id === idValue);
+        if (index === -1) {
+          showToast("Hostel not found.");
+          return;
+        }
 
-        try {
-          if (action === "edit") {
-            const snap = await ref.get();
-            if (!snap.exists) {
-              showToast("Hostel not found.");
-              return;
-            }
-            fillForm({ id: snap.id, ...snap.data() });
-            return;
-          }
+        if (action === "edit") {
+          fillForm(next[index]);
+          return;
+        }
 
-          if (action === "toggle") {
-            const snap = await ref.get();
-            if (!snap.exists) {
-              showToast("Hostel not found.");
-              return;
-            }
-            const current = snap.data() || {};
-            const nextStatus = (current.status || "active") === "active" ? "inactive" : "active";
-            await ref.update({
-              status: nextStatus,
-              updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-            });
-            showToast(`Marked as ${nextStatus}.`);
-            return;
-          }
+        if (action === "toggle") {
+          const current = next[index];
+          const nextStatus = (current.status || "active") === "active" ? "inactive" : "active";
+          next[index] = { ...current, status: nextStatus, updatedAt: currentTimeISO() };
+          persistAndRender(next, `Marked as ${nextStatus}.`);
+          return;
+        }
 
-          if (action === "delete") {
-            const ok = window.confirm("Delete this hostel permanently?");
-            if (!ok) return;
-            await ref.delete();
-            if (editingId === id) resetForm();
-            showToast("Hostel deleted.");
-          }
-        } catch (error) {
-          console.error(error);
-          showToast("Action failed.");
+        if (action === "delete") {
+          const ok = window.confirm("Delete this hostel permanently?");
+          if (!ok) return;
+          next.splice(index, 1);
+          if (editingId === idValue) resetForm();
+          persistAndRender(next, "Hostel deleted.");
         }
       }
 
       hostelGrid.addEventListener("click", (event) => {
         const button = event.target.closest("[data-action]");
         if (!button) return;
-        const action = button.getAttribute("data-action");
-        const id = button.getAttribute("data-id");
-        handleCardAction(action, id);
+        handleCardAction(button.getAttribute("data-action"), button.getAttribute("data-id"));
       });
 
       searchInput.addEventListener("input", renderList);
@@ -1143,44 +837,48 @@ async function ensureManager(user) {
       resetBtn.addEventListener("click", resetForm);
       cancelEditBtn.addEventListener("click", resetForm);
 
-      if (!auth || !db) {
-        loadingWrap.innerHTML = '<div class="loading-card"><i class="fa-solid fa-triangle-exclamation"></i> Firebase is not connected.</div>';
+      signOutBtn.addEventListener("click", async () => {
+        try {
+          await auth.signOut();
+        } finally {
+          window.location.replace("login.html");
+        }
+      });
+
+      window.addEventListener("storage", (event) => {
+        if (event.key === STORAGE_KEY) {
+          hostelsCache = loadHostels();
+          renderList();
+        }
+      });
+
+      if (!auth) {
+        loadingWrap.innerHTML = '<div class="loading-card"><i class="fa-solid fa-triangle-exclamation"></i> Firebase Auth is not connected.</div>';
         return;
       }
 
-      auth.onAuthStateChanged(async (user) => {
+      auth.onAuthStateChanged((user) => {
         if (!user) {
           window.location.replace("login.html?redirect=manager-portal.html");
           return;
         }
 
         currentUser = user;
-        managerProfile = await ensureManager(user);
-
-        if (!managerProfile || managerProfile.role !== "manager") {
+        const email = (user.email || "").trim().toLowerCase();
+        if (email !== MANAGER_EMAIL.trim().toLowerCase()) {
           window.location.replace("index.html");
           return;
         }
 
-        window.HostelLinkAuth?.setAuthUI?.(user, managerProfile, true);
+        const profile = loadProfile();
+        managerName.textContent = profile.fullName || user.displayName || user.email || "Manager";
 
-        db.collection("hostels").onSnapshot((snapshot) => {
-          hostelsCache = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          renderList();
-
-          loadingWrap.style.display = "none";
-          document.body.classList.add("ready");
-        }, (error) => {
-          console.error(error);
-          showToast("Could not load hostel listings.");
-          loadingWrap.style.display = "none";
-          document.body.classList.add("ready");
-        });
+        hostelsCache = loadHostels();
+        renderList();
+        loadingWrap.style.display = "none";
+        document.body.classList.add("ready");
       });
-    });
+    })();
   </script>
 </body>
 </html>
