@@ -13,6 +13,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <style>
     :root{
@@ -418,461 +419,578 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script>
-    (function () {
-      "use strict";
+<script>
+  (function () {
+    "use strict";
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
-        authDomain: "vitra-ai-712ea.firebaseapp.com",
-        projectId: "vitra-ai-712ea",
-        storageBucket: "vitra-ai-712ea.appspot.com",
-        messagingSenderId: "306868103753",
-        appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98",
+    const firebaseConfig = {
+      apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
+      authDomain: "vitra-ai-712ea.firebaseapp.com",
+      projectId: "vitra-ai-712ea",
+      storageBucket: "vitra-ai-712ea.appspot.com",
+      messagingSenderId: "306868103753",
+      appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98",
+    };
+
+    const STORAGE_KEY = "hostel_link_hostels";
+    const HOSTELS_COLLECTION = "hostels";
+    const PROFILE_KEY_PREFIX = "staynest_manager_profile";
+
+    if (!window.firebase) {
+      const loadingWrap = document.getElementById("loadingWrap");
+      loadingWrap.innerHTML =
+        '<div class="loading-card"><i class="fa-solid fa-triangle-exclamation"></i> Firebase is not loaded.</div>';
+      return;
+    }
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = typeof firebase.firestore === "function" ? firebase.firestore() : null;
+    const loadingWrap = document.getElementById("loadingWrap");
+    const toast = document.getElementById("toast");
+    const hostelForm = document.getElementById("hostelForm");
+    const saveBtn = document.getElementById("saveBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const cancelEditBtn = document.getElementById("cancelEditBtn");
+    const editState = document.getElementById("editState");
+    const hostelGrid = document.getElementById("hostelGrid");
+    const emptyState = document.getElementById("emptyState");
+    const resultsCount = document.getElementById("resultsCount");
+    const searchInput = document.getElementById("searchInput");
+    const filterStatus = document.getElementById("filterStatus");
+    const sortBy = document.getElementById("sortBy");
+    const clearFilters = document.getElementById("clearFilters");
+    const lastUpdated = document.getElementById("lastUpdated");
+    const signOutBtn = document.getElementById("signOutBtn");
+    const managerName = document.getElementById("managerName");
+
+    const heroTotal = document.getElementById("heroTotal");
+    const heroActive = document.getElementById("heroActive");
+    const heroHidden = document.getElementById("heroHidden");
+    const heroFeatured = document.getElementById("heroFeatured");
+
+    const sumAll = document.getElementById("sumAll");
+    const sumActive = document.getElementById("sumActive");
+    const sumInactive = document.getElementById("sumInactive");
+    const sumFeatured = document.getElementById("sumFeatured");
+
+    const fields = {
+      name: document.getElementById("name"),
+      area: document.getElementById("area"),
+      location: document.getElementById("location"),
+      priceYear: document.getElementById("priceYear"),
+      roomType: document.getElementById("roomType"),
+      capacity: document.getElementById("capacity"),
+      imageUrl: document.getElementById("imageUrl"),
+      description: document.getElementById("description"),
+      amenities: document.getElementById("amenities"),
+      status: document.getElementById("status"),
+      featured: document.getElementById("featured"),
+      managerNote: document.getElementById("managerNote"),
+    };
+
+    let currentUser = null;
+    let editingId = null;
+    let hostelsCache = loadHostels();
+
+    function safeParse(value, fallback) {
+      try {
+        const parsed = JSON.parse(value);
+        return parsed && typeof parsed === "object" ? parsed : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function managerProfileKey(uid) {
+      return `${PROFILE_KEY_PREFIX}_${uid || "guest"}`;
+    }
+
+    function loadManagerProfile(uid) {
+      const profile = safeParse(localStorage.getItem(managerProfileKey(uid)), {});
+      if (!profile || typeof profile !== "object") return {};
+      if (profile.role && profile.role !== "manager") return {};
+      return profile;
+    }
+
+    function saveManagerProfile(uid, profile) {
+      if (!uid) return;
+      localStorage.setItem(
+        managerProfileKey(uid),
+        JSON.stringify({
+          ...profile,
+          role: "manager",
+          updatedAt: new Date().toISOString(),
+        })
+      );
+    }
+
+    function loadHostels() {
+      const items = safeParse(localStorage.getItem(STORAGE_KEY), []);
+      return Array.isArray(items) ? items : [];
+    }
+
+    function saveHostels(items) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items || []));
+      hostelsCache = [...(items || [])];
+    }
+
+    function toFirestorePayload(hostel) {
+      return {
+        ...hostel,
+        updatedAt: hostel.updatedAt || currentTimeISO(),
+        createdAt: hostel.createdAt || currentTimeISO(),
       };
+    }
 
-      const STORAGE_KEY = "hostel_link_hostels";
-      const PROFILE_KEY = "staynest_profile";
+    async function upsertHostelRemote(hostel) {
+      if (!db || !hostel?.id) return;
+      const payload = toFirestorePayload(hostel);
+      await db.collection(HOSTELS_COLLECTION).doc(String(hostel.id)).set(payload, { merge: true });
+    }
 
-      if (!window.firebase) {
-        const loadingWrap = document.getElementById("loadingWrap");
-        loadingWrap.innerHTML = '<div class="loading-card"><i class="fa-solid fa-triangle-exclamation"></i> Firebase is not loaded.</div>';
+    async function deleteHostelRemote(hostelId) {
+      if (!db || !hostelId) return;
+      await db.collection(HOSTELS_COLLECTION).doc(String(hostelId)).delete();
+    }
+
+    async function syncRemoteHostelsToLocal() {
+      if (!db) return;
+      try {
+        const snap = await db.collection(HOSTELS_COLLECTION).get();
+        const remoteItems = snap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        if (!remoteItems.length) return;
+
+        const byId = new Map(hostelsCache.map((item) => [String(item.id), item]));
+        for (const item of remoteItems) {
+          if (!item?.id) continue;
+          byId.set(String(item.id), item);
+        }
+
+        const merged = Array.from(byId.values());
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+        hostelsCache = merged;
+      } catch (error) {
+        console.warn("Could not load hostels from Firestore:", error);
+      }
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(window.__managerToastTimer);
+      window.__managerToastTimer = setTimeout(
+        () => toast.classList.remove("show"),
+        2200
+      );
+    }
+
+    function currency(amount) {
+      const num = Number(amount || 0);
+      return `₵${num.toLocaleString("en-GH")}`;
+    }
+
+    function normalizeAmenities(text) {
+      return String(text || "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
+    function formatDate(value) {
+      if (!value) return "just now";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "just now";
+      return d.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+    }
+
+    function currentTimeISO() {
+      return new Date().toISOString();
+    }
+
+    function id() {
+      return `hostel_${Math.random().toString(36).slice(2, 9)}_${Date.now().toString(36)}`;
+    }
+
+    function setLoading(isLoading) {
+      saveBtn.disabled = isLoading;
+      saveBtn.innerHTML = isLoading
+        ? '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...'
+        : editingId
+          ? '<i class="fa-solid fa-pen-to-square"></i> Update hostel'
+          : '<i class="fa-solid fa-floppy-disk"></i> Save hostel';
+    }
+
+    function setEditMode(value = null) {
+      editingId = value;
+      if (editingId) {
+        editState.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Editing mode';
+        cancelEditBtn.hidden = false;
+        document.getElementById("formTitle").textContent = "Edit hostel";
+      } else {
+        editState.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Create mode';
+        cancelEditBtn.hidden = true;
+        document.getElementById("formTitle").textContent = "Add hostel";
+      }
+      setLoading(false);
+    }
+
+    function resetForm() {
+      hostelForm.reset();
+      fields.status.value = "active";
+      fields.roomType.value = "self-contained";
+      fields.featured.checked = false;
+      setEditMode(null);
+    }
+
+    function fillForm(hostel) {
+      fields.name.value = hostel.name || "";
+      fields.area.value = hostel.area || "";
+      fields.location.value = hostel.location || "";
+      fields.priceYear.value = hostel.priceYear ?? "";
+      fields.roomType.value = hostel.roomType || "self-contained";
+      fields.capacity.value = hostel.capacity ?? "";
+      fields.imageUrl.value = hostel.imageUrl || "";
+      fields.description.value = hostel.description || "";
+      fields.amenities.value = Array.isArray(hostel.amenities)
+        ? hostel.amenities.join(", ")
+        : (hostel.amenities || "");
+      fields.status.value = hostel.status || "active";
+      fields.featured.checked = !!hostel.featured;
+      fields.managerNote.value = hostel.managerNote || "";
+      setEditMode(hostel.id);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function applyFilters(items) {
+      const query = searchInput.value.trim().toLowerCase();
+      const status = filterStatus.value;
+      const sort = sortBy.value;
+
+      let filtered = [...items];
+
+      if (query) {
+        filtered = filtered.filter((item) =>
+          [item.name, item.area, item.location].join(" ").toLowerCase().includes(query)
+        );
+      }
+
+      if (status !== "all") {
+        filtered = filtered.filter((item) => (item.status || "active") === status);
+      }
+
+      filtered.sort((a, b) => {
+        if (sort === "name-asc") return String(a.name || "").localeCompare(String(b.name || ""));
+        if (sort === "price-asc") return Number(a.priceYear || 0) - Number(b.priceYear || 0);
+        if (sort === "price-desc") return Number(b.priceYear || 0) - Number(a.priceYear || 0);
+        return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
+      });
+
+      return filtered;
+    }
+
+    function updateStats(items) {
+      const total = items.length;
+      const active = items.filter((item) => (item.status || "active") === "active").length;
+      const inactive = total - active;
+      const featured = items.filter((item) => !!item.featured).length;
+
+      heroTotal.textContent = total;
+      heroActive.textContent = active;
+      heroHidden.textContent = inactive;
+      heroFeatured.textContent = featured;
+
+      sumAll.textContent = total;
+      sumActive.textContent = active;
+      sumInactive.textContent = inactive;
+      sumFeatured.textContent = featured;
+    }
+
+    function hostelCard(hostel) {
+      const image =
+        hostel.imageUrl ||
+        "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80";
+      const amenities = Array.isArray(hostel.amenities)
+        ? hostel.amenities
+        : normalizeAmenities(hostel.amenities);
+      const status = hostel.status || "active";
+      const roomLabel = hostel.roomType || "hostel";
+      const featuredBadge = hostel.featured
+        ? '<span class="tag alt"><i class="fa-solid fa-star"></i> Featured</span>'
+        : "";
+      const statusClass = status === "active" ? "active" : "inactive";
+
+      return `
+        <article class="hostel-card">
+          <div class="hostel-image">
+            <img src="${image}" alt="${hostel.name || "Hostel"}">
+            <span class="tag ${status === "active" ? "" : "alt"}">${status === "active" ? "Active" : "Inactive"}</span>
+            ${featuredBadge}
+          </div>
+          <div class="hostel-body">
+            <div>
+              <h3>${hostel.name || "Untitled hostel"}</h3>
+              <div class="meta">
+                <span><i class="fa-solid fa-location-dot"></i> ${hostel.area || "Area not set"}</span>
+                <span><i class="fa-solid fa-house"></i> ${roomLabel}</span>
+                <span><i class="fa-solid fa-bed"></i> ${hostel.capacity || 0} rooms</span>
+              </div>
+            </div>
+            <p class="desc">${hostel.description || "No description provided yet."}</p>
+            <div class="amenities">
+              ${amenities.slice(0, 5).map((item) => `<span class="amenity">${item}</span>`).join("")}
+            </div>
+            <div class="card-footer">
+              <div class="price-row">
+                <div class="price">${currency(hostel.priceYear)}</div>
+                <span class="status ${statusClass}">
+                  <i class="fa-solid ${status === "active" ? "fa-circle-check" : "fa-circle-minus"}"></i>
+                  ${status === "active" ? "Active" : "Inactive"}
+                </span>
+              </div>
+              <div class="actions">
+                <button class="btn btn-ghost" type="button" data-action="edit" data-id="${hostel.id}">
+                  <i class="fa-solid fa-pen"></i> Edit
+                </button>
+                <button class="btn ${status === "active" ? "btn-danger" : "btn-primary"}" type="button" data-action="toggle" data-id="${hostel.id}">
+                  <i class="fa-solid ${status === "active" ? "fa-eye-slash" : "fa-eye"}"></i> ${status === "active" ? "Hide" : "Show"}
+                </button>
+                <button class="btn btn-danger" type="button" data-action="delete" data-id="${hostel.id}">
+                  <i class="fa-solid fa-trash"></i> Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderList() {
+      const filtered = applyFilters(hostelsCache);
+      resultsCount.textContent = `${filtered.length} hostel${filtered.length === 1 ? "" : "s"}`;
+      emptyState.hidden = filtered.length !== 0;
+      hostelGrid.innerHTML = filtered.map(hostelCard).join("");
+
+      const latest = hostelsCache
+        .filter((item) => item.updatedAt)
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
+
+      updateStats(hostelsCache);
+      lastUpdated.textContent = `Last update: ${latest?.updatedAt ? formatDate(latest.updatedAt) : "—"}`;
+      document.title = `Hostel Link Ghana | Manager Portal (${hostelsCache.length})`;
+    }
+
+    function persistAndRender(nextItems, message) {
+      saveHostels(nextItems);
+      renderList();
+      if (message) showToast(message);
+    }
+
+    async function saveHostel(event) {
+      event.preventDefault();
+
+      if (!currentUser) {
+        showToast("Please sign in first.");
         return;
       }
 
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      const name = fields.name.value.trim();
+      const area = fields.area.value.trim();
+      const location = fields.location.value.trim();
+      const priceYear = Number(fields.priceYear.value);
+      const roomType = fields.roomType.value;
+      const capacity = Number(fields.capacity.value);
+      const imageUrl = fields.imageUrl.value.trim();
+      const description = fields.description.value.trim();
+      const amenities = normalizeAmenities(fields.amenities.value);
+      const status = fields.status.value;
+      const featured = fields.featured.checked;
+      const managerNote = fields.managerNote.value.trim();
 
-      const auth = firebase.auth();
-      const loadingWrap = document.getElementById("loadingWrap");
-      const toast = document.getElementById("toast");
-      const hostelForm = document.getElementById("hostelForm");
-      const saveBtn = document.getElementById("saveBtn");
-      const resetBtn = document.getElementById("resetBtn");
-      const cancelEditBtn = document.getElementById("cancelEditBtn");
-      const editState = document.getElementById("editState");
-      const hostelGrid = document.getElementById("hostelGrid");
-      const emptyState = document.getElementById("emptyState");
-      const resultsCount = document.getElementById("resultsCount");
-      const searchInput = document.getElementById("searchInput");
-      const filterStatus = document.getElementById("filterStatus");
-      const sortBy = document.getElementById("sortBy");
-      const clearFilters = document.getElementById("clearFilters");
-      const lastUpdated = document.getElementById("lastUpdated");
-      const signOutBtn = document.getElementById("signOutBtn");
-      const managerName = document.getElementById("managerName");
-
-      const heroTotal = document.getElementById("heroTotal");
-      const heroActive = document.getElementById("heroActive");
-      const heroHidden = document.getElementById("heroHidden");
-      const heroFeatured = document.getElementById("heroFeatured");
-
-      const sumAll = document.getElementById("sumAll");
-      const sumActive = document.getElementById("sumActive");
-      const sumInactive = document.getElementById("sumInactive");
-      const sumFeatured = document.getElementById("sumFeatured");
-
-      const fields = {
-        name: document.getElementById("name"),
-        area: document.getElementById("area"),
-        location: document.getElementById("location"),
-        priceYear: document.getElementById("priceYear"),
-        roomType: document.getElementById("roomType"),
-        capacity: document.getElementById("capacity"),
-        imageUrl: document.getElementById("imageUrl"),
-        description: document.getElementById("description"),
-        amenities: document.getElementById("amenities"),
-        status: document.getElementById("status"),
-        featured: document.getElementById("featured"),
-        managerNote: document.getElementById("managerNote"),
-      };
-
-      let currentUser = null;
-      let editingId = null;
-      let hostelsCache = loadHostels();
-
-      function safeParse(value, fallback) {
-        try {
-          const parsed = JSON.parse(value);
-          return parsed && typeof parsed === "object" ? parsed : fallback;
-        } catch {
-          return fallback;
-        }
+      if (!name || !area || !location || !Number.isFinite(priceYear) || !Number.isFinite(capacity)) {
+        showToast("Please fill the required fields correctly.");
+        return;
       }
 
-      function loadHostels() {
-        return Array.isArray(safeParse(localStorage.getItem(STORAGE_KEY), []))
-          ? safeParse(localStorage.getItem(STORAGE_KEY), [])
-          : [];
-      }
+      setLoading(true);
 
-      function saveHostels(items) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(items || []));
-        hostelsCache = [...(items || [])];
-      }
+      try {
+        const profile = loadManagerProfile(currentUser.uid);
 
-      function loadProfile() {
-        return safeParse(localStorage.getItem(PROFILE_KEY), {});
-      }
+        const payload = {
+          id: editingId || id(),
+          name,
+          area,
+          location,
+          priceYear,
+          roomType,
+          capacity,
+          imageUrl,
+          description,
+          amenities,
+          status,
+          featured,
+          managerNote,
+          managerId: currentUser.uid,
+          managerName: profile.fullName || currentUser.displayName || currentUser.email || "Manager",
+          updatedAt: currentTimeISO(),
+          createdAt: editingId
+            ? (hostelsCache.find((item) => item.id === editingId)?.createdAt || currentTimeISO())
+            : currentTimeISO(),
+        };
 
-      function showToast(message) {
-        toast.textContent = message;
-        toast.classList.add("show");
-        clearTimeout(window.__managerToastTimer);
-        window.__managerToastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
-      }
-
-      function currency(amount) {
-        const num = Number(amount || 0);
-        return `₵${num.toLocaleString("en-GH")}`;
-      }
-
-      function normalizeAmenities(text) {
-        return String(text || "")
-          .split(",")
-          .map((item) => item.trim())
-          .filter(Boolean);
-      }
-
-      function formatDate(value) {
-        if (!value) return "just now";
-        const d = new Date(value);
-        if (Number.isNaN(d.getTime())) return "just now";
-        return d.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
-      }
-
-      function currentTimeISO() {
-        return new Date().toISOString();
-      }
-
-      function id() {
-        return `hostel_${Math.random().toString(36).slice(2, 9)}_${Date.now().toString(36)}`;
-      }
-
-      function setLoading(isLoading) {
-        saveBtn.disabled = isLoading;
-        saveBtn.innerHTML = isLoading
-          ? '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...'
-          : editingId
-            ? '<i class="fa-solid fa-pen-to-square"></i> Update hostel'
-            : '<i class="fa-solid fa-floppy-disk"></i> Save hostel';
-      }
-
-      function setEditMode(value = null) {
-        editingId = value;
+        const next = [...hostelsCache];
         if (editingId) {
-          editState.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Editing mode';
-          cancelEditBtn.hidden = false;
-          document.getElementById("formTitle").textContent = "Edit hostel";
+          const index = next.findIndex((item) => item.id === editingId);
+          if (index === -1) {
+            next.unshift(payload);
+          } else {
+            next[index] = { ...next[index], ...payload };
+          }
+          await upsertHostelRemote(payload);
+          persistAndRender(next, "Hostel updated.");
         } else {
-          editState.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Create mode';
-          cancelEditBtn.hidden = true;
-          document.getElementById("formTitle").textContent = "Add hostel";
+          next.unshift(payload);
+          await upsertHostelRemote(payload);
+          persistAndRender(next, "Hostel added.");
         }
+
+        resetForm();
+      } catch (error) {
+        console.error(error);
+        showToast("Could not save hostel.");
+      } finally {
         setLoading(false);
       }
+    }
 
-      function resetForm() {
-        hostelForm.reset();
-        fields.status.value = "active";
-        fields.roomType.value = "self-contained";
-        fields.featured.checked = false;
-        setEditMode(null);
-      }
-
-      function fillForm(hostel) {
-        fields.name.value = hostel.name || "";
-        fields.area.value = hostel.area || "";
-        fields.location.value = hostel.location || "";
-        fields.priceYear.value = hostel.priceYear ?? "";
-        fields.roomType.value = hostel.roomType || "self-contained";
-        fields.capacity.value = hostel.capacity ?? "";
-        fields.imageUrl.value = hostel.imageUrl || "";
-        fields.description.value = hostel.description || "";
-        fields.amenities.value = Array.isArray(hostel.amenities) ? hostel.amenities.join(", ") : (hostel.amenities || "");
-        fields.status.value = hostel.status || "active";
-        fields.featured.checked = !!hostel.featured;
-        fields.managerNote.value = hostel.managerNote || "";
-        setEditMode(hostel.id);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-
-      function applyFilters(items) {
-        const query = searchInput.value.trim().toLowerCase();
-        const status = filterStatus.value;
-        const sort = sortBy.value;
-
-        let filtered = [...items];
-
-        if (query) {
-          filtered = filtered.filter((item) =>
-            [item.name, item.area, item.location].join(" ").toLowerCase().includes(query)
-          );
-        }
-
-        if (status !== "all") {
-          filtered = filtered.filter((item) => (item.status || "active") === status);
-        }
-
-        filtered.sort((a, b) => {
-          if (sort === "name-asc") return String(a.name || "").localeCompare(String(b.name || ""));
-          if (sort === "price-asc") return Number(a.priceYear || 0) - Number(b.priceYear || 0);
-          if (sort === "price-desc") return Number(b.priceYear || 0) - Number(a.priceYear || 0);
-          return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
-        });
-
-        return filtered;
-      }
-
-      function updateStats(items) {
-        const total = items.length;
-        const active = items.filter((item) => (item.status || "active") === "active").length;
-        const inactive = total - active;
-        const featured = items.filter((item) => !!item.featured).length;
-        const avg = total
-          ? Math.round(items.reduce((sum, item) => sum + Number(item.priceYear || 0), 0) / total)
-          : 0;
-
-        heroTotal.textContent = total;
-        heroActive.textContent = active;
-        heroHidden.textContent = inactive;
-        heroFeatured.textContent = featured;
-
-        sumAll.textContent = total;
-        sumActive.textContent = active;
-        sumInactive.textContent = inactive;
-        sumFeatured.textContent = featured;
-
-        return avg;
-      }
-
-      function hostelCard(hostel) {
-        const image = hostel.imageUrl || "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80";
-        const amenities = Array.isArray(hostel.amenities) ? hostel.amenities : normalizeAmenities(hostel.amenities);
-        const status = hostel.status || "active";
-        const roomLabel = hostel.roomType || "hostel";
-        const featuredBadge = hostel.featured ? '<span class="tag alt"><i class="fa-solid fa-star"></i> Featured</span>' : '';
-        const statusClass = status === "active" ? "active" : "inactive";
-
-        return `
-          <article class="hostel-card">
-            <div class="hostel-image">
-              <img src="${image}" alt="${hostel.name || "Hostel"}">
-              <span class="tag ${status === "active" ? "" : "alt"}">${status === "active" ? "Active" : "Inactive"}</span>
-              ${featuredBadge}
-            </div>
-            <div class="hostel-body">
-              <div>
-                <h3>${hostel.name || "Untitled hostel"}</h3>
-                <div class="meta">
-                  <span><i class="fa-solid fa-location-dot"></i> ${hostel.area || "Area not set"}</span>
-                  <span><i class="fa-solid fa-house"></i> ${roomLabel}</span>
-                  <span><i class="fa-solid fa-bed"></i> ${hostel.capacity || 0} rooms</span>
-                </div>
-              </div>
-              <p class="desc">${hostel.description || "No description provided yet."}</p>
-              <div class="amenities">
-                ${amenities.slice(0, 5).map((item) => `<span class="amenity">${item}</span>`).join("")}
-              </div>
-              <div class="card-footer">
-                <div class="price-row">
-                  <div class="price">${currency(hostel.priceYear)}</div>
-                  <span class="status ${statusClass}"><i class="fa-solid ${status === "active" ? "fa-circle-check" : "fa-circle-minus"}"></i> ${status === "active" ? "Active" : "Inactive"}</span>
-                </div>
-                <div class="actions">
-                  <button class="btn btn-ghost" type="button" data-action="edit" data-id="${hostel.id}"><i class="fa-solid fa-pen"></i> Edit</button>
-                  <button class="btn ${status === "active" ? "btn-danger" : "btn-primary"}" type="button" data-action="toggle" data-id="${hostel.id}"><i class="fa-solid ${status === "active" ? "fa-eye-slash" : "fa-eye"}"></i> ${status === "active" ? "Hide" : "Show"}</button>
-                  <button class="btn btn-danger" type="button" data-action="delete" data-id="${hostel.id}"><i class="fa-solid fa-trash"></i> Delete</button>
-                </div>
-              </div>
-            </div>
-          </article>
-        `;
-      }
-
-      function renderList() {
-        const filtered = applyFilters(hostelsCache);
-        resultsCount.textContent = `${filtered.length} hostel${filtered.length === 1 ? "" : "s"}`;
-        emptyState.hidden = filtered.length !== 0;
-        hostelGrid.innerHTML = filtered.map(hostelCard).join("");
-
-        const latest = hostelsCache
-          .filter((item) => item.updatedAt)
-          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
-
-        const avg = updateStats(hostelsCache);
-        lastUpdated.textContent = `Last update: ${latest?.updatedAt ? formatDate(latest.updatedAt) : "—"}`;
-        document.title = `Hostel Link Ghana | Manager Portal (${hostelsCache.length})`;
-        return avg;
-      }
-
-      function persistAndRender(nextItems, message) {
-        saveHostels(nextItems);
-        renderList();
-        if (message) showToast(message);
-      }
-
-      async function saveHostel(event) {
-        event.preventDefault();
-
-        if (!currentUser) {
-          showToast("Please sign in first.");
-          return;
-        }
-
-        const name = fields.name.value.trim();
-        const area = fields.area.value.trim();
-        const location = fields.location.value.trim();
-        const priceYear = Number(fields.priceYear.value);
-        const roomType = fields.roomType.value;
-        const capacity = Number(fields.capacity.value);
-        const imageUrl = fields.imageUrl.value.trim();
-        const description = fields.description.value.trim();
-        const amenities = normalizeAmenities(fields.amenities.value);
-        const status = fields.status.value;
-        const featured = fields.featured.checked;
-        const managerNote = fields.managerNote.value.trim();
-
-        if (!name || !area || !location || !Number.isFinite(priceYear) || !Number.isFinite(capacity)) {
-          showToast("Please fill the required fields correctly.");
-          return;
-        }
-
-        setLoading(true);
-
-        try {
-          const profile = loadProfile();
-          const payload = {
-            id: editingId || id(),
-            name,
-            area,
-            location,
-            priceYear,
-            roomType,
-            capacity,
-            imageUrl,
-            description,
-            amenities,
-            status,
-            featured,
-            managerNote,
-            managerId: currentUser.uid,
-            managerName: profile.fullName || currentUser.displayName || currentUser.email || "Manager",
-            updatedAt: currentTimeISO(),
-            createdAt: editingId
-              ? (hostelsCache.find((item) => item.id === editingId)?.createdAt || currentTimeISO())
-              : currentTimeISO(),
-          };
-
-          const next = [...hostelsCache];
-          if (editingId) {
-            const index = next.findIndex((item) => item.id === editingId);
-            if (index === -1) {
-              next.unshift(payload);
-            } else {
-              next[index] = { ...next[index], ...payload };
-            }
-            persistAndRender(next, "Hostel updated.");
-          } else {
-            next.unshift(payload);
-            persistAndRender(next, "Hostel added.");
-          }
-
-          resetForm();
-        } catch (error) {
-          console.error(error);
-          showToast("Could not save hostel.");
-        } finally {
-          setLoading(false);
-        }
-      }
-
-      function handleCardAction(action, idValue) {
-        const next = [...hostelsCache];
-        const index = next.findIndex((item) => item.id === idValue);
-        if (index === -1) {
-          showToast("Hostel not found.");
-          return;
-        }
-
-        if (action === "edit") {
-          fillForm(next[index]);
-          return;
-        }
-
-        if (action === "toggle") {
-          const current = next[index];
-          const nextStatus = (current.status || "active") === "active" ? "inactive" : "active";
-          next[index] = { ...current, status: nextStatus, updatedAt: currentTimeISO() };
-          persistAndRender(next, `Marked as ${nextStatus}.`);
-          return;
-        }
-
-        if (action === "delete") {
-          const ok = window.confirm("Delete this hostel permanently?");
-          if (!ok) return;
-          next.splice(index, 1);
-          if (editingId === idValue) resetForm();
-          persistAndRender(next, "Hostel deleted.");
-        }
-      }
-
-      hostelGrid.addEventListener("click", (event) => {
-        const button = event.target.closest("[data-action]");
-        if (!button) return;
-        handleCardAction(button.getAttribute("data-action"), button.getAttribute("data-id"));
-      });
-
-      searchInput.addEventListener("input", renderList);
-      filterStatus.addEventListener("change", renderList);
-      sortBy.addEventListener("change", renderList);
-      clearFilters.addEventListener("click", () => {
-        searchInput.value = "";
-        filterStatus.value = "all";
-        sortBy.value = "updated-desc";
-        renderList();
-      });
-
-      hostelForm.addEventListener("submit", saveHostel);
-      resetBtn.addEventListener("click", resetForm);
-      cancelEditBtn.addEventListener("click", resetForm);
-
-      signOutBtn.addEventListener("click", async () => {
-        try {
-          await auth.signOut();
-        } finally {
-          window.location.replace("login.html");
-        }
-      });
-
-      window.addEventListener("storage", (event) => {
-        if (event.key === STORAGE_KEY) {
-          hostelsCache = loadHostels();
-          renderList();
-        }
-      });
-
-      if (!auth) {
-        loadingWrap.innerHTML = '<div class="loading-card"><i class="fa-solid fa-triangle-exclamation"></i> Firebase Auth is not connected.</div>';
+    function handleCardAction(action, idValue) {
+      const next = [...hostelsCache];
+      const index = next.findIndex((item) => item.id === idValue);
+      if (index === -1) {
+        showToast("Hostel not found.");
         return;
       }
 
-      auth.onAuthStateChanged((user) => {
-        if (!user) {
-          window.location.replace("login.html?redirect=manager-portal.html");
-          return;
-        }
+      if (action === "edit") {
+        fillForm(next[index]);
+        return;
+      }
 
-        currentUser = user;
-        const profile = loadProfile();
-        managerName.textContent = profile.fullName || user.displayName || user.email || "Manager";
+      if (action === "toggle") {
+        const current = next[index];
+        const nextStatus = (current.status || "active") === "active" ? "inactive" : "active";
+        next[index] = { ...current, status: nextStatus, updatedAt: currentTimeISO() };
+        upsertHostelRemote(next[index]).catch((error) => console.error(error));
+        persistAndRender(next, `Marked as ${nextStatus}.`);
+        return;
+      }
 
+      if (action === "delete") {
+        const ok = window.confirm("Delete this hostel permanently?");
+        if (!ok) return;
+        next.splice(index, 1);
+        if (editingId === idValue) resetForm();
+        deleteHostelRemote(idValue).catch((error) => console.error(error));
+        persistAndRender(next, "Hostel deleted.");
+      }
+    }
+
+    hostelGrid.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-action]");
+      if (!button) return;
+      handleCardAction(button.getAttribute("data-action"), button.getAttribute("data-id"));
+    });
+
+    searchInput.addEventListener("input", renderList);
+    filterStatus.addEventListener("change", renderList);
+    sortBy.addEventListener("change", renderList);
+    clearFilters.addEventListener("click", () => {
+      searchInput.value = "";
+      filterStatus.value = "all";
+      sortBy.value = "updated-desc";
+      renderList();
+    });
+
+    hostelForm.addEventListener("submit", saveHostel);
+    resetBtn.addEventListener("click", resetForm);
+    cancelEditBtn.addEventListener("click", resetForm);
+
+    signOutBtn.addEventListener("click", async () => {
+      try {
+        await auth.signOut();
+      } finally {
+        window.location.replace("login.html");
+      }
+    });
+
+    window.addEventListener("storage", (event) => {
+      if (event.key === STORAGE_KEY) {
         hostelsCache = loadHostels();
         renderList();
-        loadingWrap.style.display = "none";
-        document.body.classList.add("ready");
-      });
-    })();
-  </script>
-  <script src="script.js"></script>
+      }
+    });
+
+    if (!auth) {
+      loadingWrap.innerHTML =
+        '<div class="loading-card"><i class="fa-solid fa-triangle-exclamation"></i> Firebase Auth is not connected.</div>';
+      return;
+    }
+
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.replace("login.html?redirect=manager-portal.html");
+        return;
+      }
+
+      currentUser = user;
+
+      const profile = loadManagerProfile(user.uid);
+      if (!profile.fullName && (user.displayName || user.email)) {
+        saveManagerProfile(user.uid, {
+          fullName: user.displayName || user.email,
+          email: user.email || "",
+          role: "manager",
+        });
+      }
+
+      const managerProfile = loadManagerProfile(user.uid);
+      managerName.textContent =
+        managerProfile.fullName || user.displayName || user.email || "Manager";
+
+      hostelsCache = loadHostels();
+      renderList();
+      loadingWrap.style.display = "none";
+      document.body.classList.add("ready");
+
+      if (db?.collection) {
+        syncRemoteHostelsToLocal().then(() => {
+          hostelsCache = loadHostels();
+          renderList();
+        });
+        db.collection(HOSTELS_COLLECTION).onSnapshot((snapshot) => {
+          const remoteItems = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          const byId = new Map(hostelsCache.map((item) => [String(item.id), item]));
+          for (const item of remoteItems) {
+            if (!item?.id) continue;
+            byId.set(String(item.id), item);
+          }
+          const merged = Array.from(byId.values());
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+          hostelsCache = merged;
+          renderList();
+        });
+      }
+    });
+  })();
+</script>
 </body>
 </html>
